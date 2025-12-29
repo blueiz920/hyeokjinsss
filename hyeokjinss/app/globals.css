@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 
   body {
@@ -37,23 +37,24 @@
   }
 
   .project-pin {
-    @apply relative mx-auto min-h-[70vh] max-w-6xl px-6 md:px-10;
+    @apply relative mx-auto mt-10 max-w-6xl px-6 md:px-10;
+    height: clamp(200px, 50vh, 300px);
   }
 
   .project-stage {
-    @apply relative min-h-[60vh];
+    @apply relative h-full;
   }
 
   .project-card {
-    @apply rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)];
+    @apply absolute inset-0 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)];
   }
 
   .skills-pin {
-    @apply relative min-h-[60vh] overflow-hidden;
+    @apply relative mt-10 h-screen overflow-hidden;
   }
 
   .skills-track {
-    @apply flex w-max gap-6 px-6 md:px-10;
+    @apply flex h-full w-max gap-6 px-6 md:px-10;
   }
 
   .skills-card {
