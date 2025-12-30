@@ -55,7 +55,8 @@ export const SkillsHorizontal = () => {
       className="section-padding bg-neutral-950 text-white"
       aria-labelledby="skills-title"
     >
-      <Container className="space-y-6">
+      <div ref={pinRef} className="skills-pin">
+              <Container className="space-y-6">
         <p className="text-xs uppercase tracking-[0.4em] text-white/50">
           Skills horizontal
         </p>
@@ -63,7 +64,6 @@ export const SkillsHorizontal = () => {
           Problem → Approach → Result
         </h2>
       </Container>
-      <div ref={pinRef} className="skills-pin mt-10">
         <div ref={trackRef} className="skills-track">
           {portfolio.skills.map((skill) => (
             <article

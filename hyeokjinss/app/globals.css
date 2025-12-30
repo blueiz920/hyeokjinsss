@@ -38,7 +38,7 @@
 
   .project-pin {
     @apply relative mx-auto mt-10 max-w-6xl px-6 md:px-10;
-    height: clamp(200px, 50vh, 300px);
+    height: clamp(400px, 60vh, 700px);
   }
 
   .project-stage {
@@ -50,11 +50,12 @@
   }
 
   .skills-pin {
-    @apply relative mt-10 h-screen overflow-hidden;
+    @apply relative h-screen overflow-hidden;
+    height: clamp(200px, 50vh, 500px);
   }
 
   .skills-track {
-    @apply flex h-full w-max gap-6 px-6 md:px-10;
+    @apply flex h-[60%] w-max mt-10 gap-6 px-6 md:px-10;
   }
 
   .skills-card {
