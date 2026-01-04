@@ -56,14 +56,14 @@ export const SkillsHorizontal = () => {
       aria-labelledby="skills-title"
     >
       <div ref={pinRef} className="skills-pin">
-              <Container className="space-y-6">
-        <p className="text-xs uppercase tracking-[0.4em] text-white/50">
-          Skills horizontal
-        </p>
-        <h2 id="skills-title" className="text-3xl font-semibold md:text-4xl">
-          Problem → Approach → Result
-        </h2>
-      </Container>
+        <Container className="space-y-6">
+          <p className="text-xs uppercase tracking-[0.4em] text-white/50">
+            Skills horizontal
+          </p>
+          <h2 id="skills-title" className="text-3xl font-semibold md:text-4xl">
+            Problem → Approach → Result
+          </h2>
+        </Container>
         <div ref={trackRef} className="skills-track">
           {portfolio.skills.map((skill) => (
             <article

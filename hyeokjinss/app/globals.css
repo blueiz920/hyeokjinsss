@@ -29,20 +29,20 @@
   }
 
   .section-padding {
-    @apply py-20 md:py-28;
+    @apply py-25 md:py-28;
   }
 
   .breather {
-    @apply border-y border-white/10 bg-neutral-950 py-16;
+    @apply border-b border-white/10 bg-neutral-950 py-16;
   }
 
   .project-pin {
-    @apply relative mx-auto mt-10 max-w-6xl px-6 md:px-10;
+    @apply relative mx-auto max-w-6xl px-6 md:px-10;
     height: clamp(400px, 60vh, 700px);
   }
 
   .project-stage {
-    @apply relative h-full;
+    @apply relative mt-10 h-full;
   }
 
   .project-card {
@@ -55,10 +55,10 @@
   }
 
   .skills-track {
-    @apply flex h-[60%] w-max mt-10 gap-6 px-6 md:px-10;
+    @apply flex h-[70%] w-max mt-10 gap-6 px-6 md:px-10;
   }
 
   .skills-card {
-    @apply flex min-w-[260px] max-w-[300px] flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
+    @apply flex min-w-[300px] max-w-[40%] flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
   }
 }

@@ -62,15 +62,15 @@ export const ProjectReveal = () => {
       className="section-padding bg-neutral-950 text-white"
       aria-labelledby="projects-title"
     >
-      <Container className="space-y-6">
-        <p className="text-xs uppercase tracking-[0.4em] text-white/50">
-          Project reveal
-        </p>
-        <h2 id="projects-title" className="text-3xl font-semibold md:text-4xl">
-          Three builds that show the scope.
-        </h2>
-      </Container>
-      <div ref={pinRef} className="project-pin mt-10">
+      <div ref={pinRef} className="project-pin">
+        <Container className="space-y-6">
+          <p className="text-xs uppercase tracking-[0.4em] text-white/50">
+            Project reveal
+          </p>
+          <h2 id="projects-title" className="text-3xl font-semibold md:text-4xl">
+            Three builds that show the scope.
+          </h2>
+        </Container>
         <div ref={stageRef} className="project-stage">
           {portfolio.projects.map((project, index) => (
             <article
