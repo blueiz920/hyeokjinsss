@@ -29,7 +29,7 @@
   }
 
   .section-padding {
-    @apply py-25 md:py-28;
+    @apply py-24 md:py-28;
   }
 
   .breather {
@@ -37,7 +37,7 @@
   }
 
   .project-pin {
-    @apply relative mx-auto max-w-6xl px-6 md:px-10;
+    @apply relative mx-auto max-w-6xl px-6 md:px-10 pt-24 ;
     height: clamp(400px, 60vh, 700px);
   }
 
@@ -50,8 +50,8 @@
   }
 
   .skills-pin {
-    @apply relative h-screen overflow-hidden;
-    height: clamp(200px, 50vh, 500px);
+    @apply relative h-screen overflow-hidden pt-24 ;
+    height: clamp(200px, 70vh, 500px);
   }
 
   .skills-track {

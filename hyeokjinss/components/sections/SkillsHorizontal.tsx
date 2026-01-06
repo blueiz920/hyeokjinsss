@@ -27,25 +27,33 @@ export const SkillsHorizontal = () => {
   }, [register, unregister]);
 
   useEffect(() => {
-    if (!sectionRef.current || !pinRef.current || !trackRef.current) {
-      return;
-    }
+    if (!sectionRef.current || !pinRef.current || !trackRef.current) return;
 
-    let cleanup: (() => void) | undefined;
+    let alive = true;
+    let destroy: (() => void) | null = null;
 
-    initSkillsHorizontal({
-      root: sectionRef.current,
-      pinFrame: pinRef.current,
-      track: trackRef.current,
-      prefersReducedMotion,
-    }).then((destroy) => {
-      cleanup = destroy;
-    });
+    (async () => {
+      const d = await initSkillsHorizontal({
+        root: sectionRef.current!,
+        pinFrame: pinRef.current!,
+        track: trackRef.current!,
+        prefersReducedMotion,
+      });
+
+      if (!alive) {
+        d();
+        return;
+      }
+
+      destroy = d;
+    })();
 
     return () => {
-      cleanup?.();
+      alive = false;
+      if (destroy) destroy();
     };
   }, [prefersReducedMotion]);
+
 
   return (
     <section

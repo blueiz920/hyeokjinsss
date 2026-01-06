@@ -29,30 +29,36 @@ export const ProjectReveal = () => {
   }, [register, unregister]);
 
   useEffect(() => {
-    if (!sectionRef.current || !pinRef.current || !stageRef.current) {
-      return;
-    }
+  if (!sectionRef.current || !pinRef.current || !stageRef.current) return;
 
-    const cards = cardsRef.current.filter(
-      (card): card is HTMLElement => Boolean(card),
-    );
+  const cards = cardsRef.current.filter(
+    (card): card is HTMLElement => Boolean(card),
+  );
 
-    let cleanup: (() => void) | undefined;
+  let alive = true;
+  let destroy: (() => void) | null = null;
 
-    initProjectReveal({
-      root: sectionRef.current,
-      pinFrame: pinRef.current,
-      stage: stageRef.current,
+  (async () => {
+    const d = await initProjectReveal({
+      root: sectionRef.current!,
+      pinFrame: pinRef.current!,
+      stage: stageRef.current!,
       cards,
       prefersReducedMotion,
-    }).then((destroy) => {
-      cleanup = destroy;
     });
 
-    return () => {
-      cleanup?.();
-    };
-  }, [prefersReducedMotion]);
+    if (!alive) {
+      d();
+      return;
+    }
+    destroy = d;
+  })();
+
+  return () => {
+    alive = false;
+    if (destroy) destroy();
+  };
+}, [prefersReducedMotion]);
 
   return (
     <section
