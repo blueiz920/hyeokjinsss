@@ -3,40 +3,73 @@
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
-import { initIntroAnimation } from "@/lib/animation/intro";
+import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { SectionBackground } from "@/components/common/SectionBackground";
 
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const bgRef = useRef<HTMLDivElement | null>(null);
+
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
 
   useEffect(() => {
-    if (!sectionRef.current) {
-      return;
-    }
+    if (!sectionRef.current) return;
 
     register("intro", sectionRef);
-
-    return () => {
-      unregister("intro");
-    };
+    return () => unregister("intro");
   }, [register, unregister]);
 
+  // ✅ 진입 애니메이션
   useEffect(() => {
-    if (!sectionRef.current) {
-      return;
-    }
+    if (!sectionRef.current) return;
 
-    let cleanup: (() => void) | undefined;
+    let alive = true;
+    let destroy: (() => void) | null = null;
 
-    initIntroAnimation(sectionRef.current, prefersReducedMotion).then((destroy) => {
-      cleanup = destroy;
-    });
+    (async () => {
+      const d = await initIntroAnimation(sectionRef.current!, prefersReducedMotion);
+      if (!alive) {
+        d();
+        return;
+      }
+      destroy = d;
+    })();
 
     return () => {
-      cleanup?.();
+      alive = false;
+      destroy?.();
+    };
+  }, [prefersReducedMotion]);
+
+  // ✅ 스크롤 기반 흩어짐/소멸
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    let alive = true;
+    let destroy: (() => void) | null = null;
+
+    (async () => {
+      const d = await initIntroScroll({
+        root: sectionRef.current!,
+        heading: headingRef.current,
+        bgLayer: bgRef.current,
+        prefersReducedMotion,
+      });
+
+      if (!alive) {
+        d();
+        return;
+      }
+      destroy = d;
+    })();
+
+    return () => {
+      alive = false;
+      destroy?.();
     };
   }, [prefersReducedMotion]);
 
@@ -45,29 +78,29 @@ export const Intro = () => {
       id="intro"
       ref={sectionRef}
       tabIndex={-1}
-      className="section-padding flex min-h-[90vh] items-center bg-neutral-950 text-white"
+      className="section-padding relative flex min-h-[90vh] items-center overflow-hidden bg-neutral-950 text-white"
       aria-labelledby="intro-title"
     >
-      <Container className="space-y-8">
-        <p
-          className="text-xs uppercase tracking-[0.4em] text-white/60"
-          data-intro-item
-        >
+      <SectionBackground ref={bgRef} variant="intro" density={24} />
+
+      <Container className="relative z-10 space-y-8">
+        <p className="text-xs uppercase tracking-[0.4em] text-white/60" data-intro-item>
           {portfolio.introEyebrow}
         </p>
+
         <h1
           id="intro-title"
+          ref={headingRef}
           className="text-4xl font-semibold leading-tight md:text-6xl"
           data-intro-item
         >
           {portfolio.introHeadline}
         </h1>
-        <p
-          className="max-w-2xl text-lg text-white/70 md:text-xl"
-          data-intro-item
-        >
+
+        <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>
           {portfolio.introSubhead}
         </p>
+
         <div className="flex flex-wrap gap-3" data-intro-item>
           {portfolio.introHighlights.map((item) => (
             <span

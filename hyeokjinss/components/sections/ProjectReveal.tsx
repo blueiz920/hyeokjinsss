@@ -7,58 +7,58 @@ import { Container } from "@/components/layout/Container";
 import { initProjectReveal } from "@/lib/animation/projectReveal";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { SectionBackground } from "@/components/common/SectionBackground";
+import { getMotionProfile } from "@/lib/motion/mediaPolicy";
 
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const bgRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<Array<HTMLElement | null>>([]);
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
 
   useEffect(() => {
-    if (!sectionRef.current) {
-      return;
-    }
-
+    if (!sectionRef.current) return;
     register("projects", sectionRef);
-
-    return () => {
-      unregister("projects");
-    };
+    return () => unregister("projects");
   }, [register, unregister]);
 
   useEffect(() => {
-  if (!sectionRef.current || !pinRef.current || !stageRef.current) return;
+    if (!sectionRef.current || !pinRef.current || !stageRef.current) return;
 
-  const cards = cardsRef.current.filter(
-    (card): card is HTMLElement => Boolean(card),
-  );
+    const cards = cardsRef.current.filter(
+      (card): card is HTMLElement => Boolean(card),
+    );
 
-  let alive = true;
-  let destroy: (() => void) | null = null;
+    let alive = true;
+    let destroy: (() => void) | null = null;
 
-  (async () => {
-    const d = await initProjectReveal({
-      root: sectionRef.current!,
-      pinFrame: pinRef.current!,
-      stage: stageRef.current!,
-      cards,
-      prefersReducedMotion,
-    });
+    (async () => {
+      const d = await initProjectReveal({
+        root: sectionRef.current!,
+        pinFrame: pinRef.current!,
+        stage: stageRef.current!,
+        cards,
+        bgLayer: bgRef.current, // ✅ 추가
+        prefersReducedMotion,
+      });
 
-    if (!alive) {
-      d();
-      return;
-    }
-    destroy = d;
-  })();
+      if (!alive) {
+        d();
+        return;
+      }
+      destroy = d;
+    })();
 
-  return () => {
-    alive = false;
-    if (destroy) destroy();
-  };
-}, [prefersReducedMotion]);
+    return () => {
+      alive = false;
+      destroy?.();
+    };
+  }, [prefersReducedMotion]);
+
+  const { density } = getMotionProfile(prefersReducedMotion);
 
   return (
     <section
@@ -68,8 +68,15 @@ export const ProjectReveal = () => {
       className="section-padding bg-neutral-950 text-white"
       aria-labelledby="projects-title"
     >
-      <div ref={pinRef} className="project-pin">
-        <Container className="space-y-6">
+      <div ref={pinRef} className="project-pin relative overflow-hidden">
+        {/* ✅ 배경 레이어 */}
+        <SectionBackground
+          ref={bgRef}
+          variant="projects"
+          density={density + 4} // projects는 조금 더(원하면 조절)
+        />
+
+        <Container className="relative z-10 space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
             Project reveal
           </p>
@@ -77,7 +84,8 @@ export const ProjectReveal = () => {
             Three builds that show the scope.
           </h2>
         </Container>
-        <div ref={stageRef} className="project-stage">
+
+        <div ref={stageRef} className="project-stage relative z-10">
           {portfolio.projects.map((project, index) => (
             <article
               key={project.slug}
@@ -97,6 +105,7 @@ export const ProjectReveal = () => {
                   </h3>
                   <p className="text-base text-white/70">{project.summary}</p>
                   <p className="text-sm text-white/60">{project.impact}</p>
+
                   <div className="flex flex-wrap gap-2">
                     {project.stack.map((item) => (
                       <span
@@ -107,6 +116,7 @@ export const ProjectReveal = () => {
                       </span>
                     ))}
                   </div>
+
                   <div className="flex gap-4 text-sm">
                     {project.links.map((link) => (
                       <a
@@ -121,6 +131,7 @@ export const ProjectReveal = () => {
                     ))}
                   </div>
                 </div>
+
                 <div className="relative h-56 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
                   <Image
                     src={project.thumbnail}
