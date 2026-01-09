@@ -35,7 +35,7 @@ export const initIntroAnimation = async (
   };
 };
 
-// ✅ 추가: 스크롤 기반 “점진 소멸 + 흩어짐”
+// 스크롤 기반 소멸 + 흩어짐
 export const initIntroScroll = async ({
   root,
   heading,
@@ -69,7 +69,7 @@ export const initIntroScroll = async ({
     tl.to(items, { opacity: 0, y: -profile.drift * 0.35 }, 0);
   }
 
-  // 헤드라인만 예외적으로 문자 단위 흩어짐 (Reduced면 자동 비활성)
+  // 헤드라인만 예외적으로 문자 단위 흩어짐
   if (!prefersReducedMotion && heading) {
     split = splitTextToChars(heading);
     const chars = split.chars;

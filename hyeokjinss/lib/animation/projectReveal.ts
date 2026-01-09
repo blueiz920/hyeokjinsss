@@ -58,7 +58,7 @@ export const initProjectReveal = async ({
       .fromTo(cur, { autoAlpha: 0, y: distance }, { autoAlpha: 1, y: 0 }, i);
   }
 
-  // ✅ 배경 패럴랙스(아주 약하게)
+  // 배경 패럴랙스(아주 약하게)
   let bgTween: gsap.core.Tween | null = null;
   if (bgLayer) {
     bgTween = gsap.to(bgLayer, {

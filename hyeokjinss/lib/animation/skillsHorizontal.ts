@@ -48,7 +48,7 @@ export const initSkillsHorizontal = async ({
     },
   });
 
-  // ✅ 배경도 우→좌로 약하게
+  // 배경도 우→좌로 약하게
   let bgTween: gsap.core.Tween | null = null;
   if (bgLayer) {
     bgTween = gsap.to(bgLayer, {

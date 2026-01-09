@@ -10,7 +10,7 @@ type Props = {
   className?: string;
 };
 
-/** 문자열 -> 32bit 해시 */
+//  문자열 -> 32bit 해시
 const hash32 = (str: string) => {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -20,7 +20,7 @@ const hash32 = (str: string) => {
   return h >>> 0;
 };
 
-/** 결정적 PRNG: mulberry32 */
+// PRNG: mulberry32
 const mulberry32 = (seed: number) => {
   return () => {
     let t = (seed += 0x6d2b79f5);
@@ -30,7 +30,7 @@ const mulberry32 = (seed: number) => {
   };
 };
 
-/** (variant, index, key) 조합으로 0~1 난수 생성 */
+// (variant, index, key) 조합으로 0~1 난수 생성
 const rand01 = (variant: string, index: number, key: string) => {
   const seed = hash32(`${variant}:${index}:${key}`);
   const r = mulberry32(seed);

@@ -97,7 +97,6 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
             height: window.innerHeight,
           };
         },
-        // Lenis는 보통 native scroll 기반이라 fixed가 안전한 편
         pinType: "fixed",
       });
 
@@ -112,7 +111,6 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
 
       // Lenis 생성
       const lenis = new Lenis({
-        // snap/스크럽과 충돌 줄이려면 너무 빠릿한 값보다 조금 둔하게 가는 게 안정적
         lerp: prefersReducedMotion ? 0.25 : 0.18,
         wheelMultiplier: prefersReducedMotion ? 0.6 : 0.85,
         smoothWheel: true,

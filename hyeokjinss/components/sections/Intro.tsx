@@ -23,7 +23,7 @@ export const Intro = () => {
     return () => unregister("intro");
   }, [register, unregister]);
 
-  // ✅ 진입 애니메이션
+  // 진입 애니메이션
   useEffect(() => {
     if (!sectionRef.current) return;
 
@@ -45,7 +45,7 @@ export const Intro = () => {
     };
   }, [prefersReducedMotion]);
 
-  // ✅ 스크롤 기반 흩어짐/소멸
+  // 스크롤 기반 흩어짐/소멸
   useEffect(() => {
     if (!sectionRef.current) return;
 

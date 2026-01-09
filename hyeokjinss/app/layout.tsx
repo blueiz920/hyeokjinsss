@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ScrollRuntimeProvider } from "@/hooks/useScrollRuntime";
 import { SectionRegistryProvider } from "@/hooks/useSectionRegistry";
-import { MotionToggle } from "@/components/common/MotionToggle";
+// import { MotionToggle } from "@/components/common/MotionToggle";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
 
 const geistSans = Geist({
@@ -40,7 +40,7 @@ export default function RootLayout({
           <SectionRegistryProvider>
             <ScrollProgress />
             {children}
-            <MotionToggle />
+            {/* <MotionToggle /> */}
           </SectionRegistryProvider>
         </ScrollRuntimeProvider>
       </body>

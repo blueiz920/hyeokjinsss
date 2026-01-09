@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { initSkillsHorizontal } from "@/lib/animation/skillsHorizontal";
@@ -17,6 +17,21 @@ export const SkillsHorizontal = () => {
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
+
+  // SSR/CSR 첫 렌더 동일
+  const [bgDensity, setBgDensity] = useState(16);
+
+  useEffect(() => {
+  const id = requestAnimationFrame(() => {
+    const { density } = getMotionProfile(prefersReducedMotion);
+    const next = density + 10;
+
+    setBgDensity((prev) => (prev === next ? prev : next));
+  });
+
+  return () => cancelAnimationFrame(id);
+}, [prefersReducedMotion]);
+
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -35,7 +50,7 @@ export const SkillsHorizontal = () => {
         root: sectionRef.current!,
         pinFrame: pinRef.current!,
         track: trackRef.current!,
-        bgLayer: bgRef.current, // ✅ 추가
+        bgLayer: bgRef.current, // 섹션 배경 ref
         prefersReducedMotion,
       });
 
@@ -52,25 +67,20 @@ export const SkillsHorizontal = () => {
     };
   }, [prefersReducedMotion]);
 
-  const { density } = getMotionProfile(prefersReducedMotion);
-
   return (
     <section
       id="skills"
       ref={sectionRef}
       tabIndex={-1}
-      className="section-padding bg-neutral-950 text-white"
+      className="section-padding relative overflow-hidden bg-neutral-950 text-white"
       aria-labelledby="skills-title"
     >
-      <div ref={pinRef} className="skills-pin relative overflow-hidden">
-        {/* ✅ 배경 레이어 */}
-        <SectionBackground
-          ref={bgRef}
-          variant="skills"
-          density={density + 6} // skills는 가로 스크롤이라 좀 더 깔아도 괜찮음
-        />
+      
 
-        <Container className="relative z-10 space-y-6">
+      <div ref={pinRef} className="skills-pin relative z-10">
+        {/* 섹션 전체 배경 (요약 텍스트 아래까지 커버) */}
+      <SectionBackground ref={bgRef} variant="skills" density={bgDensity} />
+        <Container className="space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
             Skills horizontal
           </p>
@@ -79,7 +89,7 @@ export const SkillsHorizontal = () => {
           </h2>
         </Container>
 
-        <div ref={trackRef} className="skills-track relative z-10">
+        <div ref={trackRef} className="skills-track">
           {portfolio.skills.map((skill) => (
             <article
               key={skill.title}
@@ -95,7 +105,7 @@ export const SkillsHorizontal = () => {
         </div>
       </div>
 
-      <Container className="relative">
+      <Container className="relative z-10">
         <p className="mt-10 max-w-2xl text-base text-white/70">
           {portfolio.skillsSummary}
         </p>

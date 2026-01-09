@@ -8,7 +8,7 @@ export const splitTextPolicy = {
   },
 } as const;
 
-// ✅ 예외적으로 허용하는 '가벼운' split 함수(플러그인 없이)
+// 예외적으로 허용하는 split 함수
 export type SplitResult = { chars: HTMLElement[]; revert: () => void };
 
 export const splitTextToChars = (el: HTMLElement): SplitResult => {

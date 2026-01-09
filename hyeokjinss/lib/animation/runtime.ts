@@ -8,7 +8,7 @@ export const getStepSnap = (steps: number) => {
   return 1 / (steps - 1);
 };
 
-// ✅ 추가 유틸(기존 호환)
+// 추가 유틸(기존 호환)
 export const getFrameHeight = (el: HTMLElement) =>
   Math.max(1, Math.round(el.getBoundingClientRect().height));
 

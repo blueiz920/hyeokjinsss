@@ -37,12 +37,12 @@
   }
 
   .project-pin {
-    @apply relative mx-auto max-w-6xl px-6 md:px-10 pt-24 ;
+    @apply relative mx-auto w-full px-6 md:px-10 pt-24 ;
     height: clamp(400px, 60vh, 700px);
   }
 
   .project-stage {
-    @apply relative mt-10 h-full;
+    @apply relative mt-10 h-full max-w-6xl mx-auto;
   }
 
   .project-card {
@@ -51,11 +51,12 @@
 
   .skills-pin {
     @apply relative h-screen overflow-hidden pt-24 ;
-    height: clamp(200px, 70vh, 500px);
+
   }
 
   .skills-track {
-    @apply flex h-[70%] w-max mt-10 gap-6 px-6 md:px-10;
+    @apply flex h-[30%] w-max mt-10 gap-6 px-6 md:px-10 mx-auto;
+        height: clamp(200px, 70vh, 500px);
   }
 
   .skills-card {
