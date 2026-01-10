@@ -13,7 +13,7 @@ export default function Home() {
       <Header />
       <main id="content" className="pt-20">
         <Intro />
-        <section className="breather">
+        {/* <section className="breather">
           <Container className="text-center">
             <p className="text-sm uppercase tracking-[0.4em] text-white/50">
               Narrative pace
@@ -22,15 +22,15 @@ export default function Home() {
               Every pin is intentional. Between them, I let the story breathe.
             </p>
           </Container>
-        </section>
+        </section> */}
         <ProjectReveal />
         <section className="breather">
           <Container className="text-center">
             <p className="text-sm uppercase tracking-[0.4em] text-white/50">
-              System thinking
+              사용자경험을 최우선으로 생각해요
             </p>
             <p className="mt-4 text-lg text-white/70">
-              Motion lives in one place, so teams can iterate safely.
+              빠르고 편한 경험을 위해 항상 고민해요
             </p>
           </Container>
         </section>

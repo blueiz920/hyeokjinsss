@@ -89,10 +89,10 @@ export const ProjectReveal = () => {
       <SectionBackground ref={bgRef} variant="projects" density={bgDensity} />
         <Container className="space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
-            Project reveal
+            Project
           </p>
           <h2 id="projects-title" className="text-3xl font-semibold md:text-4xl">
-            Three builds that show the scope.
+            이런 프로젝트에 참여했어요
           </h2>
         </Container>
         <div ref={stageRef} className="project-stage">

@@ -82,10 +82,10 @@ export const SkillsHorizontal = () => {
       <SectionBackground ref={bgRef} variant="skills" density={bgDensity} />
         <Container className="space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
-            Skills horizontal
+            Skills
           </p>
           <h2 id="skills-title" className="text-3xl font-semibold md:text-4xl">
-            Problem → Approach → Result
+            이런 기술을 사용해 봤어요
           </h2>
         </Container>
 

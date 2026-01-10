@@ -62,10 +62,10 @@ export const SectionBackground = forwardRef<HTMLDivElement, Props>(
   ({ variant, density = 12, className }, ref) => {
     const base =
       variant === "projects"
-        ? { blur: 1, opacity: 0.10 }
+        ? { blur: 2, opacity: 0.15 }
         : variant === "skills"
           ? { blur: 2, opacity: 0.12 }
-          : { blur: 2, opacity: 0.14 };
+          : { blur: 3, opacity: 0.24 };
 
     return (
       <div

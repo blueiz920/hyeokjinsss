@@ -111,8 +111,8 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
 
       // Lenis 생성
       const lenis = new Lenis({
-        lerp: prefersReducedMotion ? 0.25 : 0.18,
-        wheelMultiplier: prefersReducedMotion ? 0.6 : 0.85,
+        lerp: prefersReducedMotion ? 0.25 : 0.28,
+        wheelMultiplier: prefersReducedMotion ? 0.6 : 0.60,
         smoothWheel: true,
       });
 

@@ -90,7 +90,7 @@ export const initIntroScroll = async ({
         rotate: (i: number) => scatter[i].r,
         stagger: { each: 0.008, from: "center" },
       },
-      0,
+      -0.01,
     );
   }
 

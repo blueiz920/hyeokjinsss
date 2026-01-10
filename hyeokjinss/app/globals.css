@@ -46,7 +46,7 @@
   }
 
   .project-card {
-    @apply absolute inset-0 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)];
+    @apply absolute inset-0 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)] mb-3;
   }
 
   .skills-pin {
@@ -60,6 +60,7 @@
   }
 
   .skills-card {
-    @apply flex min-w-[300px] max-w-[40%] flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
+    @apply flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
+        width: clamp(300px, 40vh, 400px);
   }
 }
