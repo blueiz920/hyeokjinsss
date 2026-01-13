@@ -3,18 +3,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ScrollRuntimeProvider } from "@/hooks/useScrollRuntime";
 import { SectionRegistryProvider } from "@/hooks/useSectionRegistry";
-// import { MotionToggle } from "@/components/common/MotionToggle";
+import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Hyeokjin | Frontend Portfolio",
@@ -26,21 +19,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 font-sans text-white antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 font-sans text-white antialiased`}>
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
-            <ScrollProgress />
-            {children}
-            {/* <MotionToggle /> */}
+            <ScrollIndicatorsProvider>
+              <ScrollProgress />
+              {children}
+            </ScrollIndicatorsProvider>
           </SectionRegistryProvider>
         </ScrollRuntimeProvider>
       </body>

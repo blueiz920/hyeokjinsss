@@ -47,7 +47,7 @@ export const initIntroScroll = async ({
   bgLayer?: HTMLElement | null;
   prefersReducedMotion: boolean;
 }) => {
-  const { gsap, ScrollTrigger } = await loadGsap();
+  const { gsap } = await loadGsap();
   const profile = getMotionProfile(prefersReducedMotion);
 
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");

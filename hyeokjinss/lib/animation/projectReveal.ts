@@ -10,6 +10,8 @@ type ProjectRevealOptions = {
   cards: HTMLElement[];
   bgLayer?: HTMLElement | null;
   prefersReducedMotion: boolean;
+  onActiveChange?: (active: boolean) => void;
+  onStepChange?: (step: number) => void;
 };
 
 export const initProjectReveal = async ({
@@ -19,36 +21,36 @@ export const initProjectReveal = async ({
   cards,
   bgLayer,
   prefersReducedMotion,
+  onActiveChange,
+  onStepChange,
 }: ProjectRevealOptions) => {
   const { gsap, ScrollTrigger } = await loadGsap();
   if (!cards.length) return () => {};
 
   const profile = getMotionProfile(prefersReducedMotion);
-  const distance = prefersReducedMotion ? 12 : 26; // 등장용(살짝만)
-  const cardDistance = prefersReducedMotion ? 18 : 36; // 카드 전환용(기존)
-  const steps = Math.max(1, cards.length - 1);
+
+  const distance = prefersReducedMotion ? 12 : 26; // 섹션 등장용
+  const cardDistance = prefersReducedMotion ? 18 : 36; // 카드 전환용
+
+  // step 정의 (0..maxStep)
+  const maxStep = Math.max(0, cards.length - 1);
+  // pin 구간 길이는 최소 1 step은 확보(카드 1장이어도 pin 안정)
+  const endSteps = Math.max(1, maxStep);
+
   const getFrameH = () => Math.max(1, pinFrame.getBoundingClientRect().height);
-  const getEnd = () => `+=${getFrameH() * steps}`;
+  const getEnd = () => `+=${getFrameH() * endSteps}`;
 
   /**
    * 0) 최초 상태 세팅
    * - 카드 스택(겹침) 유지
-   * - pin 시작 전에도 "보이되, 살짝 들어오는" 연출을 위해 pinFrame / 타이틀 / bg를 별도로 등장 처리
    */
   gsap.set(cards, { autoAlpha: 0, y: cardDistance });
   gsap.set(cards[0], { autoAlpha: 1, y: 0 });
 
-  // 섹션 타이틀/설명 같은 것들(프로젝트 구조가 유지되도록 data 속성 없이 안전 셀렉터로)
-  const header = root.querySelector<HTMLElement>('[aria-labelledby="projects-title"]');
-  // 위 셀렉터가 넓으면, 더 보수적으로 pinFrame 안의 Container만 잡기:
-  const headingTargets =
-    pinFrame.querySelectorAll<HTMLElement>("p, h2");
-
-  // 1) ✅ “등장” 애니메이션 (pin 시작 전 1회)
-  // - pinFrame 전체가 뷰포트에 들어올 때: 타이틀/첫 카드/배경이 스르륵 등장
+  // 1) 섹션 "등장" 애니메이션 (pin 시작 전 1회)
+  const headingTargets = pinFrame.querySelectorAll<HTMLElement>("p, h2");
   const enterTl = gsap.timeline({ paused: true });
 
-  // pinFrame 자체(전체 덩어리) 살짝 업 + 페이드
   enterTl.fromTo(
     pinFrame,
     { autoAlpha: 0, y: distance },
@@ -62,7 +64,6 @@ export const initProjectReveal = async ({
     0,
   );
 
-  // 헤더 텍스트는 약간의 딜레이로
   if (headingTargets.length) {
     enterTl.fromTo(
       headingTargets,
@@ -79,7 +80,6 @@ export const initProjectReveal = async ({
     );
   }
 
-  // 첫 카드(이미 보이게 세팅되어 있으니, transform만 살짝)
   enterTl.fromTo(
     cards[0],
     { y: prefersReducedMotion ? 10 : 18, autoAlpha: 1 },
@@ -92,7 +92,6 @@ export const initProjectReveal = async ({
     0.08,
   );
 
-  // 배경은 더 약하게
   if (bgLayer) {
     enterTl.fromTo(
       bgLayer,
@@ -101,7 +100,6 @@ export const initProjectReveal = async ({
         autoAlpha: 1,
         duration: prefersReducedMotion ? 0.2 : 0.45,
         ease: "none",
-        // bgLayer는 pin 스크럽에서 transform을 쓰므로 clearProps 금지
       },
       0,
     );
@@ -109,132 +107,178 @@ export const initProjectReveal = async ({
 
   const enterTrigger = ScrollTrigger.create({
     trigger: pinFrame,
-    start: "top 85%", // 화면 아래에서 들어올 때
+    start: "top 85%",
     once: true,
-    onEnter: () => {
-      enterTl.play(0);
+    onEnter: () => enterTl.play(0),
+  });
+
+  /**
+   * 2) pin + 카드 전환 타임라인
+   * - 라벨(card{i})은 "전환 끝(정착)"
+   * - 전환이 시작되면 즉시 해당 step으로 확정 + HOLD
+   * - HOLD 동안 wheel/touchmove 입력 자체 차단(관성/연타 포함)
+   */
+
+  const TRANS = prefersReducedMotion ? 0.45 : 0.78; // 카드 전환 길이(클수록 느림)
+  const HOLD_MS = prefersReducedMotion ? 160 : 700; // 전환 후 다음 전환 금지 시간
+  const HOLD_CAP = prefersReducedMotion ? 0.04 : 0.06; // HOLD 중 허용 상한(정착 라벨 이후 조금)
+  const START_EPS = prefersReducedMotion ? 0.03 : 0.02; // 전환 시작 감지 여유
+
+  // projects active는 pin 타임라인과 분리해서 안정적으로 판단 (앞/뒤 여유)
+  const ACTIVE_START = "top 30%";
+  const ACTIVE_END = "bottom 50%";
+
+  let committedStep = 0; // HOLD/캡 기준이 되는 확정 step
+  let holdUntil = 0;
+  let gateLock = false;
+
+  // step emit은 "파생(derive) + 변경 시 emit"으로 누락 방지
+  let emittedStep = -1;
+  const emitStep = (step: number) => {
+    const next = Math.max(0, Math.min(step, maxStep));
+    if (next === emittedStep) return;
+    emittedStep = next;
+    onStepChange?.(next);
+  };
+
+  const deriveStep = (t: number) => {
+    // 전환 시작 시점(i - TRANS)을 넘으면 i로 간주 (체감상 "카드 넘어감"과 일치)
+    for (let i = maxStep; i >= 1; i--) {
+      if (t >= i - TRANS + START_EPS) return i;
+    }
+    return 0;
+  };
+
+  function scrollToTime(self: ScrollTriggerType, time: number, timeline: gsap.core.Timeline) {
+    const dur = Math.max(0.0001, timeline.duration());
+    const p = Math.max(0, Math.min(1, time / dur));
+    const y = self.start + (self.end - self.start) * p;
+
+    gateLock = true;
+    self.scroll(y);
+
+    // setTimeout 대신 rAF로 풀어서 "빈틈" 최소화
+    requestAnimationFrame(() => {
+      gateLock = false;
+    });
+  }
+
+  const tl = gsap.timeline({
+    defaults: { ease: motionDefaults.ease, duration: TRANS },
+    scrollTrigger: {
+      trigger: pinFrame,
+      start: "top top",
+      end: getEnd,
+      scrub: prefersReducedMotion ? 0.2 : 0.22,
+      pin: pinFrame,
+      pinSpacing: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+
+      snap: prefersReducedMotion
+        ? { snapTo: "labelsDirectional", duration: 0.22, delay: 0, inertia: false }
+        : { snapTo: "labelsDirectional", duration: 0.17, delay: 0.02, inertia: false },
+
+      onUpdate: (self: ScrollTriggerType) => {
+        const t = tl.time();
+
+        // ✅ dots는 gateLock 여부와 무관하게 항상 최신 step으로 동기화
+        emitStep(deriveStep(t));
+
+        // 아래 로직은 스크롤 강제 이동 중엔 건드리지 않음
+        if (gateLock) return;
+
+        const now = performance.now();
+
+        // ✅ HOLD 중: 다음 전환 시작으로 못 가게 상한으로 막기
+        if (now < holdUntil) {
+          const capTime = Math.min(tl.duration(), committedStep + HOLD_CAP);
+          if (t > capTime) scrollToTime(self, capTime, tl);
+          return;
+        }
+
+        // ✅ 앞으로 전환 시작 감지 → step 확정 + HOLD 시작 + 정착점으로 강제 정렬
+        if (committedStep < maxStep) {
+          const next = committedStep + 1;
+          const nextStart = next - TRANS;
+
+          if (t >= nextStart + START_EPS) {
+            committedStep = next;
+            holdUntil = now + HOLD_MS;
+
+            // step은 emitStep이 tl.time 기반으로 이미 따라오지만,
+            // 강제 정렬 직후 한 번 더 확정해도 무해 (안전)
+            emitStep(committedStep);
+
+            scrollToTime(self, committedStep, tl);
+          }
+        }
+      },
     },
   });
 
-  // 2) ✅ pin + 카드 전환 타임라인
-// 핵심: "card{i} 라벨은 전환 끝(정착)" / 전환이 시작되면 즉시 HOLD
-const TRANS = prefersReducedMotion ? 0.45 : 0.78; // 전환 길이(1보다 작게/크게 조절 가능, 1 미만이면 정착 구간이 생김)
-const HOLD_MS = prefersReducedMotion ? 160 : 900; // 카드 넘어간 직후 다음 전환 금지 시간
-const HOLD_CAP = prefersReducedMotion ? 0.04 : 0.06; // HOLD 중 허용 상한(정착 라벨 이후 조금은 허용)
-const START_EPS = prefersReducedMotion ? 0.03 : 0.02; // 전환 시작 감지 여유
+  // 라벨은 "정착점"
+  tl.addLabel("card0", 0);
 
-let currentStep = 0;
-let holdUntil = 0;
-let gateLock = false;
+  // 전환은 라벨(i)보다 TRANS만큼 앞에서 시작해서, 라벨(i)에서 끝나게 배치
+  for (let i = 1; i < cards.length; i++) {
+    tl.addLabel(`card${i}`, i);
 
-const tl = gsap.timeline({
-  defaults: { ease: motionDefaults.ease, duration: TRANS },
-  scrollTrigger: {
-    trigger: pinFrame,
-    start: "top top",
-    end: getEnd,
-    scrub: prefersReducedMotion ? 0.2 : 0.22,
-    pin: pinFrame,
-    pinSpacing: true,
-    anticipatePin: 1,
-    invalidateOnRefresh: true,
+    const prev = cards[i - 1];
+    const cur = cards[i];
 
-    // ✅ 라벨 스냅 유지 (단, 라벨이 "정착점"이 되도록 아래 루프에서 타임 배치 바꿈)
-    snap: prefersReducedMotion
-      ? { snapTo: "labelsDirectional", duration: 0.32, delay: 0, inertia: false }
-      : { snapTo: "labelsDirectional", duration: 0.17, delay: 0.02, inertia: false },
+    const startAt = i - TRANS;
 
-    onUpdate: (self) => {
-      if (gateLock) return;
+    tl.to(prev, { autoAlpha: 0, y: -cardDistance }, startAt).fromTo(
+      cur,
+      { autoAlpha: 0, y: cardDistance },
+      { autoAlpha: 1, y: 0 },
+      startAt,
+    );
+  }
 
-      const now = performance.now();
-      const t = tl.time();
-
-      // ✅ HOLD 중: 다음 전환 시작으로 못 가게 "상한"으로 막기 (속도/스냅 여부 무관)
-      if (now < holdUntil) {
-        // currentStep 정착 라벨(time = currentStep)보다 조금만 더 허용
-        const capTime = Math.min(tl.duration(), currentStep + HOLD_CAP);
-
-        if (t > capTime) {
-          scrollToTime(self, capTime);
-        }
-        return;
-      }
-
-      // ✅ 앞으로(다음 카드) 전환 "시작" 감지
-      // 전환 to step (currentStep+1)은 (currentStep+1 - TRANS)에서 시작해서 (currentStep+1)에서 끝남
-      if (currentStep < steps) {
-        const next = currentStep + 1;
-        const nextStart = next - TRANS;
-
-        // 전환이 시작됐다고 판단되면: 즉시 다음 스텝으로 확정 + HOLD 시작 + 정착점으로 붙이기
-        if (t >= nextStart + START_EPS) {
-          currentStep = next;
-          holdUntil = now + HOLD_MS;
-
-          // ✅ "전환 끝(정착)" 라벨로 붙여서, 이전 카드가 다 사라진 상태로 고정되게
-          scrollToTime(self, currentStep);
-          return;
-        }
-      }
-
-      // (선택) 뒤로(이전 카드)도 깔끔히 정착시키고 싶으면 아래를 살려도 됨
-      // - 너가 요구한 건 forward HOLD라서 기본은 주석 처리해둠
-      /*
-      if (currentStep > 0) {
-        const prev = currentStep - 1;
-        const curStart = currentStep - TRANS; // currentStep으로 들어오는 전환 시작점
-        if (t <= curStart - START_EPS) {
-          currentStep = prev;
-          scrollToTime(self, currentStep);
-          return;
-        }
-      }
-      */
+  // ✅ projects active 전용 트리거 (pin 타임라인과 분리)
+  const indicatorTrigger = ScrollTrigger.create({
+    trigger: root,
+    start: ACTIVE_START,
+    end: ACTIVE_END,
+    onEnter: () => {
+      onActiveChange?.(true);
+      emitStep(deriveStep(tl.time()));
     },
-  },
-});
+    onEnterBack: () => {
+      onActiveChange?.(true);
+      emitStep(deriveStep(tl.time()));
+    },
+    onLeave: () => onActiveChange?.(false),
+    onLeaveBack: () => onActiveChange?.(false),
+  });
 
-// time(타임라인 시간) -> 스크롤 위치로 강제 이동
-const scrollToTime = (self: ScrollTriggerType, time: number) => {
-  const dur = Math.max(0.0001, tl.duration());
-  const p = Math.max(0, Math.min(1, time / dur));
-  const y = self.start + (self.end - self.start) * p;
+  // 초기 step 동기화(첫 렌더)
+  emitStep(0);
 
-  gateLock = true;
-  self.scroll(y);
-  window.setTimeout(() => {
-    gateLock = false;
-  }, prefersReducedMotion ? 70 : 110);
-};
+  // ✅ HOLD 동안 입력 자체 차단(트랙패드 관성/연타 포함)
+  const inputBlockOptions = { passive: false, capture: true } as const;
 
-// ✅ 라벨은 "정착점"
-tl.addLabel("card0", 0);
+  const blockInputDuringHold = (e: WheelEvent | TouchEvent) => {
+    const st = tl.scrollTrigger;
+    if (!st) return;
 
-// ✅ 전환은 라벨(i)보다 TRANS만큼 앞에서 시작해서, 라벨(i)에서 끝나게 배치
-for (let i = 1; i < cards.length; i++) {
-  tl.addLabel(`card${i}`, i);
+    // pin 구간에서만 + HOLD 시간 동안만 차단
+    if (performance.now() < holdUntil && st.isActive) {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
-  const prev = cards[i - 1];
-  const cur = cards[i];
+  window.addEventListener("wheel", blockInputDuringHold, inputBlockOptions);
+  window.addEventListener("touchmove", blockInputDuringHold, inputBlockOptions);
 
-  const startAt = i - TRANS; // 전환 시작 시점 (정착 라벨보다 앞)
-
-  tl.to(prev, { autoAlpha: 0, y: -cardDistance }, startAt).fromTo(
-    cur,
-    { autoAlpha: 0, y: cardDistance },
-    { autoAlpha: 1, y: 0 },
-    startAt,
-  );
-}
-
-
-  // 3) ✅ 배경 패럴랙스(핀 구간에서만)
+  // 3) 배경 패럴랙스(핀 구간에서만)
   let bgTween: gsap.core.Tween | null = null;
   if (bgLayer) {
     bgTween = gsap.to(bgLayer, {
       y: -profile.drift,
-      // opacity: 0.10,
       ease: "none",
       scrollTrigger: {
         trigger: pinFrame,
@@ -259,6 +303,11 @@ for (let i = 1; i < cards.length; i++) {
   return () => {
     ScrollTrigger.removeEventListener("refreshInit", handleRefresh);
 
+    window.removeEventListener("wheel", blockInputDuringHold, inputBlockOptions);
+    window.removeEventListener("touchmove", blockInputDuringHold, inputBlockOptions);
+
+    indicatorTrigger.kill();
+
     enterTrigger.kill();
     enterTl.kill();
 
@@ -267,5 +316,8 @@ for (let i = 1; i < cards.length; i++) {
 
     tl.scrollTrigger?.kill();
     tl.kill();
+
+    // 상태는 마지막에 정리(SSOT consumer가 안전하게 종료 처리 가능)
+    onActiveChange?.(false);
   };
 };

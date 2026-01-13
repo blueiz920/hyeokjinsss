@@ -6,6 +6,7 @@ import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { initProjectReveal } from "@/lib/animation/projectReveal";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
+import { useScrollIndicators } from '@/hooks/useScrollIndicators';
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SectionBackground } from "@/components/common/SectionBackground";
 import { getMotionProfile } from "@/lib/motion/mediaPolicy";
@@ -19,9 +20,13 @@ export const ProjectReveal = () => {
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
-
+  const { setProjectsActive, setProjectsStep, setProjectsTotal } = useScrollIndicators();
   // SSR/CSR 첫 렌더 동일하게(하이드레이션 이슈 방지)
   const [bgDensity, setBgDensity] = useState(14);
+
+  useEffect(() => {
+    setProjectsTotal(portfolio.projects.length);
+  }, [setProjectsTotal]);
 
   useEffect(() => {
   const id = requestAnimationFrame(() => {
@@ -59,6 +64,8 @@ export const ProjectReveal = () => {
         cards,
         bgLayer: bgRef.current, // 섹션 배경 ref
         prefersReducedMotion,
+        onActiveChange: setProjectsActive,
+        onStepChange: setProjectsStep,
       });
 
       if (!alive) {
@@ -70,6 +77,7 @@ export const ProjectReveal = () => {
 
     return () => {
       alive = false;
+      setProjectsActive(false);
       destroy?.();
     };
   }, [prefersReducedMotion]);
