@@ -34,7 +34,7 @@ html::-webkit-scrollbar {
   }
 
   .section-padding {
-    @apply py-24 md:py-28;
+    @apply py-24 md:py-36;
   }
 
   .breather {
