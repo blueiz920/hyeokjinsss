@@ -67,13 +67,14 @@ html::-webkit-scrollbar {
   }
 
   .skills-track {
-    @apply flex h-[30%] w-max mt-10 gap-6 px-6 md:px-10 mx-auto;
-        height: clamp(200px, 70vh, 500px);
+    @apply flex h-[30%] w-max mt-10 gap-6 px-6 md:px-16 mx-auto;
+        height: clamp(200px, 50vh, 450px);
   }
 
   .skills-card {
     @apply flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
         width: clamp(300px, 40vh, 400px);
+        height: clamp(200px, 45vh, 350px);
   }
 }
 

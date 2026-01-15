@@ -9,7 +9,7 @@ export const Footer = () => {
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">
             Contact
           </p>
-          <h2 className="text-2xl font-semibold text-white md:text-3xl">
+          <h2 className="text-2xl font-normal text-white/80 md:text-xl">
             Let&apos;s build the next narrative together.
           </h2>
           <p className="text-base text-white/70">

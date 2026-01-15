@@ -107,7 +107,7 @@ export const SectionBackground = forwardRef<HTMLDivElement, Props>(
         </div>
 
         {/* 아주 약한 질감 */}
-        <div className="absolute inset-0 opacity-[0.10] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] [background-size:18px_18px]" />
+        <div className="absolute inset-0 opacity-[0.20] mix-blend-overlay bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] [background-size:18px_18px]" />
       </div>
     );
   },

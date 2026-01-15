@@ -105,11 +105,11 @@ export const SkillsHorizontal = () => {
         </div>
       </div>
 
-      <Container className="relative z-10">
+      {/* <Container className="relative z-10">
         <p className="mt-10 max-w-2xl text-base text-white/70">
           {portfolio.skillsSummary}
         </p>
-      </Container>
+      </Container> */}
     </section>
   );
 };

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hyeokjin | Frontend Portfolio",
     description: "Scroll-first frontend portfolio built with Next.js.",
-    images: ["/images/og.png"],
+    images: ["/public/example.svg"],
   },
 };
 
