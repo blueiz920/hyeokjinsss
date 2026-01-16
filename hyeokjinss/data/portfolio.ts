@@ -77,7 +77,7 @@ export const portfolio: PortfolioData = {
         "Vercel",
         "Lenis",
       ],
-      thumbnail: "/example.svg",
+      thumbnail: "/hyeokjin.svg",
       links: [{ label: "GitHub", href: "https://github.com/blueiz920/hyeokjinsss" }],
     },
   ],
