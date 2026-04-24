@@ -2553,9 +2553,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyeokjinss@workspace:.":
+"hyeokjinsss@workspace:.":
   version: 0.0.0-use.local
-  resolution: "hyeokjinss@workspace:."
+  resolution: "hyeokjinsss@workspace:."
   dependencies:
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^20"
