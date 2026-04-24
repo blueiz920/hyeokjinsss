@@ -3,7 +3,6 @@ import { getMotionProfile } from "@/lib/motion/mediaPolicy";
 import { motionDefaults } from "./runtime";
 
 type SkillsHorizontalOptions = {
-  root: HTMLElement;
   pinFrame: HTMLElement;
   track: HTMLElement;
   bgLayer?: HTMLElement | null;
@@ -11,7 +10,6 @@ type SkillsHorizontalOptions = {
 };
 
 export const initSkillsHorizontal = async ({
-  root,
   pinFrame,
   track,
   bgLayer,

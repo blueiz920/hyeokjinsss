@@ -47,7 +47,6 @@ export const SkillsHorizontal = () => {
 
     (async () => {
       const d = await initSkillsHorizontal({
-        root: sectionRef.current!,
         pinFrame: pinRef.current!,
         track: trackRef.current!,
         bgLayer: bgRef.current, // 섹션 배경 ref

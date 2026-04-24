@@ -80,7 +80,7 @@ export const ProjectReveal = () => {
       setProjectsActive(false);
       destroy?.();
     };
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, setProjectsActive, setProjectsStep]);
 
   return (
     <section
