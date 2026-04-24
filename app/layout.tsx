@@ -10,18 +10,19 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hyeokjin | Frontend Portfolio",
-  description: "Scroll-first frontend portfolio built with Next.js.",
+  metadataBase: new URL("https://hyeokjinsss.vercel.app"),
+  title: "권혁진 | 프론트엔드 ",
+  description: "호기심을 갖고 성장하는 프론트엔드 개발자 권혁진입니다.",
   openGraph: {
-    title: "Hyeokjin | Frontend Portfolio",
-    description: "Scroll-first frontend portfolio built with Next.js.",
+    title: "권혁진 | 성장하는 개발자",
+    description: "개발자 권혁진의 공간입니다.",
     images: ["/hyeokjin.svg"],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 font-sans text-white antialiased`}>
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
