@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { OverlayNav } from "@/components/common/OverlayNav";
@@ -8,6 +8,7 @@ import { Container } from "./Container";
 
 export const Header = () => {
   const [open, setOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const { scrollTo } = useSectionRegistry();
 
   return (
@@ -34,6 +35,7 @@ export const Header = () => {
           ))}
         </nav>
         <button
+          ref={menuButtonRef}
           type="button"
           onClick={() => setOpen(true)}
           className="rounded-full border border-white/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white md:hidden"
@@ -42,7 +44,12 @@ export const Header = () => {
           Menu
         </button>
       </Container>
-      <OverlayNav open={open} onClose={() => setOpen(false)} navItems={portfolio.nav} />
+      <OverlayNav
+        open={open}
+        onClose={() => setOpen(false)}
+        navItems={portfolio.nav}
+        restoreFocusRef={menuButtonRef}
+      />
     </header>
   );
 };
