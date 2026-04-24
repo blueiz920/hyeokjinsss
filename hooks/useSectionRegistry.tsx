@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { useScrollRuntime } from "./useScrollRuntime";
 
 export type SectionEntry = {
   id: string;
@@ -27,6 +28,7 @@ export const SectionRegistryProvider = ({
   children: React.ReactNode;
 }) => {
   const registry = useRef(new Map<string, React.RefObject<HTMLElement | null>>());
+  const { prefersReducedMotion } = useScrollRuntime();
 
   const register = useCallback(
     (id: string, ref: React.RefObject<HTMLElement | null>) => {
@@ -46,9 +48,12 @@ export const SectionRegistryProvider = ({
       return;
     }
 
-    node.scrollIntoView({ behavior: "smooth", block: "start" });
+    node.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
     node.focus({ preventScroll: true });
-  }, []);
+  }, [prefersReducedMotion]);
 
   const value = useMemo(
     () => ({ register, unregister, scrollTo }),

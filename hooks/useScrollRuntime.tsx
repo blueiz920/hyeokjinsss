@@ -66,6 +66,7 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
 
       // 항상 같은 스크롤러(문서)로 통일: Lenis ON/OFF 상관없이 안정적
       const scrollerEl = document.documentElement;
+      const shouldUseLenis = lenisEnabled && !prefersReducedMotion;
       ScrollTrigger.defaults({ scroller: scrollerEl });
 
       // scrollerProxy는 "Lenis가 있으면 Lenis로", 없으면 native로" 동작하도록 안전하게 구성
@@ -73,7 +74,7 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
         scrollTop(value) {
           if (typeof value === "number") {
             const lenis = lenisRef.current;
-            if (lenisEnabled && lenis) {
+            if (shouldUseLenis && lenis) {
               // ScrollTrigger가 스냅 등으로 "스크롤을 설정"할 때 Lenis에 위임
               lenis.scrollTo(value, { immediate: true });
             } else {
@@ -83,7 +84,7 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
 
           // ScrollTrigger가 "현재 스크롤을 읽을 때"
           const lenis = lenisRef.current;
-          if (lenisEnabled && lenis) {
+          if (shouldUseLenis && lenis) {
             // Lenis 내부 스크롤 값을 우선 사용
             return lenis.scroll;
           }
@@ -103,7 +104,7 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
       // 기존 Lenis/RAF 정리
       cleanup();
 
-      if (!lenisEnabled) {
+      if (!shouldUseLenis) {
         document.documentElement.dataset.lenis = "false";
         ScrollTrigger.refresh();
         return;
@@ -111,8 +112,8 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
 
       // Lenis 생성
       const lenis = new Lenis({
-        lerp: prefersReducedMotion ? 0.25 : 0.28,
-        wheelMultiplier: prefersReducedMotion ? 0.6 : 0.6,
+        lerp: 0.28,
+        wheelMultiplier: 0.6,
         smoothWheel: true,
       });
 
