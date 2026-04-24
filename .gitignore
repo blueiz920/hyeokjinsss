@@ -42,3 +42,8 @@ next-env.d.ts
 
 # patch
 *.patch
+
+# Codex run artifacts
+/plan/
+subagent-runs/
+subagent-*
