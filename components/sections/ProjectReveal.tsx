@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
@@ -9,24 +9,11 @@ import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SectionBackground } from "@/components/common/SectionBackground";
 import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
+import {
+  getProjectCardIndex,
+  useProjectBgMotion,
+} from "@/lib/animation/projectReveal";
 import { getMotionProfile } from "@/lib/motion/mediaPolicy";
-
-const getClosestCardIndex = (cards: HTMLElement[]) => {
-  const viewportCenter = window.innerHeight / 2;
-
-  return cards.reduce(
-    (closest, card, index) => {
-      const rect = card.getBoundingClientRect();
-      const cardCenter = rect.top + rect.height / 2;
-      const distance = Math.abs(cardCenter - viewportCenter);
-
-      return distance < closest.distance ? { index, distance } : closest;
-    },
-    { index: 0, distance: Number.POSITIVE_INFINITY },
-  ).index;
-};
-
-const PROJECT_BACKGROUND_DRIFT_PX = 120;
 
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -37,29 +24,15 @@ export const ProjectReveal = () => {
   const { setProjectsActive, setProjectsStep, setProjectsTotal } =
     useScrollIndicators();
   const [bgDensity, setBgDensity] = useState(14);
-  const [isMounted, setIsMounted] = useState(false);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  // 배경 wrapper만 움직여서 공통 SectionBackground 로직은 그대로 유지
-  const backgroundY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    prefersReducedMotion
-      ? [0, 0]
-      : [0, PROJECT_BACKGROUND_DRIFT_PX],
+  // 배경 wrapper만 움직여서 공통 SectionBackground 로직은 그대로 유지함.
+  const backgroundStyle = useProjectBgMotion(
+    sectionRef,
+    prefersReducedMotion,
   );
 
   useEffect(() => {
     setProjectsTotal(portfolio.projects.length);
   }, [setProjectsTotal]);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setIsMounted(true));
-
-    return () => cancelAnimationFrame(id);
-  }, []);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -95,7 +68,7 @@ export const ProjectReveal = () => {
       setProjectsActive(active);
 
       if (active) {
-        setProjectsStep(getClosestCardIndex(cards));
+        setProjectsStep(getProjectCardIndex(cards));
       }
     };
 
@@ -131,7 +104,7 @@ export const ProjectReveal = () => {
         <div className="sticky top-0 h-screen overflow-hidden">
           <motion.div
             className="absolute -inset-20"
-            style={isMounted ? { y: backgroundY } : { y: 0 }}
+            style={backgroundStyle}
           >
             <SectionBackground variant="projects" density={bgDensity} />
           </motion.div>

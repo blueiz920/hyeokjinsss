@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useRef } from "react";
 import type { Project } from "@/data/types";
+import { useProjectCardMotion } from "@/lib/animation/projectReveal";
 
 type ProjectRevealCardProps = {
   project: Project;
@@ -13,42 +14,13 @@ type ProjectRevealCardProps = {
 export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>(
   ({ project, prefersReducedMotion }, ref) => {
     const cardRef = useRef<HTMLElement | null>(null);
-    const [motionReady, setMotionReady] = useState(false);
-    const { scrollYProgress } = useScroll({
-      target: cardRef,
-      offset: ["start end", "end start"],
-    });
-    const cardOpacity = useTransform(
-      scrollYProgress,
-      [0, 0.3,0.7, 1],
-      prefersReducedMotion ? [1, 1,1, 1] : [0.40,1, 1, 0.40],
-    );
-    const cardY = useTransform(
-      scrollYProgress,
-      [0, 0.3,0.7, 1],
-      prefersReducedMotion ? [0, 0,0, 0] : [200, 0, 0, -200],
-    );
-    const cardScale = useTransform(
-      scrollYProgress,
-      [0.2, 0.4,0.6, 0.8],
-      prefersReducedMotion ? [1, 1,1, 1] : [0.882,1, 1, 0.886],
-    );
-    const imageY = useTransform(
-      scrollYProgress,
-      [0, 1],
-      prefersReducedMotion ? [0, 0] : [-34, 34],
-    );
-    const motionEnabled = motionReady && !prefersReducedMotion;
+    const {
+      cardStyle,
+      enabled: motionEnabled,
+      imageStyle,
+    } = useProjectCardMotion(cardRef, prefersReducedMotion);
 
-    useEffect(() => {
-      if (prefersReducedMotion) return;
-
-      const id = requestAnimationFrame(() => setMotionReady(true));
-
-      return () => cancelAnimationFrame(id);
-    }, [prefersReducedMotion]);
-
-    // 부모 observer와 카드 motion이 같은 article을 보도록 ref를 합침
+    // 부모 observer와 카드 motion이 같은 article을 보도록 ref를 합침.
     const setCardRef = useCallback(
       (node: HTMLElement | null) => {
         cardRef.current = node;
@@ -70,11 +42,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
         ref={setCardRef}
         className="project-card group"
         aria-label={project.title}
-        style={
-          motionEnabled
-            ? { opacity: cardOpacity, y: cardY, scale: cardScale }
-            : undefined
-        }
+        style={cardStyle}
       >
         <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
           <div className="space-y-4">
@@ -114,7 +82,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
           <div className="relative h-56 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
             <motion.div
               className="absolute -inset-y-4 inset-x-0"
-              style={motionEnabled ? { y: imageY } : undefined}
+              style={imageStyle}
             >
               <div
                 className={[
