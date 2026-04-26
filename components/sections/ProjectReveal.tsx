@@ -10,13 +10,29 @@ import { SectionBackground } from "@/components/common/SectionBackground";
 import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
 import { getMotionProfile } from "@/lib/motion/mediaPolicy";
 
+const getClosestCardIndex = (cards: HTMLElement[]) => {
+  const viewportCenter = window.innerHeight / 2;
+
+  return cards.reduce(
+    (closest, card, index) => {
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(cardCenter - viewportCenter);
+
+      return distance < closest.distance ? { index, distance } : closest;
+    },
+    { index: 0, distance: Number.POSITIVE_INFINITY },
+  ).index;
+};
+
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const cardsRef = useRef<Array<HTMLElement | null>>([]);
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
-  const { setProjectsTotal } = useScrollIndicators();
+  const { setProjectsActive, setProjectsStep, setProjectsTotal } =
+    useScrollIndicators();
   const [bgDensity, setBgDensity] = useState(14);
 
   useEffect(() => {
@@ -39,6 +55,47 @@ export const ProjectReveal = () => {
     register("projects", sectionRef);
     return () => unregister("projects");
   }, [register, unregister]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const cards = cardsRef.current.filter(
+      (card): card is HTMLElement => Boolean(card),
+    );
+
+    if (!section || cards.length === 0) return;
+
+    const syncIndicators = () => {
+      const sectionRect = section.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      const active =
+        sectionRect.top <= viewportCenter && sectionRect.bottom >= viewportCenter;
+
+      setProjectsActive(active);
+
+      if (active) {
+        setProjectsStep(getClosestCardIndex(cards));
+      }
+    };
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "-45% 0px -45% 0px",
+      threshold: 0,
+    };
+
+    const sectionObserver = new IntersectionObserver(syncIndicators, observerOptions);
+    const cardObserver = new IntersectionObserver(syncIndicators, observerOptions);
+
+    sectionObserver.observe(section);
+    cards.forEach((card) => cardObserver.observe(card));
+    syncIndicators();
+
+    return () => {
+      sectionObserver.disconnect();
+      cardObserver.disconnect();
+      setProjectsActive(false);
+    };
+  }, [setProjectsActive, setProjectsStep]);
 
   return (
     <section
