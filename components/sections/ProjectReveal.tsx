@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
@@ -25,6 +26,8 @@ const getClosestCardIndex = (cards: HTMLElement[]) => {
   ).index;
 };
 
+const PROJECT_BACKGROUND_DRIFT_PX = 120;
+
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const cardsRef = useRef<Array<HTMLElement | null>>([]);
@@ -34,10 +37,29 @@ export const ProjectReveal = () => {
   const { setProjectsActive, setProjectsStep, setProjectsTotal } =
     useScrollIndicators();
   const [bgDensity, setBgDensity] = useState(14);
+  const [isMounted, setIsMounted] = useState(false);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  // 배경 wrapper만 움직여서 공통 SectionBackground 로직은 그대로 유지
+  const backgroundY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    prefersReducedMotion
+      ? [0, 0]
+      : [0, PROJECT_BACKGROUND_DRIFT_PX],
+  );
 
   useEffect(() => {
     setProjectsTotal(portfolio.projects.length);
   }, [setProjectsTotal]);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setIsMounted(true));
+
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -105,8 +127,15 @@ export const ProjectReveal = () => {
       className="section-padding relative bg-neutral-950 text-white"
       aria-labelledby="projects-title"
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <SectionBackground variant="projects" density={bgDensity} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+        <div className="sticky top-0 h-screen overflow-hidden">
+          <motion.div
+            className="absolute -inset-20"
+            style={isMounted ? { y: backgroundY } : { y: 0 }}
+          >
+            <SectionBackground variant="projects" density={bgDensity} />
+          </motion.div>
+        </div>
       </div>
 
       <Container className="relative z-10">
