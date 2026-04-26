@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ScrollRuntimeProvider } from "@/hooks/useScrollRuntime";
 import { SectionRegistryProvider } from "@/hooks/useSectionRegistry";
 import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
+import { PointerGlow } from "@/components/common/PointerGlow";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
             <ScrollIndicatorsProvider>
+              <PointerGlow />
               <ScrollProgress />
               {children}
             </ScrollIndicatorsProvider>
