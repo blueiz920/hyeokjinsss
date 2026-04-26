@@ -157,6 +157,7 @@ export const ProjectReveal = () => {
                   cardsRef.current[index] = node;
                 }}
                 project={project}
+                prefersReducedMotion={prefersReducedMotion}
               />
             ))}
           </div>

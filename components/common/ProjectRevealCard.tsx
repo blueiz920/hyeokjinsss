@@ -1,17 +1,81 @@
 "use client";
 
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/types";
 
 type ProjectRevealCardProps = {
   project: Project;
+  prefersReducedMotion: boolean;
 };
 
 export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>(
-  ({ project }, ref) => {
+  ({ project, prefersReducedMotion }, ref) => {
+    const cardRef = useRef<HTMLElement | null>(null);
+    const [motionReady, setMotionReady] = useState(false);
+    const { scrollYProgress } = useScroll({
+      target: cardRef,
+      offset: ["start end", "end start"],
+    });
+    const cardOpacity = useTransform(
+      scrollYProgress,
+      [0, 0.3,0.7, 1],
+      prefersReducedMotion ? [1, 1,1, 1] : [0.40,1, 1, 0.40],
+    );
+    const cardY = useTransform(
+      scrollYProgress,
+      [0, 0.3,0.7, 1],
+      prefersReducedMotion ? [0, 0,0, 0] : [200, 0, 0, -200],
+    );
+    const cardScale = useTransform(
+      scrollYProgress,
+      [0.2, 0.4,0.6, 0.8],
+      prefersReducedMotion ? [1, 1,1, 1] : [0.882,1, 1, 0.886],
+    );
+    const imageY = useTransform(
+      scrollYProgress,
+      [0, 1],
+      prefersReducedMotion ? [0, 0] : [-34, 34],
+    );
+    const motionEnabled = motionReady && !prefersReducedMotion;
+
+    useEffect(() => {
+      if (prefersReducedMotion) return;
+
+      const id = requestAnimationFrame(() => setMotionReady(true));
+
+      return () => cancelAnimationFrame(id);
+    }, [prefersReducedMotion]);
+
+    // 부모 observer와 카드 motion이 같은 article을 보도록 ref를 합침
+    const setCardRef = useCallback(
+      (node: HTMLElement | null) => {
+        cardRef.current = node;
+
+        if (typeof ref === "function") {
+          ref(node);
+          return;
+        }
+
+        if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref],
+    );
+
     return (
-      <article ref={ref} className="project-card" aria-label={project.title}>
+      <motion.article
+        ref={setCardRef}
+        className="project-card group"
+        aria-label={project.title}
+        style={
+          motionEnabled
+            ? { opacity: cardOpacity, y: cardY, scale: cardScale }
+            : undefined
+        }
+      >
         <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -48,16 +112,30 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
           </div>
 
           <div className="relative h-56 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-            <Image
-              src={project.thumbnail}
-              alt={project.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 40vw"
-            />
+            <motion.div
+              className="absolute -inset-y-4 inset-x-0"
+              style={motionEnabled ? { y: imageY } : undefined}
+            >
+              <div
+                className={[
+                  "relative h-full w-full",
+                  motionEnabled
+                    ? "transition-transform duration-500 ease-out group-hover:scale-[1.03] group-focus-within:scale-[1.03]"
+                    : "",
+                ].join(" ")}
+              >
+                <Image
+                  src={project.thumbnail}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 40vw"
+                />
+              </div>
+            </motion.div>
           </div>
         </div>
-      </article>
+      </motion.article>
     );
   },
 );
