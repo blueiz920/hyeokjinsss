@@ -45,6 +45,13 @@ html::-webkit-scrollbar {
     @apply relative rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] md:p-8;
   }
 
+  .project-reveal-bg {
+    background-image: url("/project/projectBg-mb.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
   .skills-pin {
     @apply relative h-screen overflow-hidden pt-24 ;
 
@@ -59,6 +66,18 @@ html::-webkit-scrollbar {
     @apply flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
         width: clamp(300px, 40vh, 400px);
         height: clamp(200px, 45vh, 350px);
+  }
+}
+
+@media (min-width: 768px) and (orientation: landscape) {
+  .project-reveal-bg {
+    background-image: url("/project/projectBg-tb.png");
+  }
+}
+
+@media (min-width: 1280px) {
+  .project-reveal-bg {
+    background-image: url("/project/projectBg.png");
   }
 }
 

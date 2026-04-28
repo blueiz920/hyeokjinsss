@@ -1,19 +1,22 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
-import { SectionBackground } from "@/components/common/SectionBackground";
 import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
-import {
-  getProjectCardIndex,
-  useProjectBgMotion,
-} from "@/lib/animation/projectReveal";
-import { getMotionProfile } from "@/lib/motion/mediaPolicy";
+import { getProjectCardIndex } from "@/lib/animation/projectReveal";
+
+/*
+ * Project 배경 에셋/드리프트 복구용으로 남겨둔 이전 import:
+ * import { motion } from "framer-motion";
+ * import { useState } from "react";
+ * import { SectionBackground } from "@/components/common/SectionBackground";
+ * import { useProjectBgMotion } from "@/lib/animation/projectReveal";
+ * import { getMotionProfile } from "@/lib/motion/mediaPolicy";
+ */
 
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -23,27 +26,33 @@ export const ProjectReveal = () => {
   const { register, unregister } = useSectionRegistry();
   const { setProjectsActive, setProjectsStep, setProjectsTotal } =
     useScrollIndicators();
-  const [bgDensity, setBgDensity] = useState(14);
-  // 배경 wrapper만 움직여서 공통 SectionBackground 로직은 그대로 유지함.
-  const backgroundStyle = useProjectBgMotion(
-    sectionRef,
-    prefersReducedMotion,
-  );
+
+  /*
+   * 이전 Project 배경 에셋/드리프트 상태:
+   * const [bgDensity, setBgDensity] = useState(14);
+   * const backgroundStyle = useProjectBgMotion(
+   *   sectionRef,
+   *   prefersReducedMotion,
+   * );
+   */
 
   useEffect(() => {
     setProjectsTotal(portfolio.projects.length);
   }, [setProjectsTotal]);
 
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const { density } = getMotionProfile(prefersReducedMotion);
-      const next = density + 14;
-
-      setBgDensity((prev) => (prev === next ? prev : next));
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, [prefersReducedMotion]);
+  /*
+   * 이전 SectionBackground density 동기화:
+   * useEffect(() => {
+   *   const id = requestAnimationFrame(() => {
+   *     const { density } = getMotionProfile(prefersReducedMotion);
+   *     const next = density + 14;
+   *
+   *     setBgDensity((prev) => (prev === next ? prev : next));
+   *   });
+   *
+   *   return () => cancelAnimationFrame(id);
+   * }, [prefersReducedMotion]);
+   */
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -102,12 +111,15 @@ export const ProjectReveal = () => {
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
         <div className="sticky top-0 h-screen overflow-hidden">
-          <motion.div
-            className="absolute -inset-20"
-            style={backgroundStyle}
-          >
-            <SectionBackground variant="projects" density={bgDensity} />
-          </motion.div>
+          {/*
+            이전 Project 배경 에셋 레이어:
+            <motion.div className="absolute -inset-20" style={backgroundStyle}>
+              <SectionBackground variant="projects" density={bgDensity} />
+            </motion.div>
+          */}
+          <div className="project-reveal-bg absolute inset-0" />
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-neutral-950 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 to-transparent" />
         </div>
       </div>
 
