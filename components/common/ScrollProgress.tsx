@@ -79,7 +79,9 @@ export const ScrollProgress = () => {
                   className={[
                     "block h-2 w-2 rounded-full border border-white/20",
                     "transition-[transform,background-color] duration-200",
-                    isActive ? "bg-white scale-125" : "bg-white/20 scale-100",
+                    isActive
+                      ? "border-amber-200/60 bg-amber-300 scale-125 shadow-[0_0_16px_rgba(251,191,36,0.45)]"
+                      : "bg-white/20 scale-100",
                   ].join(" ")}
                 />
               </li>
@@ -114,7 +116,9 @@ export const ScrollProgress = () => {
                   className={[
                     "block h-2 w-2 rounded-full border border-white/20",
                     "transition-[transform,background-color] duration-200",
-                    isActive ? "bg-white scale-125" : "bg-white/20 scale-100",
+                    isActive
+                      ? "border-amber-200/60 bg-amber-300 scale-125 shadow-[0_0_16px_rgba(251,191,36,0.45)]"
+                      : "bg-white/20 scale-100",
                   ].join(" ")}
                 />
               </li>

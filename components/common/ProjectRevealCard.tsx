@@ -46,7 +46,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
       >
         <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-8">
           <div className="space-y-3 md:space-y-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
               {project.role}
             </p>
             <h3 className="text-2xl font-semibold md:text-3xl">
@@ -73,7 +73,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-white underline decoration-white/40 underline-offset-4"
+                  className="text-white underline decoration-amber-300/50 underline-offset-4 transition hover:text-amber-100 hover:decoration-amber-300 focus-visible:outline-amber-200"
                 >
                   {link.label}
                 </a>

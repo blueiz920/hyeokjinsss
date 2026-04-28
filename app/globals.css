@@ -42,7 +42,11 @@ html::-webkit-scrollbar {
   }
 
   .project-card {
-    @apply relative rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
+    @apply relative rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.001), rgba(255, 255, 255, 0.000)) padding-box,
+      linear-gradient(135deg, rgba(255, 191, 36, 0.15), rgba(255, 255, 255, 0.025) 45%, rgba(251, 255, 255, 0.01)) border-box;
+    border-color: transparent;
   }
 
   .project-reveal-bg {
