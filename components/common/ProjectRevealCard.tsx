@@ -44,7 +44,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
         aria-label={project.title}
         style={cardStyle}
       >
-        <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-8">
+        <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-8">
           <div className="space-y-3 md:space-y-4">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               {project.role}
@@ -52,11 +52,11 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
             <h3 className="text-2xl font-semibold md:text-3xl">
               {project.title}
             </h3>
-            <p className="text-[0.95rem] leading-7 text-white/70 md:text-base">
+            <p className="text-[0.95rem] leading-6 text-white/70 md:text-base md:leading-normal">
               {project.summary}
             </p>
             <p className="text-sm leading-6 text-white/60">{project.impact}</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
               {project.stack.map((item) => (
                 <span
                   key={item}
