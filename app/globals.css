@@ -42,12 +42,13 @@ html::-webkit-scrollbar {
   }
 
   .project-card {
-    @apply relative rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)] md:p-8;
+    @apply relative rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
   }
 
   .project-reveal-bg {
     background-image: url("/project/projectBg-mb.png");
-    background-position: center;
+    /* 모바일은 좌하단 광원이 보이게 왼쪽 아래 기준으로 둠. */
+    background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: cover;
   }
@@ -72,12 +73,14 @@ html::-webkit-scrollbar {
 @media (min-width: 768px) and (orientation: landscape) {
   .project-reveal-bg {
     background-image: url("/project/projectBg-tb.png");
+    background-position: center;
   }
 }
 
 @media (min-width: 1280px) {
   .project-reveal-bg {
     background-image: url("/project/projectBg.png");
+    background-position: center;
   }
 }
 

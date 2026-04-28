@@ -44,21 +44,23 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
         aria-label={project.title}
         style={cardStyle}
       >
-        <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <div className="space-y-4">
+        <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-8">
+          <div className="space-y-3 md:space-y-4">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               {project.role}
             </p>
             <h3 className="text-2xl font-semibold md:text-3xl">
               {project.title}
             </h3>
-            <p className="text-base text-white/70">{project.summary}</p>
-            <p className="text-sm text-white/60">{project.impact}</p>
+            <p className="text-[0.95rem] leading-7 text-white/70 md:text-base">
+              {project.summary}
+            </p>
+            <p className="text-sm leading-6 text-white/60">{project.impact}</p>
             <div className="flex flex-wrap gap-2">
               {project.stack.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/20 px-3 py-1 text-xs text-white/70"
+                  className="rounded-full border border-white/20 px-2.5 py-1 text-xs text-white/70 md:px-3"
                 >
                   {item}
                 </span>
@@ -79,7 +81,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
             </div>
           </div>
 
-          <div className="relative h-56 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+          <div className="relative h-44 overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:h-48 md:h-56">
             <motion.div
               className="absolute -inset-y-4 inset-x-0"
               style={imageStyle}
