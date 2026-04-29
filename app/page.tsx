@@ -11,7 +11,7 @@ export default function Home() {
     <div className="bg-neutral-950 text-white">
       <SkipLink />
       <Header />
-      <main id="content" className="pt-20">
+      <main id="content" className="">
         <Intro />
         {/* <section className="breather">
           <Container className="text-center">

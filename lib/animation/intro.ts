@@ -47,6 +47,9 @@ export const initIntroScroll = async ({
 }) => {
   const { gsap } = await loadGsap();
   const profile = getMotionProfile(prefersReducedMotion);
+  const scatterDistance = prefersReducedMotion
+    ? "bottom top"
+    : () => `+=${Math.round(window.innerHeight * 0.42)}`;
 
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");
   let split: ReturnType<typeof splitTextToChars> | null = null;
@@ -55,7 +58,7 @@ export const initIntroScroll = async ({
     scrollTrigger: {
       trigger: root,
       start: "top top",
-      end: "bottom top",
+      end: scatterDistance,
       scrub: profile.scrub,
       invalidateOnRefresh: true,
     },
@@ -64,7 +67,15 @@ export const initIntroScroll = async ({
 
   // 전체 intro 아이템은 점진적으로 사라짐
   if (items.length) {
-    tl.to(items, { opacity: 0, y: -profile.drift * 0.35 }, 0);
+    tl.to(
+      items,
+      {
+        opacity: 0,
+        y: prefersReducedMotion ? -profile.drift * 0.35 : -profile.drift * 0.55,
+        duration: prefersReducedMotion ? 1 : 0.24,
+      },
+      0,
+    );
   }
 
   // 헤드라인만 예외적으로 문자 단위 흩어짐
@@ -72,23 +83,25 @@ export const initIntroScroll = async ({
     split = splitTextToChars(heading);
     const chars = split.chars;
 
+    // 초반 스크롤에 바로 반응하도록 이동량과 회전을 키움.
     const scatter = chars.map(() => ({
-      x: (Math.random() - 0.5) * 80,
-      y: (Math.random() - 0.5) * 50,
-      r: (Math.random() - 0.5) * 12,
+      x: (Math.random() - 0.5) * 200,
+      y: 24 - Math.random() * 118,
+      r: (Math.random() - 0.5) * 128,
     }));
 
     tl.to(
       chars,
       {
-        opacity: 0,
-        filter: `blur(${profile.blurMax}px)`,
+        opacity: 0.9,
+        filter: `blur(${Math.min(10, profile.blurMax * 1.15)}px)`,
         x: (i: number) => scatter[i].x,
         y: (i: number) => scatter[i].y,
         rotate: (i: number) => scatter[i].r,
-        stagger: { each: 0.008, from: "center" },
+        duration: 0.32,
+        stagger: { each: 0.004, from: "center" },
       },
-      -0.01,
+      0,
     );
   }
 
