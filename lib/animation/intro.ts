@@ -39,12 +39,10 @@ export const initIntroAnimation = async (
 export const initIntroScroll = async ({
   root,
   heading,
-  bgLayer,
   prefersReducedMotion,
 }: {
   root: HTMLElement;
   heading?: HTMLElement | null;
-  bgLayer?: HTMLElement | null;
   prefersReducedMotion: boolean;
 }) => {
   const { gsap } = await loadGsap();
@@ -92,11 +90,6 @@ export const initIntroScroll = async ({
       },
       -0.01,
     );
-  }
-
-  // 배경 레이어는 아주 약하게 위로
-  if (bgLayer) {
-    tl.to(bgLayer, { opacity: 0.06, y: -profile.drift }, 0);
   }
 
   return () => {

@@ -6,12 +6,10 @@ import { Container } from "@/components/layout/Container";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
-import { SectionBackground } from "@/components/common/SectionBackground";
 
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
-  const bgRef = useRef<HTMLDivElement | null>(null);
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -56,7 +54,6 @@ export const Intro = () => {
       const d = await initIntroScroll({
         root: sectionRef.current!,
         heading: headingRef.current,
-        bgLayer: bgRef.current,
         prefersReducedMotion,
       });
 
@@ -81,8 +78,6 @@ export const Intro = () => {
       className="section-padding relative flex min-h-[90vh] items-center overflow-hidden bg-neutral-950 text-white"
       aria-labelledby="intro-title"
     >
-      <SectionBackground ref={bgRef} variant="intro" density={24} />
-
       <Container className="relative z-10 space-y-8">
         <p className="text-xs uppercase tracking-[0.4em] text-white/60" data-intro-item>
           {portfolio.introEyebrow}

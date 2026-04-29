@@ -5,14 +5,12 @@ import { motionDefaults } from "./runtime";
 type SkillsHorizontalOptions = {
   pinFrame: HTMLElement;
   track: HTMLElement;
-  bgLayer?: HTMLElement | null;
   prefersReducedMotion: boolean;
 };
 
 export const initSkillsHorizontal = async ({
   pinFrame,
   track,
-  bgLayer,
   prefersReducedMotion,
 }: SkillsHorizontalOptions) => {
   const { gsap, ScrollTrigger } = await loadGsap();
@@ -83,20 +81,6 @@ export const initSkillsHorizontal = async ({
     0.08,
   );
 
-  // pin 배경은 약하게 페이드 인
-  if (bgLayer) {
-    enterTl.fromTo(
-      bgLayer,
-      { autoAlpha: 0 },
-      {
-        autoAlpha: 1,
-        duration: prefersReducedMotion ? 0.2 : 0.45,
-        ease: "none",
-      },
-      0,
-    );
-  }
-
   const enterTrigger = ScrollTrigger.create({
     trigger: pinFrame,
     start: "top 85%",
@@ -123,31 +107,11 @@ export const initSkillsHorizontal = async ({
     },
   });
 
-  // 3) ✅ 배경도 우→좌로 약하게(핀 구간)
-  let bgTween: gsap.core.Tween | null = null;
-  if (bgLayer) {
-    bgTween = gsap.to(bgLayer, {
-      x: -Math.min(60, profile.drift),
-      // opacity: 0.92,
-      ease: "none",
-      scrollTrigger: {
-        trigger: pinFrame,
-        start: "top top",
-        end: () => `+=${getEnd()}`,
-        scrub: profile.scrub,
-        invalidateOnRefresh: true,
-      },
-    });
-  }
-
   requestAnimationFrame(() => ScrollTrigger.refresh());
 
   return () => {
     enterTrigger.kill();
     enterTl.kill();
-
-    bgTween?.scrollTrigger?.kill();
-    bgTween?.kill();
 
     tween.scrollTrigger?.kill();
     tween.kill();

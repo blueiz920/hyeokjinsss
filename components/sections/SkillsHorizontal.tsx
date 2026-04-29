@@ -1,37 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { initSkillsHorizontal } from "@/lib/animation/skillsHorizontal";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
-import { SectionBackground } from "@/components/common/SectionBackground";
-import { getMotionProfile } from "@/lib/motion/mediaPolicy";
 
 export const SkillsHorizontal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const bgRef = useRef<HTMLDivElement | null>(null);
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
-
-  // SSR/CSR 첫 렌더 동일
-  const [bgDensity, setBgDensity] = useState(16);
-
-  useEffect(() => {
-  const id = requestAnimationFrame(() => {
-    const { density } = getMotionProfile(prefersReducedMotion);
-    const next = density + 10;
-
-    setBgDensity((prev) => (prev === next ? prev : next));
-  });
-
-  return () => cancelAnimationFrame(id);
-}, [prefersReducedMotion]);
-
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -49,7 +31,6 @@ export const SkillsHorizontal = () => {
       const d = await initSkillsHorizontal({
         pinFrame: pinRef.current!,
         track: trackRef.current!,
-        bgLayer: bgRef.current, // 섹션 배경 ref
         prefersReducedMotion,
       });
 
@@ -74,11 +55,7 @@ export const SkillsHorizontal = () => {
       className="section-padding relative overflow-hidden bg-neutral-950 text-white"
       aria-labelledby="skills-title"
     >
-      
-
       <div ref={pinRef} className="skills-pin relative z-10">
-        {/* 섹션 전체 배경 (요약 텍스트 아래까지 커버) */}
-      <SectionBackground ref={bgRef} variant="skills" density={bgDensity} />
         <Container className="space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
             Skills
