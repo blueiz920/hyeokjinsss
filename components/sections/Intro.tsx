@@ -97,7 +97,7 @@ export const Intro = () => {
         <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-neutral-950 to-transparent" />
       </div>
 
-      <Container className="relative max-w-4xl z-10 space-y-8 mt-48">
+      <Container className="relative max-w-4xl z-10 space-y-8 mt-38">
         <p className="text-xs uppercase tracking-[0.4em] text-white/60" data-intro-item>
           {portfolio.introEyebrow}
         </p>

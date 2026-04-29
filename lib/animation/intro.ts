@@ -49,7 +49,7 @@ export const initIntroScroll = async ({
   const profile = getMotionProfile(prefersReducedMotion);
   const scatterDistance = prefersReducedMotion
     ? "bottom top"
-    : () => `+=${Math.round(window.innerHeight * 0.42)}`;
+    : () => `+=${Math.round(window.innerHeight * 0.68)}`;
 
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");
   let split: ReturnType<typeof splitTextToChars> | null = null;
@@ -72,7 +72,7 @@ export const initIntroScroll = async ({
       {
         opacity: 0,
         y: prefersReducedMotion ? -profile.drift * 0.35 : -profile.drift * 0.55,
-        duration: prefersReducedMotion ? 1 : 0.24,
+        duration: prefersReducedMotion ? 1 : 0.74,
       },
       0,
     );
@@ -85,20 +85,20 @@ export const initIntroScroll = async ({
 
     // 초반 스크롤에 바로 반응하도록 이동량과 회전을 키움.
     const scatter = chars.map(() => ({
-      x: (Math.random() - 0.5) * 200,
-      y: 24 - Math.random() * 118,
-      r: (Math.random() - 0.5) * 128,
+      x: (Math.random() - 0.5) * 360,
+      y: 40 - Math.random() * 220,
+      r: (Math.random() - 0.5) * 220,
     }));
 
     tl.to(
       chars,
       {
-        opacity: 0.9,
-        filter: `blur(${Math.min(10, profile.blurMax * 1.15)}px)`,
+        opacity: 0,
+        filter: `blur(${Math.min(14, profile.blurMax * 1.45)}px)`,
         x: (i: number) => scatter[i].x,
         y: (i: number) => scatter[i].y,
         rotate: (i: number) => scatter[i].r,
-        duration: 0.32,
+        duration: 0.72,
         stagger: { each: 0.004, from: "center" },
       },
       0,
