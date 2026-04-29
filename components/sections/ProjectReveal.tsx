@@ -35,7 +35,7 @@ export const ProjectReveal = () => {
 
     if (!frame) return;
 
-    const enterRatio = 0.88;
+    const enterRatio = 0.70;
     const exitRatio = 0.68;
 
     const observer = new IntersectionObserver(
@@ -121,8 +121,8 @@ export const ProjectReveal = () => {
           data-bg-active={bgActive ? "true" : "false"}
         >
           <div className="project-reveal-bg absolute inset-0" />
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-neutral-950 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 to-transparent" />
+          <div className="project-reveal-veil project-reveal-veil-top" />
+          <div className="project-reveal-veil project-reveal-veil-bottom" />
         </div>
       </div>
 

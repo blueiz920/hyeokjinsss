@@ -68,6 +68,34 @@ html::-webkit-scrollbar {
     transform: scale(1);
   }
 
+  .project-reveal-veil {
+    @apply absolute inset-x-0;
+    height: clamp(7rem, 18vh, 11rem);
+    opacity: 1;
+    transform: scaleY(1);
+    transition:
+      opacity 780ms ease,
+      transform 780ms ease;
+    will-change: opacity, transform;
+  }
+
+  .project-reveal-veil-top {
+    top: 0;
+    background: linear-gradient(to bottom, rgb(10 10 10), transparent);
+    transform-origin: top;
+  }
+
+  .project-reveal-veil-bottom {
+    bottom: 0;
+    background: linear-gradient(to top, rgb(10 10 10), transparent);
+    transform-origin: bottom;
+  }
+
+  .project-reveal-stage[data-bg-active="true"] .project-reveal-veil {
+    opacity: 0.72;
+    transform: scaleY(0.92);
+  }
+
   .skills-pin {
     @apply relative h-screen overflow-hidden pt-24 ;
 
@@ -92,10 +120,31 @@ html::-webkit-scrollbar {
   }
 }
 
+@media (min-width: 768px) {
+  .project-reveal-stage[data-bg-active="true"] .project-reveal-veil {
+    opacity: 0.58;
+    transform: scaleY(0.86);
+  }
+}
+
 @media (min-width: 1280px) {
   .project-reveal-bg {
     background-image: url("/project/projectBg.png");
     background-position: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-reveal-bg,
+  .project-reveal-veil {
+    transition: none;
+    transform: none;
+    will-change: auto;
+  }
+
+  .project-reveal-stage[data-bg-active="true"] .project-reveal-bg,
+  .project-reveal-stage[data-bg-active="true"] .project-reveal-veil {
+    transform: none;
   }
 }
 
