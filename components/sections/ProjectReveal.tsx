@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
@@ -11,7 +11,9 @@ import { getProjectCardIndex } from "@/lib/animation/projectReveal";
 
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const bgFrameRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<Array<HTMLElement | null>>([]);
+  const [bgActive, setBgActive] = useState(false);
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -27,6 +29,41 @@ export const ProjectReveal = () => {
     register("projects", sectionRef);
     return () => unregister("projects");
   }, [register, unregister]);
+
+  useEffect(() => {
+    const frame = bgFrameRef.current;
+
+    if (!frame) return;
+
+    const enterRatio = 0.88;
+    const exitRatio = 0.68;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+
+        // 켜짐/꺼짐 기준을 분리해서 경계 깜빡임을 줄임.
+        setBgActive((prev) => {
+          if (entry.intersectionRatio >= enterRatio) return true;
+          if (!entry.isIntersecting || entry.intersectionRatio <= exitRatio) {
+            return false;
+          }
+          return prev;
+        });
+      },
+      {
+        root: null,
+        threshold: [0, exitRatio, enterRatio, 1],
+      },
+    );
+
+    observer.observe(frame);
+
+    return () => {
+      observer.disconnect();
+      setBgActive(false);
+    };
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -78,7 +115,11 @@ export const ProjectReveal = () => {
       aria-labelledby="projects-title"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
-        <div className="sticky top-0 h-screen overflow-hidden">
+        <div
+          ref={bgFrameRef}
+          className="project-reveal-stage sticky top-0 h-screen overflow-hidden"
+          data-bg-active={bgActive ? "true" : "false"}
+        >
           <div className="project-reveal-bg absolute inset-0" />
           <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-neutral-950 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 to-transparent" />
