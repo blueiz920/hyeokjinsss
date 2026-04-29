@@ -111,7 +111,8 @@ export const ProjectReveal = () => {
       id="projects"
       ref={sectionRef}
       tabIndex={-1}
-      className="section-padding relative bg-neutral-950 text-white"
+      className="project-section section-padding relative bg-neutral-950 text-white"
+      data-bg-active={bgActive ? "true" : "false"}
       aria-labelledby="projects-title"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
