@@ -4,8 +4,6 @@ import { useScroll, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { RefObject } from "react";
 
-const PROJECT_BACKGROUND_DRIFT_PX = 120;
-
 const CARD_OPACITY_POINTS = [0, 0.3, 0.7, 1];
 const CARD_Y_POINTS = [0, 0.3, 0.7, 1];
 const CARD_SCALE_POINTS = [0.2, 0.4, 0.6, 0.8];
@@ -32,31 +30,6 @@ export const getProjectCardIndex = (cards: HTMLElement[]) => {
     },
     { index: 0, distance: Number.POSITIVE_INFINITY },
   ).index;
-};
-
-export const useProjectBgMotion = (
-  targetRef: RefObject<HTMLElement | null>,
-  prefersReducedMotion: boolean,
-) => {
-  const [isMounted, setIsMounted] = useState(false);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start end", "end start"],
-  });
-  const y = useTransform(
-    scrollYProgress,
-    [0, 1],
-    prefersReducedMotion ? [0, 0] : [0, PROJECT_BACKGROUND_DRIFT_PX],
-  );
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setIsMounted(true));
-
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  // 첫 렌더는 정적 값으로 둬서 hydration mismatch를 막음.
-  return isMounted ? { y } : { y: 0 };
 };
 
 export const useProjectCardMotion = (
