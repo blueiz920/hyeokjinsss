@@ -68,6 +68,46 @@ html::-webkit-scrollbar {
     opacity: 0.82;
   }
 
+  .intro-title {
+    position: relative;
+    color: rgba(255, 246, 229, 0.9);
+    text-wrap: balance;
+    -webkit-text-stroke: 0.65px rgba(245, 166, 70, 0.36);
+    text-shadow:
+      0 0 12px rgba(245, 166, 70, 0.36),
+      0 0 42px rgba(245, 166, 70, 0.24),
+      0 12px 36px rgba(0, 0, 0, 0.68);
+  }
+
+  .intro-title span {
+    color: rgba(255, 246, 229, 0.9);
+    -webkit-text-stroke: 0.65px rgba(245, 166, 70, 0.36);
+    text-shadow:
+      0 0 12px rgba(245, 166, 70, 0.42),
+      0 0 42px rgba(245, 166, 70, 0.24),
+      0 12px 36px rgba(0, 0, 0, 0.68);
+  }
+
+  @media (max-width: 767px) {
+    .intro-title {
+      color: rgba(255, 248, 235, 0.9);
+      -webkit-text-stroke: 0.48px rgba(245, 166, 70, 0.36);
+      text-shadow:
+        0 0 10px rgba(245, 166, 70, 0.34),
+        0 0 30px rgba(245, 166, 70, 0.18),
+        0 10px 32px rgba(0, 0, 0, 0.7);
+    }
+
+    .intro-title span {
+      color: rgba(255, 248, 235, 0.9);
+      -webkit-text-stroke: 0.48px rgba(245, 166, 70, 0.36);
+      text-shadow:
+        0 0 10px rgba(245, 166, 70, 0.34),
+        0 0 30px rgba(245, 166, 70, 0.18),
+        0 10px 32px rgba(0, 0, 0, 0.7);
+    }
+  }
+
   .project-card {
     @apply relative rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
     background:

@@ -105,7 +105,7 @@ export const Intro = () => {
         <h1
           id="intro-title"
           ref={headingRef}
-          className="text-4xl font-semibold leading-tight md:text-6xl"
+          className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
           data-intro-item
         >
           {portfolio.introHeadline}
