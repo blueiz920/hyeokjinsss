@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { IntroMaskDebugBox } from "@/components/sections/IntroMaskDebugBox";
@@ -11,6 +11,7 @@ import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 const INTRO_MASK_PHRASE = "몰입감 있는";
 const INTRO_PHRASE_TEXTURE_SRC = "/intro/intro-phrase-texture.mp4";
+const INTRO_TEXTURE_READY_FALLBACK_MS = 450;
 
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -23,6 +24,8 @@ export const Intro = () => {
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
+  const shouldGateTitleTexture = hasIntroMaskPhrase && !prefersReducedMotion;
+  const [isTitleTextureReady, setIsTitleTextureReady] = useState(!shouldGateTitleTexture);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -30,6 +33,21 @@ export const Intro = () => {
     register("intro", sectionRef);
     return () => unregister("intro");
   }, [register, unregister]);
+
+  useEffect(() => {
+    if (!shouldGateTitleTexture) return;
+
+    const fallbackId = window.setTimeout(
+      () => setIsTitleTextureReady(true),
+      INTRO_TEXTURE_READY_FALLBACK_MS,
+    );
+
+    return () => window.clearTimeout(fallbackId);
+  }, [shouldGateTitleTexture]);
+
+  const handlePhraseTextureReady = useCallback(() => {
+    setIsTitleTextureReady(true);
+  }, []);
 
   // 진입 애니메이션
   useEffect(() => {
@@ -112,7 +130,14 @@ export const Intro = () => {
           {portfolio.introEyebrow}
         </p>
 
-        <div ref={titleShellRef} className="intro-title-shell relative" data-intro-item>
+        <div
+          ref={titleShellRef}
+          className="intro-title-shell relative"
+          data-intro-item
+          data-texture-ready={
+            !shouldGateTitleTexture || isTitleTextureReady ? "true" : "false"
+          }
+        >
           <h1
             id="intro-title"
             ref={headingRef}
@@ -137,6 +162,7 @@ export const Intro = () => {
             disabled={!hasIntroMaskPhrase || prefersReducedMotion}
             headingRef={headingRef}
             hostRef={titleShellRef}
+            onReady={handlePhraseTextureReady}
             phrase={INTRO_MASK_PHRASE}
             src={INTRO_PHRASE_TEXTURE_SRC}
           />

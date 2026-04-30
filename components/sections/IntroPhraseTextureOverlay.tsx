@@ -6,6 +6,7 @@ type IntroPhraseTextureOverlayProps = {
   disabled: boolean;
   headingRef: RefObject<HTMLHeadingElement | null>;
   hostRef: RefObject<HTMLElement | null>;
+  onReady?: () => void;
   phrase: string;
   src: string;
 };
@@ -84,6 +85,7 @@ export const IntroPhraseTextureOverlay = ({
   disabled,
   headingRef,
   hostRef,
+  onReady,
   phrase,
   src,
 }: IntroPhraseTextureOverlayProps) => {
@@ -154,6 +156,7 @@ export const IntroPhraseTextureOverlay = ({
       if (hasStateChanged(nextState)) {
         lastState = nextState;
         setMaskState(nextState);
+        onReady?.();
       }
     };
 
@@ -196,7 +199,7 @@ export const IntroPhraseTextureOverlay = ({
       }
       window.removeEventListener("resize", handleResize);
     };
-  }, [disabled, headingRef, hostRef, isDesktopLike, phrase]);
+  }, [disabled, headingRef, hostRef, isDesktopLike, onReady, phrase]);
 
   if (disabled) {
     return null;

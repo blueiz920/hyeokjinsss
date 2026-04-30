@@ -68,6 +68,16 @@ html::-webkit-scrollbar {
     opacity: 0.82;
   }
 
+  #intro [data-intro-item] {
+    opacity: 0;
+  }
+
+  @media (min-width: 768px) {
+    .intro-title-shell[data-texture-ready="false"] {
+      visibility: hidden;
+    }
+  }
+
   .intro-title {
     position: relative;
     color: rgba(255, 246, 229, 0.9);
