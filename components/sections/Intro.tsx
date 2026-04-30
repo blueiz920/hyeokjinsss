@@ -15,6 +15,7 @@ const INTRO_PHRASE_TEXTURE_SRC = "/intro/intro-phrase-texture.mp4";
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const titleShellRef = useRef<HTMLDivElement | null>(null);
   const hasIntroMaskPhrase = portfolio.introHeadline.startsWith(INTRO_MASK_PHRASE);
   const introHeadlineRest = hasIntroMaskPhrase
     ? portfolio.introHeadline.slice(INTRO_MASK_PHRASE.length)
@@ -111,33 +112,35 @@ export const Intro = () => {
           {portfolio.introEyebrow}
         </p>
 
-        <h1
-          id="intro-title"
-          ref={headingRef}
-          className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
-          data-intro-mask-debug={process.env.NODE_ENV === "development" ? "true" : undefined}
-          data-intro-item
-        >
-          {hasIntroMaskPhrase ? (
-            <>
-              <span
-                className="intro-title-mask-phrase intro-title-mask-char"
-                data-intro-mask-phrase-anchor
-              >
-                {INTRO_MASK_PHRASE}
-              </span>
-              {introHeadlineRest}
-            </>
-          ) : (
-            portfolio.introHeadline
-          )}
-        </h1>
-        <IntroPhraseTextureOverlay
-          disabled={!hasIntroMaskPhrase || prefersReducedMotion}
-          headingRef={headingRef}
-          phrase={INTRO_MASK_PHRASE}
-          src={INTRO_PHRASE_TEXTURE_SRC}
-        />
+        <div ref={titleShellRef} className="intro-title-shell relative" data-intro-item>
+          <h1
+            id="intro-title"
+            ref={headingRef}
+            className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
+            data-intro-mask-debug={process.env.NODE_ENV === "development" ? "true" : undefined}
+          >
+            {hasIntroMaskPhrase ? (
+              <>
+                <span
+                  className="intro-title-mask-phrase intro-title-mask-char"
+                  data-intro-mask-phrase-anchor
+                >
+                  {INTRO_MASK_PHRASE}
+                </span>
+                {introHeadlineRest}
+              </>
+            ) : (
+              portfolio.introHeadline
+            )}
+          </h1>
+          <IntroPhraseTextureOverlay
+            disabled={!hasIntroMaskPhrase || prefersReducedMotion}
+            headingRef={headingRef}
+            hostRef={titleShellRef}
+            phrase={INTRO_MASK_PHRASE}
+            src={INTRO_PHRASE_TEXTURE_SRC}
+          />
+        </div>
         <IntroMaskDebugBox disabled={!hasIntroMaskPhrase} headingRef={headingRef} />
 
         <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>

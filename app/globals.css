@@ -118,7 +118,7 @@ html::-webkit-scrollbar {
 
   @media (min-width: 768px) {
     .intro-title .intro-title-mask-char {
-  color: rgba(255, 246, 229, 0.12);
+  color: rgba(255, 246, 229, 0.08);
   -webkit-text-stroke: 0px rgba(255, 246, 229, 0.24);
   text-shadow:
     0 0 2px rgba(255, 246, 229, 0.35),
@@ -142,9 +142,19 @@ html::-webkit-scrollbar {
     box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.5);
   } */
 
+  .intro-phrase-texture-layer {
+    position: absolute;
+    display: block;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+    will-change: opacity;
+  }
+
   .intro-phrase-texture-overlay {
-    position: fixed;
-    z-index: 95;
+    display: block;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     object-fit: cover;
     object-position: left top;

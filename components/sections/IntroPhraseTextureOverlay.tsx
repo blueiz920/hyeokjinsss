@@ -5,6 +5,7 @@ import { type CSSProperties, type RefObject, useEffect, useState } from "react";
 type IntroPhraseTextureOverlayProps = {
   disabled: boolean;
   headingRef: RefObject<HTMLHeadingElement | null>;
+  hostRef: RefObject<HTMLElement | null>;
   phrase: string;
   src: string;
 };
@@ -17,9 +18,10 @@ type TextureMaskState = {
   width: number;
 };
 
+const MIN_VIEWPORT_WIDTH = 768;
 const INITIAL_RECT_TRACK_MS = 1000;
 const RESIZE_RECT_TRACK_MS = 180;
-const MIN_VIEWPORT_WIDTH = 768;
+const RECT_EPSILON = 0.1;
 
 const escapeXml = (value: string) =>
   value
@@ -81,6 +83,7 @@ const createTextMaskImage = (heading: HTMLElement, phrase: string, width: number
 export const IntroPhraseTextureOverlay = ({
   disabled,
   headingRef,
+  hostRef,
   phrase,
   src,
 }: IntroPhraseTextureOverlayProps) => {
@@ -109,29 +112,58 @@ export const IntroPhraseTextureOverlay = ({
     let alive = true;
     let rafId: number | null = null;
     let trackUntil = 0;
+    let lastState: TextureMaskState | null = null;
+
+    const hasStateChanged = (nextState: TextureMaskState) =>
+      !lastState ||
+      Math.abs(lastState.height - nextState.height) > RECT_EPSILON ||
+      Math.abs(lastState.left - nextState.left) > RECT_EPSILON ||
+      lastState.maskImage !== nextState.maskImage ||
+      Math.abs(lastState.top - nextState.top) > RECT_EPSILON ||
+      Math.abs(lastState.width - nextState.width) > RECT_EPSILON;
+
+    const clearMaskState = () => {
+      if (lastState === null) return;
+
+      lastState = null;
+      setMaskState(null);
+    };
 
     const updateMaskState = () => {
       if (!alive) return;
 
       const heading = headingRef.current;
+      const host = hostRef.current;
       const rect = heading ? getMaskRect(heading) : null;
 
-      if (!heading || !rect) {
-        setMaskState(null);
+      if (!heading || !host || !rect) {
+        clearMaskState();
         return;
       }
 
-      setMaskState({
+      const hostRect = host.getBoundingClientRect();
+
+      const nextState = {
         height: rect.height,
-        left: rect.left,
+        left: rect.left - hostRect.left,
         maskImage: createTextMaskImage(heading, phrase, rect.width, rect.height),
-        top: rect.top,
+        top: rect.top - hostRect.top,
         width: rect.width,
-      });
+      };
+
+      if (hasStateChanged(nextState)) {
+        lastState = nextState;
+        setMaskState(nextState);
+      }
     };
 
     const trackRect = (now: number) => {
-      updateMaskState();
+      if (!alive) return;
+
+      // H1 split 직후 기준점이 바뀔 수 있어서 초기와 resize 직후에만 위치를 다시 맞춤.
+      if (document.visibilityState !== "hidden") {
+        updateMaskState();
+      }
 
       if (now < trackUntil) {
         rafId = window.requestAnimationFrame(trackRect);
@@ -144,7 +176,6 @@ export const IntroPhraseTextureOverlay = ({
     const startRectTracking = (duration: number) => {
       if (!alive) return;
 
-      // intro 진입 transform 동안 texture가 phrase 위치를 놓치지 않게 초반만 추적함.
       updateMaskState();
       trackUntil = Math.max(trackUntil, window.performance.now() + duration);
 
@@ -156,7 +187,6 @@ export const IntroPhraseTextureOverlay = ({
 
     startRectTracking(INITIAL_RECT_TRACK_MS);
     window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", updateMaskState, { passive: true });
     void document.fonts?.ready.then(() => startRectTracking(RESIZE_RECT_TRACK_MS));
 
     return () => {
@@ -165,45 +195,52 @@ export const IntroPhraseTextureOverlay = ({
         window.cancelAnimationFrame(rafId);
       }
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", updateMaskState);
     };
-  }, [disabled, headingRef, isDesktopLike, phrase]);
+  }, [disabled, headingRef, hostRef, isDesktopLike, phrase]);
 
-  if (disabled || !isDesktopLike || !maskState) {
+  if (disabled) {
     return null;
   }
 
-  const maskStyle = {
-    height: maskState.height,
-    left: maskState.left,
-    maskImage: maskState.maskImage,
-    maskPosition: "center",
-    maskRepeat: "no-repeat",
-    maskSize: "100% 100%",
-    top: maskState.top,
-    WebkitMaskImage: maskState.maskImage,
-    WebkitMaskPosition: "center",
-    WebkitMaskRepeat: "no-repeat",
-    WebkitMaskSize: "100% 100%",
-    width: maskState.width,
-  } satisfies CSSProperties;
+  const maskStyle = maskState
+    ? ({
+        height: maskState.height,
+        maskImage: maskState.maskImage,
+        maskPosition: "center",
+        maskRepeat: "no-repeat",
+        maskSize: "100% 100%",
+        left: maskState.left,
+        top: maskState.top,
+        WebkitMaskImage: maskState.maskImage,
+        WebkitMaskPosition: "center",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskSize: "100% 100%",
+        width: maskState.width,
+      } satisfies CSSProperties)
+    : null;
 
   return (
-    <video
+    <span
       aria-hidden="true"
-      autoPlay
-      className={
-        process.env.NODE_ENV === "development"
-          ? "intro-phrase-texture-overlay intro-phrase-texture-overlay--debug"
-          : "intro-phrase-texture-overlay"
-      }
+      className="intro-phrase-texture-layer"
       data-intro-phrase-texture
-      loop
-      muted
-      playsInline
-      preload="auto"
-      src={src}
-      style={maskStyle}
-    />
+      style={maskStyle ?? undefined}
+    >
+      {isDesktopLike && maskStyle ? (
+        <video
+          autoPlay
+          className={
+            process.env.NODE_ENV === "development"
+              ? "intro-phrase-texture-overlay intro-phrase-texture-overlay--debug"
+              : "intro-phrase-texture-overlay"
+          }
+          loop
+          muted
+          playsInline
+          preload="auto"
+          src={src}
+        />
+      ) : null}
+    </span>
   );
 };

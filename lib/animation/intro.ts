@@ -52,6 +52,7 @@ export const initIntroScroll = async ({
     : () => `+=${Math.round(window.innerHeight * 0.68)}`;
 
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");
+  const textureOverlay = root.querySelector<HTMLElement>("[data-intro-phrase-texture]");
   let split: ReturnType<typeof splitTextToChars> | null = null;
 
   const tl = gsap.timeline({
@@ -90,6 +91,32 @@ export const initIntroScroll = async ({
       ],
     });
     const chars = split.chars;
+    const maskChars = chars.filter((char) => char.classList.contains("intro-title-mask-char"));
+
+    if (textureOverlay) {
+      tl.to(
+        textureOverlay,
+        {
+          opacity: 0,
+          duration: 0.08,
+        },
+        0,
+      );
+    }
+
+    if (maskChars.length) {
+      tl.to(
+        maskChars,
+        {
+          color: "rgba(255, 246, 229, 0.9)",
+          duration: 0.22,
+          textShadow:
+            "0 0 10px rgba(245, 166, 70, 0.16), 0 10px 32px rgba(0, 0, 0, 0.58)",
+          webkitTextStroke: "0.35px rgba(245, 166, 70, 0.22)",
+        },
+        0,
+      );
+    }
 
     // 초반 스크롤에 바로 반응하도록 이동량과 회전을 키움.
     const scatter = chars.map(() => ({
