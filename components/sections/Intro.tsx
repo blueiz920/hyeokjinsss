@@ -3,13 +3,20 @@
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
+import { IntroMaskDebugBox } from "@/components/sections/IntroMaskDebugBox";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
+const INTRO_MASK_PHRASE = "몰입감 있는";
+
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const hasIntroMaskPhrase = portfolio.introHeadline.startsWith(INTRO_MASK_PHRASE);
+  const introHeadlineRest = hasIntroMaskPhrase
+    ? portfolio.introHeadline.slice(INTRO_MASK_PHRASE.length)
+    : "";
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -106,10 +113,24 @@ export const Intro = () => {
           id="intro-title"
           ref={headingRef}
           className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
+          data-intro-mask-debug={process.env.NODE_ENV === "development" ? "true" : undefined}
           data-intro-item
         >
-          {portfolio.introHeadline}
+          {hasIntroMaskPhrase ? (
+            <>
+              <span
+                className="intro-title-mask-phrase intro-title-mask-char"
+                data-intro-mask-phrase-anchor
+              >
+                {INTRO_MASK_PHRASE}
+              </span>
+              {introHeadlineRest}
+            </>
+          ) : (
+            portfolio.introHeadline
+          )}
         </h1>
+        <IntroMaskDebugBox disabled={!hasIntroMaskPhrase} headingRef={headingRef} />
 
         <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>
           {portfolio.introSubhead}

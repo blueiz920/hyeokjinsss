@@ -108,6 +108,28 @@ html::-webkit-scrollbar {
     }
   }
 
+  .intro-title .intro-title-mask-char {
+    color: rgba(255, 246, 229, 0.9);
+    -webkit-text-stroke: 0.35px rgba(245, 166, 70, 0.22);
+    text-shadow:
+      0 0 10px rgba(245, 166, 70, 0.16),
+      0 10px 32px rgba(0, 0, 0, 0.58);
+  }
+
+  .intro-title[data-intro-mask-debug="true"] .intro-title-mask-char {
+    outline: 1px solid rgba(248, 113, 113, 0.72);
+    outline-offset: 1px;
+  }
+
+  .intro-mask-debug-box {
+    position: fixed;
+    z-index: 60;
+    pointer-events: none;
+    border: 1px solid rgba(56, 189, 248, 0.95);
+    background: rgba(56, 189, 248, 0.08);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.5);
+  }
+
   .project-card {
     @apply relative rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
     background:

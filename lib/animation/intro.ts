@@ -80,7 +80,15 @@ export const initIntroScroll = async ({
 
   // 헤드라인만 예외적으로 문자 단위 흩어짐
   if (!prefersReducedMotion && heading) {
-    split = splitTextToChars(heading);
+    // phrase anchor의 class를 split 이후 글자 span으로 넘겨 정렬 기준을 유지함.
+    split = splitTextToChars(heading, {
+      inheritClassFromSelector: [
+        {
+          className: "intro-title-mask-char",
+          selector: "[data-intro-mask-phrase-anchor]",
+        },
+      ],
+    });
     const chars = split.chars;
 
     // 초반 스크롤에 바로 반응하도록 이동량과 회전을 키움.
