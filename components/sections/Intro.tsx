@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { IntroMaskDebugBox } from "@/components/sections/IntroMaskDebugBox";
+import { IntroPhraseTextureOverlay } from "@/components/sections/IntroPhraseTextureOverlay";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 const INTRO_MASK_PHRASE = "몰입감 있는";
+const INTRO_PHRASE_TEXTURE_SRC = "/intro/intro-phrase-texture.mp4";
 
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -130,6 +132,12 @@ export const Intro = () => {
             portfolio.introHeadline
           )}
         </h1>
+        <IntroPhraseTextureOverlay
+          disabled={!hasIntroMaskPhrase || prefersReducedMotion}
+          headingRef={headingRef}
+          phrase={INTRO_MASK_PHRASE}
+          src={INTRO_PHRASE_TEXTURE_SRC}
+        />
         <IntroMaskDebugBox disabled={!hasIntroMaskPhrase} headingRef={headingRef} />
 
         <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>

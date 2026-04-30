@@ -1,0 +1,209 @@
+"use client";
+
+import { type CSSProperties, type RefObject, useEffect, useState } from "react";
+
+type IntroPhraseTextureOverlayProps = {
+  disabled: boolean;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  phrase: string;
+  src: string;
+};
+
+type TextureMaskState = {
+  height: number;
+  left: number;
+  maskImage: string;
+  top: number;
+  width: number;
+};
+
+const INITIAL_RECT_TRACK_MS = 1000;
+const RESIZE_RECT_TRACK_MS = 180;
+const MIN_VIEWPORT_WIDTH = 768;
+
+const escapeXml = (value: string) =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+
+const getMaskRect = (heading: HTMLElement) => {
+  const rects = [
+    ...heading.querySelectorAll<HTMLElement>(
+      ".intro-title-mask-char, [data-intro-mask-phrase-anchor]",
+    ),
+  ]
+    .map((char) => char.getBoundingClientRect())
+    .filter((rect) => rect.width > 0 && rect.height > 0);
+
+  if (!rects.length) return null;
+
+  const left = Math.min(...rects.map((rect) => rect.left));
+  const top = Math.min(...rects.map((rect) => rect.top));
+  const right = Math.max(...rects.map((rect) => rect.right));
+  const bottom = Math.max(...rects.map((rect) => rect.bottom));
+
+  return {
+    height: bottom - top,
+    left,
+    top,
+    width: right - left,
+  };
+};
+
+const getMaskSupport = () =>
+  typeof CSS !== "undefined" &&
+  (CSS.supports("mask-image", "linear-gradient(#000, #000)") ||
+    CSS.supports("-webkit-mask-image", "linear-gradient(#000, #000)"));
+
+const createTextMaskImage = (heading: HTMLElement, phrase: string, width: number, height: number) => {
+  const style = window.getComputedStyle(heading);
+  const fontSize = Number.parseFloat(style.fontSize);
+  const fontFamily = escapeXml(style.fontFamily);
+  const fontWeight = escapeXml(style.fontWeight);
+  const escapedPhrase = escapeXml(phrase);
+  const TEXT_MASK_Y_OFFSET = 2;
+  const baselineY = height * 0.52 + TEXT_MASK_Y_OFFSET;
+  const textLength = Math.max(1, width);
+
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`,
+    `<text x="${width / 2}" y="${baselineY}" text-anchor="middle" dominant-baseline="central"`,
+    ` font-family="${fontFamily}" font-weight="${fontWeight}" font-size="${fontSize}"`,
+    ` textLength="${textLength}" lengthAdjust="spacing" fill="white">${escapedPhrase}</text>`,
+    "</svg>",
+  ].join("");
+
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+};
+
+export const IntroPhraseTextureOverlay = ({
+  disabled,
+  headingRef,
+  phrase,
+  src,
+}: IntroPhraseTextureOverlayProps) => {
+  const [isDesktopLike, setIsDesktopLike] = useState(false);
+  const [maskState, setMaskState] = useState<TextureMaskState | null>(null);
+
+  useEffect(() => {
+    if (disabled || typeof window === "undefined") return;
+
+    const media = window.matchMedia(`(min-width: ${MIN_VIEWPORT_WIDTH}px)`);
+    const updateViewportState = () => setIsDesktopLike(media.matches);
+
+    updateViewportState();
+    media.addEventListener("change", updateViewportState);
+
+    return () => {
+      media.removeEventListener("change", updateViewportState);
+    };
+  }, [disabled]);
+
+  useEffect(() => {
+    if (disabled || !isDesktopLike || typeof window === "undefined" || !getMaskSupport()) {
+      return;
+    }
+
+    let alive = true;
+    let rafId: number | null = null;
+    let trackUntil = 0;
+
+    const updateMaskState = () => {
+      if (!alive) return;
+
+      const heading = headingRef.current;
+      const rect = heading ? getMaskRect(heading) : null;
+
+      if (!heading || !rect) {
+        setMaskState(null);
+        return;
+      }
+
+      setMaskState({
+        height: rect.height,
+        left: rect.left,
+        maskImage: createTextMaskImage(heading, phrase, rect.width, rect.height),
+        top: rect.top,
+        width: rect.width,
+      });
+    };
+
+    const trackRect = (now: number) => {
+      updateMaskState();
+
+      if (now < trackUntil) {
+        rafId = window.requestAnimationFrame(trackRect);
+        return;
+      }
+
+      rafId = null;
+    };
+
+    const startRectTracking = (duration: number) => {
+      if (!alive) return;
+
+      // intro 진입 transform 동안 texture가 phrase 위치를 놓치지 않게 초반만 추적함.
+      updateMaskState();
+      trackUntil = Math.max(trackUntil, window.performance.now() + duration);
+
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(trackRect);
+      }
+    };
+    const handleResize = () => startRectTracking(RESIZE_RECT_TRACK_MS);
+
+    startRectTracking(INITIAL_RECT_TRACK_MS);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", updateMaskState, { passive: true });
+    void document.fonts?.ready.then(() => startRectTracking(RESIZE_RECT_TRACK_MS));
+
+    return () => {
+      alive = false;
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", updateMaskState);
+    };
+  }, [disabled, headingRef, isDesktopLike, phrase]);
+
+  if (disabled || !isDesktopLike || !maskState) {
+    return null;
+  }
+
+  const maskStyle = {
+    height: maskState.height,
+    left: maskState.left,
+    maskImage: maskState.maskImage,
+    maskPosition: "center",
+    maskRepeat: "no-repeat",
+    maskSize: "100% 100%",
+    top: maskState.top,
+    WebkitMaskImage: maskState.maskImage,
+    WebkitMaskPosition: "center",
+    WebkitMaskRepeat: "no-repeat",
+    WebkitMaskSize: "100% 100%",
+    width: maskState.width,
+  } satisfies CSSProperties;
+
+  return (
+    <video
+      aria-hidden="true"
+      autoPlay
+      className={
+        process.env.NODE_ENV === "development"
+          ? "intro-phrase-texture-overlay intro-phrase-texture-overlay--debug"
+          : "intro-phrase-texture-overlay"
+      }
+      data-intro-phrase-texture
+      loop
+      muted
+      playsInline
+      preload="auto"
+      src={src}
+      style={maskStyle}
+    />
+  );
+};
