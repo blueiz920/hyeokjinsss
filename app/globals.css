@@ -90,12 +90,12 @@ html::-webkit-scrollbar {
   }
 
   .intro-title-shell {
-    --intro-phrase-mask-y: 2px;
+    --intro-phrase-mask-y: 1px;
   }
 
   @media (min-width: 1536px) {
     .intro-title-shell {
-      --intro-phrase-mask-y: -4px;
+      --intro-phrase-mask-y: -3px;
     }
   }
 
