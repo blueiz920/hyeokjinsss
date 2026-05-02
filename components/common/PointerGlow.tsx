@@ -46,10 +46,10 @@ export const PointerGlow = () => {
   if (prefersReducedMotion) return null;
 
   return (
-    <motion.div
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-30 hidden h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.15)_0%,rgba(96,165,250,0.11)_34%,rgba(34,211,238,0.07)_55%,transparent_72%)] opacity-[0.34] blur-2xl mix-blend-screen will-change-transform md:block"
-      style={{ x, y }}
-    />
-  );
+  <motion.div
+    aria-hidden="true"
+    className="pointer-events-none fixed left-0 top-0 z-30 hidden h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,236,196,0.18)_0%,rgba(245,166,70,0.13)_34%,rgba(180,104,32,0.08)_55%,transparent_72%)] opacity-[0.34] blur-2xl mix-blend-screen will-change-transform md:block"
+    style={{ x, y }}
+  />
+);
 };
