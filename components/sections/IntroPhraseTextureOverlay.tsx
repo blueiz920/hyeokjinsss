@@ -60,14 +60,23 @@ const getMaskSupport = () =>
   (CSS.supports("mask-image", "linear-gradient(#000, #000)") ||
     CSS.supports("-webkit-mask-image", "linear-gradient(#000, #000)"));
 
-const createTextMaskImage = (heading: HTMLElement, phrase: string, width: number, height: number) => {
+const createTextMaskImage = (
+  heading: HTMLElement,
+  host: HTMLElement,
+  phrase: string,
+  width: number,
+  height: number,
+) => {
   const style = window.getComputedStyle(heading);
+  const hostStyle = window.getComputedStyle(host);
   const fontSize = Number.parseFloat(style.fontSize);
   const fontFamily = escapeXml(style.fontFamily);
   const fontWeight = escapeXml(style.fontWeight);
   const escapedPhrase = escapeXml(phrase);
-  const TEXT_MASK_Y_OFFSET = 2;
-  const baselineY = height * 0.52 + TEXT_MASK_Y_OFFSET;
+  const maskYOffset = Number.parseFloat(
+    hostStyle.getPropertyValue("--intro-phrase-mask-y") || "0",
+  );
+  const baselineY = height * 0.52 + (Number.isFinite(maskYOffset) ? maskYOffset : 0);
   const textLength = Math.max(1, width);
 
   const svg = [
@@ -148,7 +157,7 @@ export const IntroPhraseTextureOverlay = ({
       const nextState = {
         height: rect.height,
         left: rect.left - hostRect.left,
-        maskImage: createTextMaskImage(heading, phrase, rect.width, rect.height),
+        maskImage: createTextMaskImage(heading, host, phrase, rect.width, rect.height),
         top: rect.top - hostRect.top,
         width: rect.width,
       };

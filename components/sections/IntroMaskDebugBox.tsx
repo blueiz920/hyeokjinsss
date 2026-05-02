@@ -105,14 +105,14 @@ export const IntroMaskDebugBox = ({ disabled, headingRef }: IntroMaskDebugBoxPro
 
   return (
     <div
-      aria-hidden="true"
-      className="intro-mask-debug-box"
-      style={{
-        height: rect.height,
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-      }}
+      // aria-hidden="true"
+      // className="intro-mask-debug-box"
+      // style={{
+      //   height: rect.height,
+      //   left: rect.left,
+      //   top: rect.top,
+      //   width: rect.width,
+      // }}
     />
   );
 };

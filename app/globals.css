@@ -89,6 +89,16 @@ html::-webkit-scrollbar {
       0 12px 36px rgba(0, 0, 0, 0.68);
   }
 
+  .intro-title-shell {
+    --intro-phrase-mask-y: 2px;
+  }
+
+  @media (min-width: 1536px) {
+    .intro-title-shell {
+      --intro-phrase-mask-y: -4px;
+    }
+  }
+
   .intro-title span {
     color: rgba(255, 246, 229, 0.9);
     -webkit-text-stroke: 0.65px rgba(245, 166, 70, 0.36);
