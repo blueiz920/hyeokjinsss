@@ -303,12 +303,12 @@ html::-webkit-scrollbar {
   }
 
   .skills-pin {
-    @apply relative h-screen overflow-hidden pt-24 ;
+    @apply relative h-screen overflow-hidden pt-36 ;
 
   }
 
   .skills-track {
-    @apply flex h-[30%] w-max mt-10 gap-6 px-6 md:px-16 mx-auto;
+    @apply flex h-[30%] w-max mt-20 gap-6 px-6 md:px-16 mx-auto;
         height: clamp(200px, 50vh, 450px);
   }
 
