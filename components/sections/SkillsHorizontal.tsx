@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
+import { SkillsBackground } from "@/components/sections/SkillsBackground";
 import { initSkillsHorizontal } from "@/lib/animation/skillsHorizontal";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
@@ -56,7 +57,9 @@ export const SkillsHorizontal = () => {
       aria-labelledby="skills-title"
     >
       <div ref={pinRef} className="skills-pin relative z-10">
-        <Container className="space-y-6">
+        <SkillsBackground />
+
+        <Container className="relative z-10 space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
             Skills
           </p>
@@ -65,7 +68,7 @@ export const SkillsHorizontal = () => {
           </h2>
         </Container>
 
-        <div ref={trackRef} className="skills-track">
+        <div ref={trackRef} className="skills-track relative z-10">
           {portfolio.skills.map((skill) => (
             <article
               key={skill.title}
