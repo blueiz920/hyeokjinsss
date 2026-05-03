@@ -1,3 +1,5 @@
+import { forwardRef } from "react";
+
 type CircuitPath = {
   className: string;
   d: string;
@@ -133,14 +135,23 @@ const mobileRunners: Runner[] = [
   { pathKey: "bottom-main", duration: 13, offset: 0.32, r: 3.5 },
 ];
 
-const renderPaths = (paths: CircuitPath[]) =>
+const renderPaths = (
+  paths: CircuitPath[],
+  {
+    exposeMotionPath = false,
+    keyPrefix,
+  }: {
+    exposeMotionPath?: boolean;
+    keyPrefix: string;
+  },
+) =>
   paths.map(({ className, d, id, pathKey }) => (
     <path
-      key={id}
-      id={id}
+      key={`${keyPrefix}-${id}`}
+      id={exposeMotionPath ? id : undefined}
       className={className}
       d={d}
-      data-motion-path={pathKey}
+      data-motion-path={exposeMotionPath ? pathKey : undefined}
       pathLength={1}
     />
   ));
@@ -186,9 +197,12 @@ const renderRunners = (runners: Runner[]) =>
     </g>
   ));
 
-export const SkillsBackground = () => {
+export const SkillsBackground = forwardRef<HTMLDivElement>(function SkillsBackground(
+  _props,
+  ref,
+) {
   return (
-    <div className="skills-bg" aria-hidden="true">
+    <div ref={ref} className="skills-bg" aria-hidden="true">
       <div className="skills-bg__base" data-parallax-layer="base" />
       <div className="skills-bg__grid" data-parallax-layer="grid" />
 
@@ -200,8 +214,15 @@ export const SkillsBackground = () => {
         preserveAspectRatio="xMidYMid slice"
         focusable="false"
       >
-        <g className="skills-bg__glow-lines">{renderPaths(desktopPaths)}</g>
-        <g className="skills-bg__sharp-lines">{renderPaths(desktopPaths)}</g>
+        <g className="skills-bg__glow-lines">
+          {renderPaths(desktopPaths, { keyPrefix: "desktop-glow" })}
+        </g>
+        <g className="skills-bg__sharp-lines">
+          {renderPaths(desktopPaths, {
+            exposeMotionPath: true,
+            keyPrefix: "desktop-sharp",
+          })}
+        </g>
         <g className="skills-bg__nodes">{renderNodes(desktopNodes)}</g>
         <g className="skills-bg__dot-trains">{renderDotTrains(desktopDotTrains)}</g>
         <g className="skills-bg__runners" data-parallax-layer="desktop-runners">
@@ -217,8 +238,15 @@ export const SkillsBackground = () => {
         preserveAspectRatio="xMidYMid slice"
         focusable="false"
       >
-        <g className="skills-bg__glow-lines">{renderPaths(mobilePaths)}</g>
-        <g className="skills-bg__sharp-lines">{renderPaths(mobilePaths)}</g>
+        <g className="skills-bg__glow-lines">
+          {renderPaths(mobilePaths, { keyPrefix: "mobile-glow" })}
+        </g>
+        <g className="skills-bg__sharp-lines">
+          {renderPaths(mobilePaths, {
+            exposeMotionPath: true,
+            keyPrefix: "mobile-sharp",
+          })}
+        </g>
         <g className="skills-bg__nodes">{renderNodes(mobileNodes)}</g>
         <g className="skills-bg__runners" data-parallax-layer="mobile-runners">
           {renderRunners(mobileRunners)}
@@ -229,4 +257,4 @@ export const SkillsBackground = () => {
       <div className="skills-bg__vignette" />
     </div>
   );
-};
+});

@@ -4,12 +4,14 @@ import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { SkillsBackground } from "@/components/sections/SkillsBackground";
+import { initSkillsBackgroundMotion } from "@/lib/animation/skillsBackground";
 import { initSkillsHorizontal } from "@/lib/animation/skillsHorizontal";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 export const SkillsHorizontal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,6 +50,33 @@ export const SkillsHorizontal = () => {
     };
   }, [prefersReducedMotion]);
 
+  useEffect(() => {
+    const root = backgroundRef.current;
+    if (!root) return;
+
+    let alive = true;
+    let destroy: (() => void) | null = null;
+
+    (async () => {
+      const d = await initSkillsBackgroundMotion({
+        root,
+        prefersReducedMotion,
+      });
+
+      if (!alive) {
+        d();
+        return;
+      }
+
+      destroy = d;
+    })();
+
+    return () => {
+      alive = false;
+      destroy?.();
+    };
+  }, [prefersReducedMotion]);
+
   return (
     <section
       id="skills"
@@ -57,7 +86,7 @@ export const SkillsHorizontal = () => {
       aria-labelledby="skills-title"
     >
       <div ref={pinRef} className="skills-pin relative z-10">
-        <SkillsBackground />
+        <SkillsBackground ref={backgroundRef} />
 
         <Container className="relative z-10 space-y-6">
           <p className="text-xs uppercase tracking-[0.4em] text-white/50">
