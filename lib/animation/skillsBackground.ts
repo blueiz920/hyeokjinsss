@@ -5,6 +5,10 @@ type SkillsBackgroundMotionOptions = {
   prefersReducedMotion: boolean;
 };
 
+type RunnerTimelineOptions = {
+  paused?: boolean;
+};
+
 const MOBILE_QUERY = "(max-width: 767px)";
 
 const getNumber = (value: string | undefined, fallback: number) => {
@@ -25,6 +29,8 @@ const getRunnerPath = (svg: SVGSVGElement, pathKey: string) => {
   return paths.find((path) => path.dataset.motionPath === pathKey) ?? null;
 };
 
+const clampRunnerProgress = (value: number) => Math.max(0, Math.min(0.98, value));
+
 export const initSkillsBackgroundMotion = async ({
   root,
   prefersReducedMotion,
@@ -37,10 +43,7 @@ export const initSkillsBackgroundMotion = async ({
   const mobileMedia = window.matchMedia(MOBILE_QUERY);
   let activeTimelines: Array<gsap.core.Timeline> = [];
 
-  const killActiveTimelines = () => {
-    activeTimelines.forEach((timeline) => timeline.kill());
-    activeTimelines = [];
-
+  const clearRunnerStyles = () => {
     root
       .querySelectorAll<SVGGElement>("[data-runner-path]")
       .forEach((runner) => {
@@ -48,75 +51,97 @@ export const initSkillsBackgroundMotion = async ({
       });
   };
 
-  const setupActiveSvg = () => {
-    killActiveTimelines();
+  const killActiveMotion = () => {
+    activeTimelines.forEach((timeline) => timeline.kill());
+    activeTimelines = [];
+    clearRunnerStyles();
+  };
 
-    // 브레이크포인트 기준으로 보이는 SVG 하나만 잡아서 중복 runner를 막음.
-    const activeSvg = getActiveSvg(root, mobileMedia.matches);
-    if (!activeSvg) return;
+  const createRunnerTimeline = (
+    activeSvg: SVGSVGElement,
+    runner: SVGGElement,
+    { paused = false }: RunnerTimelineOptions = {},
+  ) => {
+    const pathKey = runner.dataset.runnerPath;
+    if (!pathKey) return null;
 
+    const path = getRunnerPath(activeSvg, pathKey);
+    if (!path) return null;
+
+    const duration = getNumber(runner.dataset.runnerDuration, 12);
+    const offset = getNumber(runner.dataset.runnerOffset, 0);
+    const fadeDuration = Math.min(1.2, duration * 0.14);
+    const timeline = gsap.timeline({ paused, repeat: -1 });
+
+    gsap.set(runner, {
+      autoAlpha: 0,
+      x: 0,
+      y: 0,
+      transformOrigin: "50% 50%",
+    });
+
+    timeline.to(
+      runner,
+      {
+        motionPath: {
+          path,
+          align: path,
+          alignOrigin: [0.5, 0.5],
+          autoRotate: false,
+        },
+        duration,
+        ease: "none",
+      },
+      0,
+    );
+
+    timeline.to(
+      runner,
+      {
+        autoAlpha: 1,
+        duration: fadeDuration,
+        ease: "power1.out",
+      },
+      0.1,
+    );
+
+    timeline.to(
+      runner,
+      {
+        autoAlpha: 0,
+        duration: fadeDuration,
+        ease: "power1.in",
+      },
+      duration - fadeDuration,
+    );
+
+    timeline.progress(clampRunnerProgress(offset));
+
+    return timeline;
+  };
+
+  const setupRunnerTimelines = (
+    activeSvg: SVGSVGElement,
+    options?: RunnerTimelineOptions,
+  ) => {
     const runners = Array.from(
       activeSvg.querySelectorAll<SVGGElement>("[data-runner-path]"),
     );
 
     activeTimelines = runners.flatMap((runner) => {
-      const pathKey = runner.dataset.runnerPath;
-      if (!pathKey) return [];
-
-      const path = getRunnerPath(activeSvg, pathKey);
-      if (!path) return [];
-
-      const duration = getNumber(runner.dataset.runnerDuration, 12);
-      const offset = getNumber(runner.dataset.runnerOffset, 0);
-      const fadeDuration = Math.min(1.2, duration * 0.14);
-      const timeline = gsap.timeline({ repeat: -1 });
-
-      gsap.set(runner, {
-        autoAlpha: 0,
-        x: 0,
-        y: 0,
-        transformOrigin: "50% 50%",
-      });
-
-      timeline.to(
-        runner,
-        {
-          motionPath: {
-            path,
-            align: path,
-            alignOrigin: [0.5, 0.5],
-            autoRotate: false,
-          },
-          duration,
-          ease: "none",
-        },
-        0,
-      );
-
-      timeline.to(
-        runner,
-        {
-          autoAlpha: 1,
-          duration: fadeDuration,
-          ease: "power1.out",
-        },
-        0.1,
-      );
-
-      timeline.to(
-        runner,
-        {
-          autoAlpha: 0,
-          duration: fadeDuration,
-          ease: "power1.in",
-        },
-        duration - fadeDuration,
-      );
-
-      timeline.progress(Math.max(0, Math.min(0.98, offset)));
-
-      return [timeline];
+      const timeline = createRunnerTimeline(activeSvg, runner, options);
+      return timeline ? [timeline] : [];
     });
+  };
+
+  const setupActiveSvg = () => {
+    killActiveMotion();
+
+    // 브레이크포인트 기준으로 보이는 SVG 하나만 잡아서 중복 runner를 막음.
+    const activeSvg = getActiveSvg(root, mobileMedia.matches);
+    if (!activeSvg) return;
+
+    setupRunnerTimelines(activeSvg);
   };
 
   const handleBreakpointChange = () => {
@@ -129,6 +154,6 @@ export const initSkillsBackgroundMotion = async ({
 
   return () => {
     mobileMedia.removeEventListener("change", handleBreakpointChange);
-    killActiveTimelines();
+    killActiveMotion();
   };
 };
