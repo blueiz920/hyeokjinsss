@@ -256,6 +256,8 @@ export const SkillsBackground = forwardRef<HTMLDivElement>(function SkillsBackgr
 
       <div className="skills-bg__quiet" />
       <div className="skills-bg__vignette" />
+      <div className="skills-bg__seam skills-bg__seam--top" />
+      <div className="skills-bg__seam skills-bg__seam--bottom" />
     </div>
   );
 });

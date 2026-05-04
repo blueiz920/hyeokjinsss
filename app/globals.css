@@ -333,7 +333,8 @@ html::-webkit-scrollbar {
   .skills-bg__atmosphere,
   .skills-bg__circuit,
   .skills-bg__quiet,
-  .skills-bg__vignette {
+  .skills-bg__vignette,
+  .skills-bg__seam {
     position: absolute;
     inset: 0;
   }
@@ -491,6 +492,24 @@ html::-webkit-scrollbar {
       linear-gradient(90deg, rgba(0, 0, 0, 0.68), transparent 20%, transparent 80%, rgba(0, 0, 0, 0.7)),
       linear-gradient(180deg, rgba(0, 0, 0, 0.66), transparent 22%, transparent 76%, rgba(0, 0, 0, 0.72));
   }
+
+  .skills-bg__seam {
+    inset-inline: 0;
+    height: clamp(8rem, 18vh, 13rem);
+  }
+
+  .skills-bg__seam--top {
+    top: 0;
+    bottom: auto;
+    /* 위 섹션의 neutral 배경으로 먼저 묻힌 뒤 회로 배경이 드러나게 함. */
+    background: linear-gradient(to bottom, rgb(10 10 10), rgba(10, 10, 10, 0.82) 18%, transparent);
+  }
+
+  .skills-bg__seam--bottom {
+    top: auto;
+    bottom: 0;
+    background: linear-gradient(to top, rgb(10 10 10), rgba(10, 10, 10, 0.78) 20%, transparent);
+  }
 }
 
 @media (min-width: 768px) and (orientation: landscape) {
@@ -597,6 +616,10 @@ html::-webkit-scrollbar {
         transparent 100%
       ),
       radial-gradient(ellipse at 50% 56%, rgba(0, 0, 0, 0.42), transparent 66%);
+  }
+
+  .skills-bg__seam {
+    height: clamp(7rem, 16vh, 10rem);
   }
 }
 
