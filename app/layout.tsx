@@ -8,8 +8,8 @@ import { ScrollProgress } from "@/components/common/ScrollProgress";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://hyeokjinsss.vercel.app"),
-  title: "권혁진 | 프론트엔드 ",
-  description: "호기심을 갖고 성장하는 프론트엔드 개발자 권혁진입니다.",
+  title: "권혁진 | 웹 개발자 ",
+  description: "호기심을 갖고 성장하는 개발s자 권혁진입니다.",
   openGraph: {
     title: "권혁진 | 성장하는 개발자",
     description: "개발자 권혁진의 공간입니다.",

@@ -437,6 +437,51 @@ html::-webkit-scrollbar {
     stroke-width: 0.7;
   }
 
+  .skills-bg [data-reveal-mode="draw"] {
+    /* 점등 전에는 회색 rail을 보여야 해서 dash 숨김은 JS 시작 시점에만 적용함. */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__atmosphere {
+    opacity: 0.1;
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__glow-lines .skills-bg__path {
+    opacity: 0.025;
+    stroke: rgba(148, 163, 184, 0.1);
+    filter: blur(0.16px) drop-shadow(0 0 8px rgba(148, 163, 184, 0.1));
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__sharp-lines .skills-bg__path--primary {
+    stroke: rgba(148, 163, 184, 0.18);
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__sharp-lines .skills-bg__path--secondary {
+    stroke: rgba(148, 163, 184, 0.13);
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__sharp-lines .skills-bg__path--atmospheric {
+    stroke: rgba(148, 163, 184, 0.08);
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__node,
+  .skills-bg[data-circuit-active="false"] .skills-bg__dot-train {
+    opacity: 0.56;
+    fill: rgba(148, 163, 184, 0.24);
+    filter: drop-shadow(0 0 6px rgba(148, 163, 184, 0.12));
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__node--hot {
+    opacity: 0.64;
+    fill: rgba(245, 158, 11, 0.28);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.14));
+  }
+
+  .skills-bg[data-circuit-active="false"] .skills-bg__runner {
+    opacity: 0;
+  }
+
   .skills-bg__node,
   .skills-bg__dot-train {
     fill: rgba(245, 158, 11, 0.48);
