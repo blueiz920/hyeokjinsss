@@ -205,6 +205,7 @@ export const SkillsBackground = forwardRef<HTMLDivElement>(function SkillsBackgr
     <div ref={ref} className="skills-bg" aria-hidden="true">
       <div className="skills-bg__base" data-parallax-layer="base" />
       <div className="skills-bg__grid" data-parallax-layer="grid" />
+      <div className="skills-bg__atmosphere" data-parallax-layer="atmosphere" />
 
       <svg
         className="skills-bg__circuit skills-bg__circuit--desktop"
