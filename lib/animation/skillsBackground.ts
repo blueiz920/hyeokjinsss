@@ -32,6 +32,14 @@ const getRunnerPath = (svg: SVGSVGElement, pathKey: string) => {
 
 const clampRunnerProgress = (value: number) => Math.max(0, Math.min(0.98, value));
 const REVEAL_TIME_SCALE = 1.25;
+const CARD_IGNITE_PEAK = 0.62;
+const CARD_IGNITE_STABLE = 0.6;
+
+const cardVars = {
+  "--skill-card-ignite": 0,
+  "--skill-card-scan": 0,
+  "--skill-card-scan-scale": 0,
+};
 
 export const initSkillsBackgroundMotion = async ({
   root,
@@ -61,6 +69,16 @@ export const initSkillsBackgroundMotion = async ({
       });
   };
 
+  const getSkillCards = () =>
+    Array.from(trigger.querySelectorAll<HTMLElement>("[data-skill-card]"));
+
+  const clearCardStyles = () => {
+    gsap.set(getSkillCards(), {
+      clearProps:
+        "--skill-card-ignite,--skill-card-scan,--skill-card-scan-scale",
+    });
+  };
+
   const clearRevealStyles = () => {
     root
       .querySelectorAll<SVGPathElement>("[data-reveal-mode]")
@@ -83,6 +101,7 @@ export const initSkillsBackgroundMotion = async ({
     activeTimelines.forEach((timeline) => timeline.kill());
     activeTimelines = [];
     clearRevealStyles();
+    clearCardStyles();
     clearRunnerStyles();
   };
 
@@ -170,6 +189,12 @@ export const initSkillsBackgroundMotion = async ({
       strokeDasharray: 1,
       strokeDashoffset: 0,
     });
+
+    gsap.set(getSkillCards(), {
+      "--skill-card-ignite": CARD_IGNITE_STABLE,
+      "--skill-card-scan": 0,
+      "--skill-card-scan-scale": 0,
+    });
   };
 
   const createRevealTimeline = (
@@ -197,6 +222,7 @@ export const initSkillsBackgroundMotion = async ({
     );
     const nodes = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__node"));
     const dotTrains = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__dot-train"));
+    const cards = getSkillCards();
     // fade 계열은 peak와 stable 차이를 줄여서 켜졌다 꺼지는 느낌을 막음.
     const fadeSharpPaths = fadePaths.filter(
       (path) => !path.closest(".skills-bg__glow-lines"),
@@ -235,6 +261,7 @@ export const initSkillsBackgroundMotion = async ({
     );
 
     timeline.set([...fadePaths, ...glowPaths], { opacity: 0 }, 0);
+    timeline.set(cards, cardVars, 0);
     timeline.set(
       [...nodes, ...dotTrains],
       {
@@ -392,6 +419,18 @@ export const initSkillsBackgroundMotion = async ({
     );
 
     timeline.to(
+      cards,
+      {
+        "--skill-card-scan": 1,
+        "--skill-card-scan-scale": 1,
+        duration: 0.2,
+        ease: "power2.out",
+        stagger: 0.05,
+      },
+      0.72,
+    );
+
+    timeline.to(
       dotTrains,
       {
         opacity: 0.72,
@@ -400,6 +439,17 @@ export const initSkillsBackgroundMotion = async ({
         stagger: 0.018,
       },
       0.62,
+    );
+
+    timeline.to(
+      cards,
+      {
+        "--skill-card-ignite": CARD_IGNITE_PEAK,
+        duration: 0.28,
+        ease: "power2.out",
+        stagger: 0.05,
+      },
+      0.78,
     );
 
     timeline.to(
@@ -412,6 +462,28 @@ export const initSkillsBackgroundMotion = async ({
         stagger: 0.025,
       },
       0.74,
+    );
+
+    timeline.to(
+      cards,
+      {
+        "--skill-card-scan": 0,
+        duration: 0.36,
+        ease: "power2.out",
+        stagger: 0.05,
+      },
+      1.02,
+    );
+
+    timeline.to(
+      cards,
+      {
+        "--skill-card-ignite": CARD_IGNITE_STABLE,
+        duration: 0.5,
+        ease: "power2.out",
+        stagger: 0.035,
+      },
+      1.12,
     );
 
     timeline.call(() => {
