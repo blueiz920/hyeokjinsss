@@ -196,6 +196,20 @@ export const initSkillsBackgroundMotion = async ({
     );
     const nodes = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__node"));
     const dotTrains = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__dot-train"));
+    // fade 계열은 peak와 stable 차이를 줄여서 켜졌다 꺼지는 느낌을 막음.
+    const fadeSharpPaths = fadePaths.filter(
+      (path) => !path.closest(".skills-bg__glow-lines"),
+    );
+    const secondaryFadeGlowPaths = fadePaths.filter(
+      (path) =>
+        path.closest(".skills-bg__glow-lines") &&
+        path.classList.contains("skills-bg__path--secondary"),
+    );
+    const atmosphericFadeGlowPaths = fadePaths.filter(
+      (path) =>
+        path.closest(".skills-bg__glow-lines") &&
+        path.classList.contains("skills-bg__path--atmospheric"),
+    );
 
     const timeline = gsap.timeline({
       paused: true,
@@ -232,14 +246,58 @@ export const initSkillsBackgroundMotion = async ({
     }, undefined, 0);
 
     timeline.to(
-      fadePaths,
+      fadeSharpPaths,
       {
-        opacity: 1,
-        duration: 0.55,
+        opacity: 0.84,
+        duration: 0.42,
         ease: "power1.out",
         stagger: 0.035,
       },
       0.08,
+    );
+
+    timeline.to(
+      secondaryFadeGlowPaths,
+      {
+        opacity: 0.24,
+        duration: 0.28,
+        ease: "power1.out",
+        stagger: 0.035,
+      },
+      0.1,
+    );
+
+    timeline.to(
+      atmosphericFadeGlowPaths,
+      {
+        opacity: 0.14,
+        duration: 0.28,
+        ease: "power1.out",
+        stagger: 0.035,
+      },
+      0.1,
+    );
+
+    timeline.to(
+      secondaryFadeGlowPaths,
+      {
+        opacity: 0.17,
+        duration: 0.48,
+        ease: "power2.out",
+        stagger: 0.035,
+      },
+      0.48,
+    );
+
+    timeline.to(
+      atmosphericFadeGlowPaths,
+      {
+        opacity: 0.1,
+        duration: 0.48,
+        ease: "power2.out",
+        stagger: 0.035,
+      },
+      0.48,
     );
 
     timeline.to(
@@ -256,13 +314,15 @@ export const initSkillsBackgroundMotion = async ({
     timeline.to(
       secondaryGlowPaths,
       {
-        opacity: 0.48,
-        strokeWidth: 7.5,
-        duration: 0.2,
+        opacity: 0.44,
+        strokeWidth: 7.4,
+        duration: 0.065,
+        repeat: 2,
+        yoyo: true,
         ease: "power2.out",
         stagger: 0.035,
       },
-      0.24,
+      0.23,
     );
 
     timeline.to(
@@ -270,11 +330,11 @@ export const initSkillsBackgroundMotion = async ({
       {
         opacity: 0.18,
         strokeWidth: 4.8,
-        duration: 0.55,
+        duration: 0.42,
         ease: "power2.out",
         stagger: 0.035,
       },
-      0.42,
+      0.5,
     );
 
     timeline.to(
@@ -291,9 +351,11 @@ export const initSkillsBackgroundMotion = async ({
     timeline.to(
       primaryGlowPaths,
       {
-        opacity: 0.56,
+        opacity: 0.58,
         strokeWidth: 9,
-        duration: 0.22,
+        duration: 0.07,
+        repeat: 2,
+        yoyo: true,
         ease: "power2.out",
         stagger: 0.04,
       },
@@ -305,39 +367,53 @@ export const initSkillsBackgroundMotion = async ({
       {
         opacity: 0.22,
         strokeWidth: 6.5,
-        duration: 0.6,
+        duration: 0.48,
         ease: "power2.out",
         stagger: 0.04,
       },
-      0.58,
+      0.66,
     );
 
     timeline.to(
       nodes,
       {
         opacity: 1,
-        scale: 1.18,
-        duration: 0.18,
+        scale: 1.2,
+        duration: 0.08,
+        repeat: 1,
+        yoyo: true,
         ease: "power2.out",
         stagger: 0.025,
       },
-      0.46,
+      0.56,
+    );
+
+    timeline.to(
+      dotTrains,
+      {
+        opacity: 0.72,
+        duration: 0.44,
+        ease: "power2.out",
+        stagger: 0.018,
+      },
+      0.62,
     );
 
     timeline.to(
       nodes,
       {
+        opacity: 1,
         scale: 1,
-        duration: 0.42,
+        duration: 0.32,
         ease: "power2.out",
         stagger: 0.025,
       },
-      0.64,
+      0.74,
     );
 
     timeline.call(() => {
       runnerTimelines.forEach((runnerTimeline) => runnerTimeline.play());
-    }, undefined, 0.74);
+    }, undefined, 0.84);
 
     return timeline;
   };
@@ -364,7 +440,7 @@ export const initSkillsBackgroundMotion = async ({
     const revealTimeline = createRevealTimeline(activeSvg, runnerTimelines);
     const revealTrigger = ScrollTrigger.create({
       trigger,
-      start: "top 68%",
+      start: "top 38%",
       once: true,
       onEnter: () => revealTimeline.play(0),
     });
