@@ -34,11 +34,39 @@ const clampRunnerProgress = (value: number) => Math.max(0, Math.min(0.98, value)
 const REVEAL_TIME_SCALE = 1.25;
 const CARD_IGNITE_PEAK = 0.62;
 const CARD_IGNITE_STABLE = 0.6;
+const CARD_REDUCED_MOTION_STABLE = 0.18;
+const CARD_VAR_NAMES = [
+  "--skill-card-ignite",
+  "--skill-card-scan",
+  "--skill-card-scan-scale",
+] as const;
 
 const cardVars = {
   "--skill-card-ignite": 0,
   "--skill-card-scan": 0,
   "--skill-card-scan-scale": 0,
+};
+
+const getSkillCards = (trigger: HTMLElement) =>
+  Array.from(trigger.querySelectorAll<HTMLElement>("[data-skill-card]"));
+
+const setCardVars = (
+  cards: HTMLElement[],
+  vars: Partial<Record<(typeof CARD_VAR_NAMES)[number], number>>,
+) => {
+  cards.forEach((card) => {
+    Object.entries(vars).forEach(([name, value]) => {
+      card.style.setProperty(name, String(value));
+    });
+  });
+};
+
+const clearCardVars = (cards: HTMLElement[]) => {
+  cards.forEach((card) => {
+    CARD_VAR_NAMES.forEach((name) => {
+      card.style.removeProperty(name);
+    });
+  });
 };
 
 export const initSkillsBackgroundMotion = async ({
@@ -52,7 +80,15 @@ export const initSkillsBackgroundMotion = async ({
 
   if (prefersReducedMotion) {
     root.dataset.circuitActive = "true";
-    return () => {};
+    const cards = getSkillCards(trigger);
+
+    setCardVars(cards, {
+      "--skill-card-ignite": CARD_REDUCED_MOTION_STABLE,
+      "--skill-card-scan": 0,
+      "--skill-card-scan-scale": 0,
+    });
+
+    return () => clearCardVars(cards);
   }
 
   const { gsap, ScrollTrigger } = await loadGsap();
@@ -69,11 +105,8 @@ export const initSkillsBackgroundMotion = async ({
       });
   };
 
-  const getSkillCards = () =>
-    Array.from(trigger.querySelectorAll<HTMLElement>("[data-skill-card]"));
-
   const clearCardStyles = () => {
-    gsap.set(getSkillCards(), {
+    gsap.set(getSkillCards(trigger), {
       clearProps:
         "--skill-card-ignite,--skill-card-scan,--skill-card-scan-scale",
     });
@@ -190,7 +223,7 @@ export const initSkillsBackgroundMotion = async ({
       strokeDashoffset: 0,
     });
 
-    gsap.set(getSkillCards(), {
+    gsap.set(getSkillCards(trigger), {
       "--skill-card-ignite": CARD_IGNITE_STABLE,
       "--skill-card-scan": 0,
       "--skill-card-scan-scale": 0,
@@ -222,7 +255,7 @@ export const initSkillsBackgroundMotion = async ({
     );
     const nodes = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__node"));
     const dotTrains = Array.from(activeSvg.querySelectorAll<SVGElement>(".skills-bg__dot-train"));
-    const cards = getSkillCards();
+    const cards = getSkillCards(trigger);
     // fade 계열은 peak와 stable 차이를 줄여서 켜졌다 꺼지는 느낌을 막음.
     const fadeSharpPaths = fadePaths.filter(
       (path) => !path.closest(".skills-bg__glow-lines"),
