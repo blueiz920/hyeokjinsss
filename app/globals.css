@@ -587,20 +587,6 @@ html::-webkit-scrollbar {
     opacity: 0.1;
     filter: blur(12px);
   }
-
-  .skills-bg__glow-lines .skills-bg__path--secondary,
-  .skills-bg__glow-lines .skills-bg__path--atmospheric {
-    opacity: 0.12;
-  }
-
-  .skills-bg__sharp-lines .skills-bg__path--secondary {
-    stroke-opacity: 0.72;
-  }
-
-  .skills-bg__sharp-lines .skills-bg__path--atmospheric,
-  .skills-bg__dot-trains {
-    opacity: 0.46;
-  }
 }
 
 @media (max-width: 767px) {
@@ -633,21 +619,6 @@ html::-webkit-scrollbar {
 
   .skills-bg__circuit--mobile {
     display: block;
-  }
-
-  .skills-bg__glow-lines .skills-bg__path--primary {
-    stroke-width: 4;
-    opacity: 0.22;
-  }
-
-  .skills-bg__sharp-lines .skills-bg__path--primary {
-    stroke-width: 1;
-    stroke-opacity: 0.84;
-  }
-
-  .skills-bg__node,
-  .skills-bg__dot-train {
-    filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.18));
   }
 
   .skills-bg__quiet {
