@@ -152,6 +152,7 @@ const renderPaths = (
       className={className}
       d={d}
       data-motion-path={exposeMotionPath ? pathKey : undefined}
+      data-reveal-mode={pathKey ? "draw" : "fade"}
       pathLength={1}
     />
   ));
@@ -202,7 +203,7 @@ export const SkillsBackground = forwardRef<HTMLDivElement>(function SkillsBackgr
   ref,
 ) {
   return (
-    <div ref={ref} className="skills-bg" aria-hidden="true">
+    <div ref={ref} className="skills-bg" data-circuit-active="false" aria-hidden="true">
       <div className="skills-bg__base" data-parallax-layer="base" />
       <div className="skills-bg__grid" data-parallax-layer="grid" />
       <div className="skills-bg__atmosphere" data-parallax-layer="atmosphere" />
