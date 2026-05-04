@@ -104,6 +104,7 @@ export const SkillsHorizontal = () => {
             <article
               key={skill.title}
               className="skills-card"
+              data-skill-card
               aria-label={skill.title}
             >
               <h3 className="text-lg font-semibold text-white">{skill.title}</h3>

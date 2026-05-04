@@ -316,6 +316,46 @@ html::-webkit-scrollbar {
     @apply flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6;
         width: clamp(300px, 40vh, 400px);
         height: clamp(200px, 45vh, 350px);
+        --skill-card-ignite: 0;
+        --skill-card-scan: 0;
+        --skill-card-scan-scale: 0;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+  }
+
+  .skills-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border: 1px solid rgba(245, 158, 11, calc(var(--skill-card-ignite) * 0.32));
+    border-radius: inherit;
+    box-shadow:
+      0 0 calc(var(--skill-card-ignite) * 18px) rgba(245, 158, 11, 0.12),
+      inset 0 0 calc(var(--skill-card-ignite) * 18px) rgba(245, 158, 11, 0.045);
+    opacity: var(--skill-card-ignite);
+    pointer-events: none;
+  }
+
+  .skills-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 18px;
+    left: 18px;
+    z-index: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.82), transparent);
+    opacity: var(--skill-card-scan);
+    pointer-events: none;
+    transform: scaleX(var(--skill-card-scan-scale));
+    transform-origin: left center;
+  }
+
+  .skills-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .skills-bg {
