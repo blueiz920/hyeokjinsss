@@ -451,16 +451,50 @@ export const initSkillsBackgroundMotion = async ({
       0.56,
     );
 
+    // scan은 진행바처럼 보이지 않게 짧은 전류 조각 리듬으로 튀게 함.
+    timeline.set(
+      cards,
+      {
+        "--skill-card-scan": 0,
+        "--skill-card-scan-scale": 0.14,
+      },
+      0.7,
+    );
+
     timeline.to(
       cards,
       {
         "--skill-card-scan": 1,
-        "--skill-card-scan-scale": 1,
-        duration: 0.2,
-        ease: "power2.out",
-        stagger: 0.05,
+        "--skill-card-scan-scale": 0.68,
+        duration: 0.065,
+        ease: "power3.out",
+        stagger: 0.045,
       },
       0.72,
+    );
+
+    timeline.to(
+      cards,
+      {
+        "--skill-card-scan": 0.38,
+        "--skill-card-scan-scale": 0.42,
+        duration: 0.045,
+        ease: "none",
+        stagger: 0.045,
+      },
+      0.8,
+    );
+
+    timeline.to(
+      cards,
+      {
+        "--skill-card-scan": 0.92,
+        "--skill-card-scan-scale": 0.96,
+        duration: 0.055,
+        ease: "power3.out",
+        stagger: 0.045,
+      },
+      0.86,
     );
 
     timeline.to(
@@ -501,9 +535,10 @@ export const initSkillsBackgroundMotion = async ({
       cards,
       {
         "--skill-card-scan": 0,
-        duration: 0.36,
+        "--skill-card-scan-scale": 1,
+        duration: 0.2,
         ease: "power2.out",
-        stagger: 0.05,
+        stagger: 0.04,
       },
       1.02,
     );
