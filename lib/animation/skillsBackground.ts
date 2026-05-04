@@ -31,6 +31,7 @@ const getRunnerPath = (svg: SVGSVGElement, pathKey: string) => {
 };
 
 const clampRunnerProgress = (value: number) => Math.max(0, Math.min(0.98, value));
+const REVEAL_TIME_SCALE = 1.25;
 
 export const initSkillsBackgroundMotion = async ({
   root,
@@ -221,6 +222,8 @@ export const initSkillsBackgroundMotion = async ({
         });
       },
     });
+    // 전체 점등 속도만 늦추려고 timeline 자체 속도를 조정함.
+    timeline.timeScale(1 / REVEAL_TIME_SCALE);
 
     timeline.set(
       drawPaths,
