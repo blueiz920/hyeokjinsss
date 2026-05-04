@@ -589,6 +589,14 @@ html::-webkit-scrollbar {
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .skills-bg__circuit--desktop {
+    /* 태블릿 crop에서 우측 상단 회로가 잘려서 SVG를 살짝 왼쪽으로 당김. */
+    left: -10%;
+    width: 116%;
+  }
+}
+
 @media (max-width: 767px) {
   .skills-bg__base {
     background:

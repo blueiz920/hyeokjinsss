@@ -109,8 +109,13 @@ const mobilePaths: CircuitPath[] = [
   {
     id: "skills-m-top-main",
     pathKey: "top-main",
-    className: "skills-bg__path skills-bg__path--secondary",
-    d: "M260 142 H620 L646 168 H850",
+    className: "skills-bg__path skills-bg__path--primary",
+    d: "M242 164 H420 L448 138 H640 L668 164 H760",
+  },
+  {
+    id: "skills-m-top-faint",
+    className: "skills-bg__path skills-bg__path--atmospheric",
+    d: "M318 112 H620 L648 134 H820",
   },
   {
     id: "skills-m-bottom-main",
@@ -126,12 +131,14 @@ const mobilePaths: CircuitPath[] = [
 ];
 
 const mobileNodes: CircuitNode[] = [
-  { cx: 620, cy: 142, r: 3.5 },
+  { cx: 420, cy: 164, r: 3.8, className: "skills-bg__node--hot" },
+  { cx: 640, cy: 138, r: 3.5 },
   { cx: 266, cy: 750, r: 3.8, className: "skills-bg__node--hot" },
   { cx: 654, cy: 792, r: 3.8 },
 ];
 
 const mobileRunners: Runner[] = [
+  { pathKey: "top-main", duration: 11.5, offset: 0.18, r: 3.4 },
   { pathKey: "bottom-main", duration: 13, offset: 0.32, r: 3.5 },
 ];
 
