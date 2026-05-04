@@ -52,7 +52,8 @@ export const SkillsHorizontal = () => {
 
   useEffect(() => {
     const root = backgroundRef.current;
-    if (!root) return;
+    const trigger = pinRef.current;
+    if (!root || !trigger) return;
 
     let alive = true;
     let destroy: (() => void) | null = null;
@@ -60,6 +61,7 @@ export const SkillsHorizontal = () => {
     (async () => {
       const d = await initSkillsBackgroundMotion({
         root,
+        trigger,
         prefersReducedMotion,
       });
 
