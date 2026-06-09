@@ -10,6 +10,12 @@ type RunnerTimelineOptions = {
   paused?: boolean;
 };
 
+type ParallaxTargets = {
+  grid: HTMLElement | null;
+  atmosphere: HTMLElement | null;
+  activeSvg: SVGSVGElement;
+};
+
 const MOBILE_QUERY = "(max-width: 767px)";
 
 const getNumber = (value: string | undefined, fallback: number) => {
@@ -20,6 +26,24 @@ const getNumber = (value: string | undefined, fallback: number) => {
 const getActiveSvg = (root: HTMLElement, isMobile: boolean) =>
   root.querySelector<SVGSVGElement>(
     `[data-skills-bg-svg="${isMobile ? "mobile" : "desktop"}"]`,
+  );
+
+const getParallaxTargets = (
+  root: HTMLElement,
+  activeSvg: SVGSVGElement,
+): ParallaxTargets => ({
+  grid: root.querySelector<HTMLElement>('[data-parallax-layer="grid"]'),
+  atmosphere: root.querySelector<HTMLElement>('[data-parallax-layer="atmosphere"]'),
+  activeSvg,
+});
+
+const getParallaxElements = ({
+  grid,
+  atmosphere,
+  activeSvg,
+}: ParallaxTargets) =>
+  [grid, atmosphere, activeSvg].filter(
+    (target): target is HTMLElement | SVGSVGElement => Boolean(target),
   );
 
 const getRunnerPath = (svg: SVGSVGElement, pathKey: string) => {
@@ -95,6 +119,7 @@ export const initSkillsBackgroundMotion = async ({
   const mobileMedia = window.matchMedia(MOBILE_QUERY);
   let activeTimelines: Array<gsap.core.Timeline> = [];
   let activeTriggers: Array<{ kill: () => void }> = [];
+  let activeParallaxTargets: ParallaxTargets | null = null;
   let hasRevealed = false;
 
   const clearRunnerStyles = () => {
@@ -128,6 +153,15 @@ export const initSkillsBackgroundMotion = async ({
       });
   };
 
+  const clearParallaxStyles = () => {
+    if (!activeParallaxTargets) return;
+
+    gsap.set(getParallaxElements(activeParallaxTargets), {
+      clearProps: "transform,willChange",
+    });
+    activeParallaxTargets = null;
+  };
+
   const killActiveMotion = () => {
     activeTriggers.forEach((triggerInstance) => triggerInstance.kill());
     activeTriggers = [];
@@ -136,6 +170,7 @@ export const initSkillsBackgroundMotion = async ({
     clearRevealStyles();
     clearCardStyles();
     clearRunnerStyles();
+    clearParallaxStyles();
   };
 
   const createRunnerTimeline = (
@@ -567,6 +602,9 @@ export const initSkillsBackgroundMotion = async ({
     // 브레이크포인트 기준으로 보이는 SVG 하나만 잡아서 중복 runner를 막음.
     const activeSvg = getActiveSvg(root, mobileMedia.matches);
     if (!activeSvg) return;
+
+    // 이전 브레이크포인트의 parallax transform을 지우려고 active target을 저장함.
+    activeParallaxTargets = getParallaxTargets(root, activeSvg);
 
     const runnerTimelines = setupRunnerTimelines(activeSvg, { paused: true });
 
