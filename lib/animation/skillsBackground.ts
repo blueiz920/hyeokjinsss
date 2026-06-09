@@ -56,6 +56,10 @@ const getRunnerPath = (svg: SVGSVGElement, pathKey: string) => {
 
 const clampRunnerProgress = (value: number) => Math.max(0, Math.min(0.98, value));
 const REVEAL_TIME_SCALE = 1.25;
+const GRID_PARALLAX_X = 8;
+const ATMOSPHERE_PARALLAX_X = 24;
+const DESKTOP_SVG_PARALLAX_X = 38;
+const MOBILE_SVG_PARALLAX_X = 24;
 const CARD_IGNITE_PEAK = 0.62;
 const CARD_IGNITE_STABLE = 0.6;
 const CARD_REDUCED_MOTION_STABLE = 0.18;
@@ -248,6 +252,51 @@ export const initSkillsBackgroundMotion = async ({
       const timeline = createRunnerTimeline(activeSvg, runner, options);
       return timeline ? [timeline] : [];
     });
+  };
+
+  const setupParallaxTimeline = (targets: ParallaxTargets) => {
+    const { grid, atmosphere, activeSvg } = targets;
+    const svgDistance = mobileMedia.matches
+      ? MOBILE_SVG_PARALLAX_X
+      : DESKTOP_SVG_PARALLAX_X;
+    const timeline = gsap.timeline({
+      scrollTrigger: {
+        trigger,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    gsap.set(getParallaxElements(targets), { willChange: "transform" });
+
+    if (grid) {
+      timeline.fromTo(
+        grid,
+        { x: -GRID_PARALLAX_X },
+        { x: GRID_PARALLAX_X, ease: "none" },
+        0,
+      );
+    }
+
+    if (atmosphere) {
+      timeline.fromTo(
+        atmosphere,
+        { x: ATMOSPHERE_PARALLAX_X },
+        { x: -ATMOSPHERE_PARALLAX_X, ease: "none" },
+        0,
+      );
+    }
+
+    timeline.fromTo(
+      activeSvg,
+      { x: -svgDistance },
+      { x: svgDistance, ease: "none" },
+      0,
+    );
+
+    return timeline;
   };
 
   const setFinalActiveState = (activeSvg: SVGSVGElement) => {
@@ -607,11 +656,15 @@ export const initSkillsBackgroundMotion = async ({
     activeParallaxTargets = getParallaxTargets(root, activeSvg);
 
     const runnerTimelines = setupRunnerTimelines(activeSvg, { paused: true });
+    // parallax는 ScrollTrigger 하나에 묶어서 중복 trigger 생성을 막음.
+    const parallaxTimeline = setupParallaxTimeline(activeParallaxTargets);
+    const parallaxTrigger = parallaxTimeline.scrollTrigger;
 
     if (hasRevealed) {
       setFinalActiveState(activeSvg);
       runnerTimelines.forEach((runnerTimeline) => runnerTimeline.play());
-      activeTimelines = runnerTimelines;
+      activeTimelines = [...runnerTimelines, parallaxTimeline];
+      activeTriggers = parallaxTrigger ? [parallaxTrigger] : [];
       return;
     }
 
@@ -626,8 +679,10 @@ export const initSkillsBackgroundMotion = async ({
       onEnter: () => revealTimeline.play(0),
     });
 
-    activeTimelines = [revealTimeline, ...runnerTimelines];
-    activeTriggers = [revealTrigger];
+    activeTimelines = [revealTimeline, ...runnerTimelines, parallaxTimeline];
+    activeTriggers = parallaxTrigger
+      ? [revealTrigger, parallaxTrigger]
+      : [revealTrigger];
   };
 
   const handleBreakpointChange = () => {
