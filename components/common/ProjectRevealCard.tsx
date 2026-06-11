@@ -81,7 +81,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
             </div>
           </div>
 
-          <div className="relative h-44 overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:h-48 md:h-56">
+          <div className="relative h-32 overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:h-36 md:h-44">
             <motion.div
               className="absolute -inset-y-4 inset-x-0"
               style={imageStyle}

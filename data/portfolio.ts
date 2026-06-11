@@ -37,7 +37,7 @@ export const portfolio: PortfolioData = {
         "Biome",
         "Husky",
       ],
-      thumbnail: "/hyeokjin.svg",
+      thumbnail: "/moum.zip.svg",
       links: [
         { label: "Live", href: "https://moum-zip-web.vercel.app/" },
         { label: "GitHub", href: "https://github.com/sprint-13/moum-zip" },
