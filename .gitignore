@@ -47,3 +47,6 @@ next-env.d.ts
 /plan/
 subagent-runs/
 subagent-*
+
+# Local guardrail notes
+lib/perf/guardrails.md
