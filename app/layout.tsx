@@ -6,14 +6,33 @@ import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
 import { PointerGlow } from "@/components/common/PointerGlow";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
 
+const siteUrl = "https://hyeokjinsss.vercel.app";
+const siteTitle = "권혁진 | 프론트엔드 개발자";
+const siteDescription =
+  "문제를 파고들어 사용자 경험을 개선하고, 몰입감 있는 인터랙션을 설계하는 프론트엔드 개발자 권혁진의 포트폴리오입니다.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hyeokjinsss.vercel.app"),
-  title: "권혁진 | 웹 개발자 ",
-  description: "호기심을 갖고 성장하는 개발s자 권혁진입니다.",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "권혁진 | 성장하는 개발자",
-    description: "개발자 권혁진의 공간입니다.",
-    images: ["/hyeokjin.svg"],
+    title: siteTitle,
+    description: siteDescription,
+    url: siteUrl,
+    siteName: "권혁진 포트폴리오",
+    locale: "ko_KR",
+    type: "website",
+    images: [
+      {
+        url: "/intro/intro-cinematic-poster.png",
+        width: 1200,
+        height: 675,
+        alt: "권혁진 포트폴리오 대표 이미지",
+      },
+    ],
   },
 };
 
