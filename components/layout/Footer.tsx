@@ -24,17 +24,24 @@ export const Footer = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm text-white/70">
-          {portfolio.socials.map((social) => (
-            <a
-              key={social.label}
-              className="transition hover:text-white"
-              href={social.href}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {social.label}
-            </a>
-          ))}
+          {portfolio.socials.map((social) => {
+            const isExternalLink = social.href.startsWith("http");
+
+            return (
+              <a
+                key={social.label}
+                className="transition hover:text-white"
+                href={social.href}
+                target={isExternalLink ? "_blank" : undefined}
+                rel={isExternalLink ? "noopener noreferrer" : undefined}
+                aria-label={
+                  isExternalLink ? `${social.label} 새 탭에서 열기` : undefined
+                }
+              >
+                {social.label}
+              </a>
+            );
+          })}
         </div>
       </Container>
     </footer>

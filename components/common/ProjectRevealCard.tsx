@@ -72,7 +72,8 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
                   key={link.label}
                   href={link.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  aria-label={`${project.title} ${link.label} 새 탭에서 열기`}
                   className="text-white underline decoration-amber-300/50 underline-offset-4 transition hover:text-amber-100 hover:decoration-amber-300 focus-visible:outline-amber-200"
                 >
                   {link.label}
