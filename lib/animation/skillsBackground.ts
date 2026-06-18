@@ -53,6 +53,31 @@ type RevealTimelineOptions = {
   trigger: HTMLElement;
 };
 
+type ParallaxTimelineOptions = {
+  gsap: GsapInstance;
+  isMobile: boolean;
+  targets: ParallaxTargets;
+  trigger: HTMLElement;
+};
+
+type RevealCompletionTargets = Pick<
+  RevealTargets,
+  "dotTrains" | "fadePaths" | "glowPaths" | "nodes"
+>;
+
+type RailDrawTargets = Pick<
+  RevealTargetGroups,
+  "primaryDrawPaths" | "secondaryDrawPaths"
+>;
+
+type GlowRevealTargets = Pick<
+  RevealTargets,
+  "primaryGlowPaths" | "secondaryGlowPaths"
+>;
+
+type NodeAndDotRevealTargets = Pick<RevealTargets, "dotTrains" | "nodes">;
+type CardRevealTargets = Pick<RevealTargets, "cards">;
+
 const MOBILE_QUERY = "(max-width: 767px)";
 
 const getNumber = (value: string | undefined, fallback: number) => {
@@ -225,12 +250,7 @@ const clearParallaxStyles = (
 
 const clearRevealCompletionStyles = (
   gsap: GsapInstance,
-  {
-    dotTrains,
-    fadePaths,
-    glowPaths,
-    nodes,
-  }: Pick<RevealTargets, "dotTrains" | "fadePaths" | "glowPaths" | "nodes">,
+  { dotTrains, fadePaths, glowPaths, nodes }: RevealCompletionTargets,
 ) => {
   gsap.set([...fadePaths, ...glowPaths, ...nodes, ...dotTrains], {
     clearProps: "opacity,strokeWidth,scale,transformOrigin",
@@ -326,12 +346,7 @@ const setupParallaxTimeline = ({
   isMobile,
   targets,
   trigger,
-}: {
-  gsap: GsapInstance;
-  isMobile: boolean;
-  targets: ParallaxTargets;
-  trigger: HTMLElement;
-}) => {
+}: ParallaxTimelineOptions) => {
   const { grid, atmosphere, activeSvg } = targets;
   const svgDistance = isMobile
     ? MOBILE_SVG_PARALLAX_X
@@ -493,14 +508,8 @@ const addFadeRailReveal = (
 
 const addRailDrawAndGlowReveal = (
   timeline: GsapTimeline,
-  {
-    primaryDrawPaths,
-    secondaryDrawPaths,
-  }: Pick<RevealTargetGroups, "primaryDrawPaths" | "secondaryDrawPaths">,
-  {
-    primaryGlowPaths,
-    secondaryGlowPaths,
-  }: Pick<RevealTargets, "primaryGlowPaths" | "secondaryGlowPaths">,
+  { primaryDrawPaths, secondaryDrawPaths }: RailDrawTargets,
+  { primaryGlowPaths, secondaryGlowPaths }: GlowRevealTargets,
 ) => {
   timeline.to(
     secondaryDrawPaths,
@@ -579,7 +588,7 @@ const addRailDrawAndGlowReveal = (
 
 const addNodeAndDotReveal = (
   timeline: GsapTimeline,
-  { dotTrains, nodes }: Pick<RevealTargets, "dotTrains" | "nodes">,
+  { dotTrains, nodes }: NodeAndDotRevealTargets,
 ) => {
   timeline.to(
     nodes,
@@ -621,7 +630,7 @@ const addNodeAndDotReveal = (
 
 const addCardActivationReveal = (
   timeline: GsapTimeline,
-  { cards }: Pick<RevealTargets, "cards">,
+  { cards }: CardRevealTargets,
 ) => {
   // scan은 진행바처럼 보이지 않게 짧은 전류 조각 리듬으로 튀게 함.
   timeline.set(
