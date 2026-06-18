@@ -48,5 +48,8 @@ next-env.d.ts
 subagent-runs/
 subagent-*
 
+# Local analysis artifacts
+.audit/
+
 # Local guardrail notes
 lib/perf/guardrails.md
