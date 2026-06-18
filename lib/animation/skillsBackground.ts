@@ -257,6 +257,22 @@ const clearRevealCompletionStyles = (
   });
 };
 
+const clearActiveMotionStyles = (
+  gsap: GsapInstance,
+  root: HTMLElement,
+  trigger: HTMLElement,
+  parallaxTargets: ParallaxTargets | null,
+) => {
+  clearRevealStyles(gsap, root);
+  clearCardStyles(gsap, trigger);
+  clearRunnerStyles(gsap, root);
+  clearParallaxStyles(gsap, parallaxTargets);
+};
+
+const killScrollTriggers = (triggers: ScrollTriggerInstance[]) => {
+  triggers.forEach((triggerInstance) => triggerInstance.kill());
+};
+
 const killTimeline = (timeline: GsapTimeline) => {
   timeline.scrollTrigger?.kill();
   timeline.kill();
@@ -779,19 +795,17 @@ export const initSkillsBackgroundMotion = async ({
   const { gsap, ScrollTrigger } = await loadGsap();
   const mobileMedia = window.matchMedia(MOBILE_QUERY);
   let activeTimelines: GsapTimeline[] = [];
+  // timeline에 묶이지 않은 trigger만 따로 보관해서 중복 cleanup을 피함.
   let activeTriggers: ScrollTriggerInstance[] = [];
   let activeParallaxTargets: ParallaxTargets | null = null;
   let hasRevealed = false;
 
   const killActiveMotion = () => {
-    activeTriggers.forEach((triggerInstance) => triggerInstance.kill());
+    killScrollTriggers(activeTriggers);
     activeTriggers = [];
     activeTimelines.forEach(killTimeline);
     activeTimelines = [];
-    clearRevealStyles(gsap, root);
-    clearCardStyles(gsap, trigger);
-    clearRunnerStyles(gsap, root);
-    clearParallaxStyles(gsap, activeParallaxTargets);
+    clearActiveMotionStyles(gsap, root, trigger, activeParallaxTargets);
     activeParallaxTargets = null;
   };
 
