@@ -1,48 +1,18 @@
 "use client";
 
 import { type RefObject, useEffect, useState } from "react";
+import { getIntroMaskRect, type IntroMaskRect } from "@/lib/motion/introMask";
 
 type IntroMaskDebugBoxProps = {
   disabled: boolean;
   headingRef: RefObject<HTMLHeadingElement | null>;
 };
 
-type DebugRect = {
-  height: number;
-  left: number;
-  top: number;
-  width: number;
-};
-
 const INITIAL_RECT_TRACK_MS = 1000;
 const RESIZE_RECT_TRACK_MS = 180;
 
-const getMaskRect = (heading: HTMLElement): DebugRect | null => {
-  const rects = [
-    ...heading.querySelectorAll<HTMLElement>(
-      ".intro-title-mask-char, [data-intro-mask-phrase-anchor]",
-    ),
-  ]
-    .map((char) => char.getBoundingClientRect())
-    .filter((rect) => rect.width > 0 && rect.height > 0);
-
-  if (!rects.length) return null;
-
-  const left = Math.min(...rects.map((rect) => rect.left));
-  const top = Math.min(...rects.map((rect) => rect.top));
-  const right = Math.max(...rects.map((rect) => rect.right));
-  const bottom = Math.max(...rects.map((rect) => rect.bottom));
-
-  return {
-    height: bottom - top,
-    left,
-    top,
-    width: right - left,
-  };
-};
-
 export const IntroMaskDebugBox = ({ disabled, headingRef }: IntroMaskDebugBoxProps) => {
-  const [rect, setRect] = useState<DebugRect | null>(null);
+  const [rect, setRect] = useState<IntroMaskRect | null>(null);
 
   useEffect(() => {
     if (disabled || process.env.NODE_ENV !== "development" || typeof window === "undefined") {
@@ -57,7 +27,7 @@ export const IntroMaskDebugBox = ({ disabled, headingRef }: IntroMaskDebugBoxPro
       if (!alive) return;
 
       const heading = headingRef.current;
-      setRect(heading ? getMaskRect(heading) : null);
+      setRect(heading ? getIntroMaskRect(heading) : null);
     };
 
     const trackRect = (now: number) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, type RefObject, useEffect, useState } from "react";
+import { getIntroMaskRect } from "@/lib/motion/introMask";
 
 type IntroPhraseTextureOverlayProps = {
   disabled: boolean;
@@ -30,30 +31,6 @@ const escapeXml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-
-const getMaskRect = (heading: HTMLElement) => {
-  const rects = [
-    ...heading.querySelectorAll<HTMLElement>(
-      ".intro-title-mask-char, [data-intro-mask-phrase-anchor]",
-    ),
-  ]
-    .map((char) => char.getBoundingClientRect())
-    .filter((rect) => rect.width > 0 && rect.height > 0);
-
-  if (!rects.length) return null;
-
-  const left = Math.min(...rects.map((rect) => rect.left));
-  const top = Math.min(...rects.map((rect) => rect.top));
-  const right = Math.max(...rects.map((rect) => rect.right));
-  const bottom = Math.max(...rects.map((rect) => rect.bottom));
-
-  return {
-    height: bottom - top,
-    left,
-    top,
-    width: right - left,
-  };
-};
 
 const getMaskSupport = () =>
   typeof CSS !== "undefined" &&
@@ -145,7 +122,7 @@ export const IntroPhraseTextureOverlay = ({
 
       const heading = headingRef.current;
       const host = hostRef.current;
-      const rect = heading ? getMaskRect(heading) : null;
+      const rect = heading ? getIntroMaskRect(heading) : null;
 
       if (!heading || !host || !rect) {
         clearMaskState();
