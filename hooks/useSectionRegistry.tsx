@@ -9,11 +9,6 @@ import {
 } from "react";
 import { useScrollRuntime } from "./useScrollRuntime";
 
-export type SectionEntry = {
-  id: string;
-  ref: React.RefObject<HTMLElement | null>;
-};
-
 type SectionRegistryValue = {
   register: (id: string, ref: React.RefObject<HTMLElement | null>) => void;
   unregister: (id: string) => void;

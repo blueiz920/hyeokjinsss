@@ -1,4 +1,4 @@
-export type ProjectLink = {
+type ProjectLink = {
   label: string;
   href: string;
 };
@@ -14,7 +14,7 @@ export type Project = {
   links: ProjectLink[];
 };
 
-export type SkillCard = {
+type SkillCard = {
   title: string;
   problem: string;
   approach: string;
