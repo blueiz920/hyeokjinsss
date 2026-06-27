@@ -1,15 +1,5 @@
-export const splitTextPolicy = {
-  strategy: "no-runtime-splitting",
-  rationale:
-    "Avoid runtime split-text for performance. Use static markup or CSS-only emphasis.",
-  exceptions: {
-    allowIntroCharSplit:
-      "Allowed only for short hero headings when reduced-motion is false. Must revert on cleanup.",
-  },
-} as const;
-
 // 예외적으로 허용하는 split 함수
-export type SplitResult = { chars: HTMLElement[]; revert: () => void };
+type SplitResult = { chars: HTMLElement[]; revert: () => void };
 
 type SplitTextToCharsOptions = {
   inheritClassFromSelector?: Array<{ className: string; selector: string }>;

@@ -1,10 +1,4 @@
-export const mediaPolicy = {
-  prefersReducedMotion: "Honor OS-level reduced-motion and soften scrub distances.",
-  maxPinnedSections: 2,
-  allowedProperties: ["transform", "opacity"],
-} as const;
-
-export type MotionProfile = {
+type MotionProfile = {
   density: number;   // 배경 아이콘 개수(대략)
   drift: number;     // 배경 이동량(px)
   blurMax: number;   // px (가능하면 reduced면 0)
