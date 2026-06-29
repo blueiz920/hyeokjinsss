@@ -1,23 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 
 export const ScrollProgress = () => {
   const [progress, setProgress] = useState(0);
+  const progressRafIdRef = useRef<number | null>(null);
   const { projects } = useScrollIndicators();
 
   useEffect(() => {
-    const handleScroll = () => {
+    const updateProgress = () => {
       const scrollTop = window.scrollY;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const next = maxScroll > 0 ? scrollTop / maxScroll : 0;
       setProgress(next);
     };
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const scheduleProgressUpdate = () => {
+      if (progressRafIdRef.current !== null) return;
+
+      // 스크롤 이벤트가 몰릴 수 있어서 프레임당 한 번만 진행률을 계산함.
+      progressRafIdRef.current = window.requestAnimationFrame(() => {
+        progressRafIdRef.current = null;
+        updateProgress();
+      });
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", scheduleProgressUpdate, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", scheduleProgressUpdate);
+      if (progressRafIdRef.current !== null) {
+        window.cancelAnimationFrame(progressRafIdRef.current);
+        progressRafIdRef.current = null;
+      }
+    };
   }, []);
 
   const total = projects.total;
