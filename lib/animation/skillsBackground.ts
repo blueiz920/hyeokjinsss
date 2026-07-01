@@ -159,7 +159,7 @@ const clearCardVars = (cards: HTMLElement[]) => {
   });
 };
 
-const collectRevealTargets = (
+const getRevealTargets = (
   activeSvg: SVGSVGElement,
   trigger: HTMLElement,
 ): RevealTargets => ({
@@ -187,7 +187,7 @@ const collectRevealTargets = (
   ),
 });
 
-const groupRevealTargets = ({
+const splitRevealTargets = ({
   drawPaths,
   fadePaths,
 }: RevealTargets): RevealTargetGroups => ({
@@ -342,7 +342,7 @@ const createRunnerTimeline = (
   return timeline;
 };
 
-const setupRunnerTimelines = (
+const createRunnerTimelines = (
   gsap: GsapInstance,
   activeSvg: SVGSVGElement,
   options?: RunnerTimelineOptions,
@@ -357,7 +357,7 @@ const setupRunnerTimelines = (
   });
 };
 
-const setupParallaxTimeline = ({
+const createParallaxTimeline = ({
   gsap,
   isMobile,
   targets,
@@ -407,7 +407,7 @@ const setupParallaxTimeline = ({
   return timeline;
 };
 
-const setFinalActiveState = (
+const applyActiveState = (
   gsap: GsapInstance,
   root: HTMLElement,
   trigger: HTMLElement,
@@ -427,7 +427,7 @@ const setFinalActiveState = (
   });
 };
 
-const setRevealInitialState = (
+const setRevealStartState = (
   timeline: GsapTimeline,
   root: HTMLElement,
   { cards, dotTrains, drawPaths, fadePaths, glowPaths, nodes }: RevealTargets,
@@ -457,7 +457,7 @@ const setRevealInitialState = (
   }, undefined, 0);
 };
 
-const addFadeRailReveal = (
+const addFadingRails = (
   timeline: GsapTimeline,
   {
     atmosphericFadeGlowPaths,
@@ -522,7 +522,7 @@ const addFadeRailReveal = (
   );
 };
 
-const addRailDrawAndGlowReveal = (
+const addDrawingRails = (
   timeline: GsapTimeline,
   { primaryDrawPaths, secondaryDrawPaths }: RailDrawTargets,
   { primaryGlowPaths, secondaryGlowPaths }: GlowRevealTargets,
@@ -602,7 +602,7 @@ const addRailDrawAndGlowReveal = (
   );
 };
 
-const addNodeAndDotReveal = (
+const addNodeSparks = (
   timeline: GsapTimeline,
   { dotTrains, nodes }: NodeAndDotRevealTargets,
 ) => {
@@ -644,7 +644,7 @@ const addNodeAndDotReveal = (
   );
 };
 
-const addCardActivationReveal = (
+const addCardIgnite = (
   timeline: GsapTimeline,
   { cards }: CardRevealTargets,
 ) => {
@@ -729,7 +729,7 @@ const addCardActivationReveal = (
   );
 };
 
-const scheduleRunnerStart = (
+const queueRunnerStart = (
   timeline: GsapTimeline,
   runnerTimelines: GsapTimeline[],
 ) => {
@@ -746,13 +746,13 @@ const createRevealTimeline = ({
   runnerTimelines,
   trigger,
 }: RevealTimelineOptions) => {
-  const targets = collectRevealTargets(activeSvg, trigger);
-  const groups = groupRevealTargets(targets);
+  const targets = getRevealTargets(activeSvg, trigger);
+  const groups = splitRevealTargets(targets);
   const timeline = gsap.timeline({
     paused: true,
     onComplete: () => {
       onComplete();
-      setFinalActiveState(gsap, root, trigger, activeSvg);
+      applyActiveState(gsap, root, trigger, activeSvg);
       clearRevealCompletionStyles(gsap, targets);
     },
   }) as GsapTimeline;
@@ -760,12 +760,12 @@ const createRevealTimeline = ({
   // 전체 점등 속도만 늦추려고 timeline 자체 속도를 조정함.
   timeline.timeScale(1 / REVEAL_TIME_SCALE);
 
-  setRevealInitialState(timeline, root, targets);
-  addFadeRailReveal(timeline, groups);
-  addRailDrawAndGlowReveal(timeline, groups, targets);
-  addNodeAndDotReveal(timeline, targets);
-  addCardActivationReveal(timeline, targets);
-  scheduleRunnerStart(timeline, runnerTimelines);
+  setRevealStartState(timeline, root, targets);
+  addFadingRails(timeline, groups);
+  addDrawingRails(timeline, groups, targets);
+  addNodeSparks(timeline, targets);
+  addCardIgnite(timeline, targets);
+  queueRunnerStart(timeline, runnerTimelines);
 
   return timeline;
 };
@@ -819,11 +819,11 @@ export const initSkillsBackgroundMotion = async ({
     // 이전 브레이크포인트의 parallax transform을 지우려고 active target을 저장함.
     activeParallaxTargets = getParallaxTargets(root, activeSvg);
 
-    const runnerTimelines = setupRunnerTimelines(gsap, activeSvg, {
+    const runnerTimelines = createRunnerTimelines(gsap, activeSvg, {
       paused: true,
     });
     // parallax는 ScrollTrigger 하나에 묶어서 중복 trigger 생성을 막음.
-    const parallaxTimeline = setupParallaxTimeline({
+    const parallaxTimeline = createParallaxTimeline({
       gsap,
       isMobile: mobileMedia.matches,
       targets: activeParallaxTargets,
@@ -831,7 +831,7 @@ export const initSkillsBackgroundMotion = async ({
     });
 
     if (hasRevealed) {
-      setFinalActiveState(gsap, root, trigger, activeSvg);
+      applyActiveState(gsap, root, trigger, activeSvg);
       runnerTimelines.forEach((runnerTimeline) => runnerTimeline.play());
       activeTimelines = [...runnerTimelines, parallaxTimeline];
       activeTriggers = [];
