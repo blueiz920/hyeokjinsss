@@ -2,6 +2,11 @@
 
 import { type CSSProperties, type RefObject, useEffect, useState } from "react";
 import { getIntroMaskRect } from "@/lib/motion/introMask";
+import {
+  canUseCssMask,
+  createPhraseMask,
+  type PhraseMaskBox,
+} from "@/lib/motion/introPhraseMask";
 
 type IntroPhraseTextureOverlayProps = {
   disabled: boolean;
@@ -12,62 +17,12 @@ type IntroPhraseTextureOverlayProps = {
   src: string;
 };
 
-type TextureMaskState = {
-  height: number;
-  left: number;
-  maskImage: string;
-  top: number;
-  width: number;
-};
-
 const MIN_VIEWPORT_WIDTH = 768;
 const INITIAL_RECT_TRACK_MS = 1000;
 const RESIZE_RECT_TRACK_MS = 180;
 const RECT_EPSILON = 0.1;
 const INTRO_REST_SCROLL_EPSILON = 2;
 const SCROLL_REST_RECT_TRACK_MS = 1000;
-
-const escapeXml = (value: string) =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-
-const getMaskSupport = () =>
-  typeof CSS !== "undefined" &&
-  (CSS.supports("mask-image", "linear-gradient(#000, #000)") ||
-    CSS.supports("-webkit-mask-image", "linear-gradient(#000, #000)"));
-
-const createTextMaskImage = (
-  heading: HTMLElement,
-  host: HTMLElement,
-  phrase: string,
-  width: number,
-  height: number,
-) => {
-  const style = window.getComputedStyle(heading);
-  const hostStyle = window.getComputedStyle(host);
-  const fontSize = Number.parseFloat(style.fontSize);
-  const fontFamily = escapeXml(style.fontFamily);
-  const fontWeight = escapeXml(style.fontWeight);
-  const escapedPhrase = escapeXml(phrase);
-  const maskYOffset = Number.parseFloat(
-    hostStyle.getPropertyValue("--intro-phrase-mask-y") || "0",
-  );
-  const baselineY = height * 0.52 + (Number.isFinite(maskYOffset) ? maskYOffset : 0);
-  const textLength = Math.max(1, width);
-
-  const svg = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`,
-    `<text x="${width / 2}" y="${baselineY}" text-anchor="middle" dominant-baseline="central"`,
-    ` font-family="${fontFamily}" font-weight="${fontWeight}" font-size="${fontSize}"`,
-    ` textLength="${textLength}" lengthAdjust="spacing" fill="white">${escapedPhrase}</text>`,
-    "</svg>",
-  ].join("");
-
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-};
 
 export const IntroPhraseTextureOverlay = ({
   disabled,
@@ -78,7 +33,7 @@ export const IntroPhraseTextureOverlay = ({
   src,
 }: IntroPhraseTextureOverlayProps) => {
   const [isDesktopLike, setIsDesktopLike] = useState(false);
-  const [maskState, setMaskState] = useState<TextureMaskState | null>(null);
+  const [maskState, setMaskState] = useState<PhraseMaskBox | null>(null);
 
   useEffect(() => {
     if (disabled || typeof window === "undefined") return;
@@ -95,7 +50,7 @@ export const IntroPhraseTextureOverlay = ({
   }, [disabled]);
 
   useEffect(() => {
-    if (disabled || !isDesktopLike || typeof window === "undefined" || !getMaskSupport()) {
+    if (disabled || !isDesktopLike || typeof window === "undefined" || !canUseCssMask()) {
       return;
     }
 
@@ -103,7 +58,7 @@ export const IntroPhraseTextureOverlay = ({
     let rafId: number | null = null;
     let scrollRetryRafId: number | null = null;
     let trackUntil = 0;
-    let lastState: TextureMaskState | null = null;
+    let lastState: PhraseMaskBox | null = null;
 
     const canMeasureMask = () => {
       if (document.visibilityState === "hidden") return false;
@@ -111,7 +66,7 @@ export const IntroPhraseTextureOverlay = ({
       return window.scrollY <= INTRO_REST_SCROLL_EPSILON;
     };
 
-    const hasRectChanged = (nextState: TextureMaskState) =>
+    const hasRectChanged = (nextState: PhraseMaskBox) =>
       !lastState ||
       Math.abs(lastState.height - nextState.height) > RECT_EPSILON ||
       Math.abs(lastState.left - nextState.left) > RECT_EPSILON ||
@@ -144,7 +99,7 @@ export const IntroPhraseTextureOverlay = ({
       const nextState = {
         height: rect.height,
         left: rect.left - hostRect.left,
-        maskImage: createTextMaskImage(heading, host, phrase, rect.width, rect.height),
+        maskImage: createPhraseMask(heading, host, phrase, rect.width, rect.height),
         top: rect.top - hostRect.top,
         width: rect.width,
       };
