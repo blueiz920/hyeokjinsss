@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
-import { IntroMaskDebugBox } from "@/components/sections/IntroMaskDebugBox";
 import { IntroPhraseTextureOverlay } from "@/components/sections/IntroPhraseTextureOverlay";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
@@ -167,7 +166,6 @@ export const Intro = () => {
             src={INTRO_PHRASE_TEXTURE_SRC}
           />
         </div>
-        <IntroMaskDebugBox disabled={!hasIntroMaskPhrase} headingRef={headingRef} />
 
         <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>
           {portfolio.introSubhead}
