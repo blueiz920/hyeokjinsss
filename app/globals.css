@@ -148,20 +148,6 @@ html::-webkit-scrollbar {
 }
   }
 
-  /* .intro-title[data-intro-mask-debug="true"] .intro-title-mask-char {
-    outline: 1px solid rgba(248, 113, 113, 0.72);
-    outline-offset: 1px;
-  }
-
-  .intro-mask-debug-box {
-    position: fixed;
-    z-index: 60;
-    pointer-events: none;
-    border: 1px solid rgba(56, 189, 248, 0.95);
-    background: rgba(56, 189, 248, 0.08);
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.5);
-  } */
-
   .intro-phrase-texture-layer {
     position: absolute;
     display: block;

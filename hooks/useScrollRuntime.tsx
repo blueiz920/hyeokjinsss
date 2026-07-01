@@ -2,21 +2,17 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import { useReducedMotion } from "./useReducedMotion";
 import { loadGsap } from "@/lib/gsap/loadGsap";
 import Lenis from "lenis";
 
 type ScrollRuntimeValue = {
-  lenisEnabled: boolean;
   prefersReducedMotion: boolean;
-  toggleLenis: () => void;
 };
 
 const ScrollRuntimeContext = createContext<ScrollRuntimeValue | null>(null);
@@ -25,15 +21,10 @@ type LenisInstance = InstanceType<typeof Lenis>;
 
 export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
   const prefersReducedMotion = useReducedMotion();
-  const [lenisEnabled, setLenisEnabled] = useState(true);
 
   const lenisRef = useRef<LenisInstance | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const removeRefreshListenerRef = useRef<(() => void) | null>(null);
-
-  const toggleLenis = useCallback(() => {
-    setLenisEnabled((prev) => !prev);
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,9 +55,9 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
       const { ScrollTrigger } = await loadGsap();
       if (cancelled) return;
 
-      // 항상 같은 스크롤러(문서)로 통일: Lenis ON/OFF 상관없이 안정적
+      // 항상 같은 스크롤러(문서)로 통일해서 ScrollTrigger 기준을 고정함.
       const scrollerEl = document.documentElement;
-      const shouldUseLenis = lenisEnabled && !prefersReducedMotion;
+      const shouldUseLenis = !prefersReducedMotion;
       ScrollTrigger.defaults({ scroller: scrollerEl });
 
       // scrollerProxy는 "Lenis가 있으면 Lenis로", 없으면 native로" 동작하도록 안전하게 구성
@@ -151,11 +142,11 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
       cancelled = true;
       cleanup();
     };
-  }, [lenisEnabled, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   const value = useMemo(
-    () => ({ lenisEnabled, prefersReducedMotion, toggleLenis }),
-    [lenisEnabled, prefersReducedMotion, toggleLenis],
+    () => ({ prefersReducedMotion }),
+    [prefersReducedMotion],
   );
 
   return <ScrollRuntimeContext.Provider value={value}>{children}</ScrollRuntimeContext.Provider>;

@@ -13,16 +13,6 @@ export default function Home() {
       <Header />
       <main id="content" className="pt-13">
         <Intro />
-        {/* <section className="breather">
-          <Container className="text-center">
-            <p className="text-sm uppercase tracking-[0.4em] text-white/50">
-              Narrative pace
-            </p>
-            <p className="mt-4 text-lg text-white/70">
-              Every pin is intentional. Between them, I let the story breathe.
-            </p>
-          </Container>
-        </section> */}
         <ProjectReveal />
         <section className="breather">
           <Container className="text-center">

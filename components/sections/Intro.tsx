@@ -141,7 +141,6 @@ export const Intro = () => {
             id="intro-title"
             ref={headingRef}
             className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
-            data-intro-mask-debug={process.env.NODE_ENV === "development" ? "true" : undefined}
           >
             {hasIntroMaskPhrase ? (
               <>
