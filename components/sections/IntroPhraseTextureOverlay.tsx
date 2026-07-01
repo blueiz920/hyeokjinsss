@@ -24,6 +24,8 @@ const MIN_VIEWPORT_WIDTH = 768;
 const INITIAL_RECT_TRACK_MS = 1000;
 const RESIZE_RECT_TRACK_MS = 180;
 const RECT_EPSILON = 0.1;
+const INTRO_REST_SCROLL_EPSILON = 2;
+const SCROLL_REST_RECT_TRACK_MS = 1000;
 
 const escapeXml = (value: string) =>
   value
@@ -99,10 +101,17 @@ export const IntroPhraseTextureOverlay = ({
 
     let alive = true;
     let rafId: number | null = null;
+    let scrollRetryRafId: number | null = null;
     let trackUntil = 0;
     let lastState: TextureMaskState | null = null;
 
-    const hasStateChanged = (nextState: TextureMaskState) =>
+    const canMeasureMask = () => {
+      if (document.visibilityState === "hidden") return false;
+
+      return window.scrollY <= INTRO_REST_SCROLL_EPSILON;
+    };
+
+    const hasRectChanged = (nextState: TextureMaskState) =>
       !lastState ||
       Math.abs(lastState.height - nextState.height) > RECT_EPSILON ||
       Math.abs(lastState.left - nextState.left) > RECT_EPSILON ||
@@ -110,22 +119,23 @@ export const IntroPhraseTextureOverlay = ({
       Math.abs(lastState.top - nextState.top) > RECT_EPSILON ||
       Math.abs(lastState.width - nextState.width) > RECT_EPSILON;
 
-    const clearMaskState = () => {
+    const resetMask = () => {
       if (lastState === null) return;
 
       lastState = null;
       setMaskState(null);
     };
 
-    const updateMaskState = () => {
+    const measureMask = () => {
       if (!alive) return;
+      if (!canMeasureMask()) return;
 
       const heading = headingRef.current;
       const host = hostRef.current;
       const rect = heading ? getIntroMaskRect(heading) : null;
 
       if (!heading || !host || !rect) {
-        clearMaskState();
+        resetMask();
         return;
       }
 
@@ -139,51 +149,63 @@ export const IntroPhraseTextureOverlay = ({
         width: rect.width,
       };
 
-      if (hasStateChanged(nextState)) {
+      if (hasRectChanged(nextState)) {
         lastState = nextState;
         setMaskState(nextState);
         onReady?.();
       }
     };
 
-    const trackRect = (now: number) => {
+    const tick = (now: number) => {
       if (!alive) return;
 
-      // H1 split 직후 기준점이 바뀔 수 있어서 초기와 resize 직후에만 위치를 다시 맞춤.
-      if (document.visibilityState !== "hidden") {
-        updateMaskState();
-      }
+      // 스크롤로 글자가 흩어진 상태에서는 잘못된 rect를 저장하지 않음.
+      measureMask();
 
       if (now < trackUntil) {
-        rafId = window.requestAnimationFrame(trackRect);
+        rafId = window.requestAnimationFrame(tick);
         return;
       }
 
       rafId = null;
     };
 
-    const startRectTracking = (duration: number) => {
+    const trackFor = (duration: number) => {
       if (!alive) return;
 
-      updateMaskState();
+      measureMask();
       trackUntil = Math.max(trackUntil, window.performance.now() + duration);
 
       if (rafId === null) {
-        rafId = window.requestAnimationFrame(trackRect);
+        rafId = window.requestAnimationFrame(tick);
       }
     };
-    const handleResize = () => startRectTracking(RESIZE_RECT_TRACK_MS);
 
-    startRectTracking(INITIAL_RECT_TRACK_MS);
+    const handleResize = () => trackFor(RESIZE_RECT_TRACK_MS);
+    const handleScroll = () => {
+      if (scrollRetryRafId !== null || !canMeasureMask()) return;
+
+      scrollRetryRafId = window.requestAnimationFrame(() => {
+        scrollRetryRafId = null;
+        trackFor(SCROLL_REST_RECT_TRACK_MS);
+      });
+    };
+
+    trackFor(INITIAL_RECT_TRACK_MS);
     window.addEventListener("resize", handleResize);
-    void document.fonts?.ready.then(() => startRectTracking(RESIZE_RECT_TRACK_MS));
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    void document.fonts?.ready.then(() => trackFor(RESIZE_RECT_TRACK_MS));
 
     return () => {
       alive = false;
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
+      if (scrollRetryRafId !== null) {
+        window.cancelAnimationFrame(scrollRetryRafId);
+      }
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [disabled, headingRef, hostRef, isDesktopLike, onReady, phrase]);
 
