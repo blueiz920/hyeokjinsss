@@ -20,7 +20,6 @@ type ScrollIndicatorsValue = {
   setProjectsActive: (active: boolean) => void;
   setProjectsStep: (step: number) => void;
   setProjectsTotal: (total: number) => void;
-  resetProjects: () => void;
 };
 
 const ScrollIndicatorsContext = createContext<ScrollIndicatorsValue | null>(null);
@@ -72,19 +71,14 @@ export const ScrollIndicatorsProvider = ({
     });
   }, []);
 
-  const resetProjects = useCallback(() => {
-    setProjects({ active: false, step: 0, total: 0, everActive: false });
-  }, []);
-
   const value = useMemo(
     () => ({
       projects,
       setProjectsActive,
       setProjectsStep,
       setProjectsTotal,
-      resetProjects,
     }),
-    [projects, setProjectsActive, setProjectsStep, setProjectsTotal, resetProjects],
+    [projects, setProjectsActive, setProjectsStep, setProjectsTotal],
   );
 
   return (
