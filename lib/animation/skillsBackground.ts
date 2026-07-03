@@ -80,7 +80,7 @@ type CardRevealTargets = Pick<RevealTargets, "cards">;
 
 const MOBILE_QUERY = "(max-width: 767px)";
 
-const getNumber = (value: string | undefined, fallback: number) => {
+const parseRunnerNumber = (value: string | undefined, fallback: number) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
@@ -290,8 +290,8 @@ const createRunnerTimeline = (
   const path = getRunnerPath(activeSvg, pathKey);
   if (!path) return null;
 
-  const duration = getNumber(runner.dataset.runnerDuration, 12);
-  const offset = getNumber(runner.dataset.runnerOffset, 0);
+  const duration = parseRunnerNumber(runner.dataset.runnerDuration, 12);
+  const offset = parseRunnerNumber(runner.dataset.runnerOffset, 0);
   const fadeDuration = Math.min(1.2, duration * 0.14);
   const timeline = gsap.timeline({ paused, repeat: -1 }) as GsapTimeline;
 
@@ -457,6 +457,7 @@ const setRevealStartState = (
   }, undefined, 0);
 };
 
+// 레일을 먼저 희미하게 띄우고 낮은 밝기로 안정시킨다.
 const addFadingRails = (
   timeline: GsapTimeline,
   {
@@ -522,6 +523,7 @@ const addFadingRails = (
   );
 };
 
+// 선을 따라 그리며 글로우가 잠깐 튀게 한다.
 const addDrawingRails = (
   timeline: GsapTimeline,
   { primaryDrawPaths, secondaryDrawPaths }: RailDrawTargets,
@@ -602,6 +604,7 @@ const addDrawingRails = (
   );
 };
 
+// 노드를 짧게 튕긴 뒤 점 흐름을 드러낸다.
 const addNodeSparks = (
   timeline: GsapTimeline,
   { dotTrains, nodes }: NodeAndDotRevealTargets,
@@ -644,7 +647,8 @@ const addNodeSparks = (
   );
 };
 
-const addCardIgnite = (
+// 카드에 짧은 scan 리듬을 넣고 점등 상태로 넘긴다.
+const addCardReveal = (
   timeline: GsapTimeline,
   { cards }: CardRevealTargets,
 ) => {
@@ -729,6 +733,7 @@ const addCardIgnite = (
   );
 };
 
+// reveal 중간에 runner 타임라인을 재생 예약한다.
 const queueRunnerStart = (
   timeline: GsapTimeline,
   runnerTimelines: GsapTimeline[],
@@ -764,7 +769,7 @@ const createRevealTimeline = ({
   addFadingRails(timeline, groups);
   addDrawingRails(timeline, groups, targets);
   addNodeSparks(timeline, targets);
-  addCardIgnite(timeline, targets);
+  addCardReveal(timeline, targets);
   queueRunnerStart(timeline, runnerTimelines);
 
   return timeline;
