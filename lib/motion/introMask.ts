@@ -8,7 +8,8 @@ export type IntroMaskRect = {
 const INTRO_MASK_ELEMENT_SELECTOR =
   ".intro-title-mask-char, [data-intro-mask-phrase-anchor]";
 
-export const getIntroMaskRect = (heading: HTMLElement): IntroMaskRect | null => {
+// 인트로 강조 문구를 감싸는 전체 화면 좌표를 계산함.
+export const measureIntroMask = (heading: HTMLElement): IntroMaskRect | null => {
   const rects = [...heading.querySelectorAll<HTMLElement>(INTRO_MASK_ELEMENT_SELECTOR)]
     .map((element) => element.getBoundingClientRect())
     .filter((rect) => rect.width > 0 && rect.height > 0);

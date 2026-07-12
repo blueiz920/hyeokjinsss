@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
-import { IntroPhraseTextureOverlay } from "@/components/sections/IntroPhraseTextureOverlay";
+import { IntroTextureOverlay } from "@/components/sections/IntroTextureOverlay";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
@@ -156,7 +156,7 @@ export const Intro = () => {
               portfolio.introHeadline
             )}
           </h1>
-          <IntroPhraseTextureOverlay
+          <IntroTextureOverlay
             disabled={!hasIntroMaskPhrase || prefersReducedMotion}
             headingRef={headingRef}
             hostRef={titleShellRef}

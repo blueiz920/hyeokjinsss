@@ -6,6 +6,7 @@ export type PhraseMaskBox = {
   width: number;
 };
 
+// 문구와 폰트 값을 SVG에 안전하게 넣을 수 있도록 이스케이프함.
 const escapeSvgText = (value: string) =>
   value
     .replaceAll("&", "&amp;")
@@ -13,11 +14,13 @@ const escapeSvgText = (value: string) =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 
-export const canUseCssMask = () =>
+// 현재 브라우저가 표준 또는 WebKit CSS mask를 지원하는지 확인함.
+export const supportsCssMask = () =>
   typeof CSS !== "undefined" &&
   (CSS.supports("mask-image", "linear-gradient(#000, #000)") ||
     CSS.supports("-webkit-mask-image", "linear-gradient(#000, #000)"));
 
+// 문구 모양의 SVG data URL을 만들어 CSS mask 값으로 반환함.
 export const createPhraseMask = (
   heading: HTMLElement,
   host: HTMLElement,

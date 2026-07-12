@@ -1,9 +1,9 @@
 "use client";
 
 import { type CSSProperties, type RefObject } from "react";
-import { useIntroPhraseMask } from "@/hooks/useIntroPhraseMask";
+import { usePhraseMask } from "@/hooks/usePhraseMask";
 
-type IntroPhraseTextureOverlayProps = {
+type IntroTextureOverlayProps = {
   disabled: boolean;
   headingRef: RefObject<HTMLHeadingElement | null>;
   hostRef: RefObject<HTMLElement | null>;
@@ -12,15 +12,16 @@ type IntroPhraseTextureOverlayProps = {
   src: string;
 };
 
-export const IntroPhraseTextureOverlay = ({
+// 측정된 문구 영역에 비디오 텍스처 마스크를 렌더링함.
+export const IntroTextureOverlay = ({
   disabled,
   headingRef,
   hostRef,
   onReady,
   phrase,
   src,
-}: IntroPhraseTextureOverlayProps) => {
-  const { isDesktopLike, maskState } = useIntroPhraseMask({
+}: IntroTextureOverlayProps) => {
+  const { isDesktopLike, maskState } = usePhraseMask({
     disabled,
     headingRef,
     hostRef,
