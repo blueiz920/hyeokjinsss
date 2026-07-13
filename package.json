@@ -12,6 +12,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "verify:ci": "yarn test:coverage && yarn lint && yarn check-types && yarn build",
+    "verify:commit": "yarn test && yarn lint && yarn check-types",
     "verify:push": "yarn test:coverage && yarn lint && yarn check-types"
   },
   "dependencies": {
