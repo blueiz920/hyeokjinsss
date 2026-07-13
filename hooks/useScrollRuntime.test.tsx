@@ -1,5 +1,6 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import {
   afterAll,
   afterEach,
@@ -11,7 +12,10 @@ import {
   vi,
 } from "vitest";
 import { startScrollRuntime } from "@/lib/animation/scrollRuntime";
-import { ScrollRuntimeProvider } from "./useScrollRuntime";
+import {
+  ScrollRuntimeProvider,
+  useScrollRuntime,
+} from "./useScrollRuntime";
 
 type Deferred<T> = {
   promise: Promise<T>;
@@ -84,6 +88,12 @@ const scrollTrigger = {
 };
 
 let mountedRoots: Root[] = [];
+
+// 테스트 렌더에서 Context 값을 읽어 useScrollRuntime의 정상 반환 경로를 실행한다.
+const RuntimeProbe = () => {
+  const { prefersReducedMotion } = useScrollRuntime();
+  return <span>{String(prefersReducedMotion)}</span>;
+};
 
 beforeAll(() => {
   // React 19가 테스트 환경의 act 호출을 공식 지원하도록 전역 플래그를 활성화한다.
@@ -191,9 +201,16 @@ describe("ScrollRuntimeProvider", () => {
   it("reduced motion에서는 Lenis와 RAF 없이 네이티브 스크롤 상태를 사용한다", async () => {
     runtimeMocks.prefersReducedMotion = true;
     const root = await mountProvider();
+    const proxy = scrollTrigger.scrollerProxy.mock.calls[0][1] as {
+      scrollTop: (value?: number) => number;
+    };
+
+    proxy.scrollTop(120);
 
     expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
     expect(requestAnimationFrame).not.toHaveBeenCalled();
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 120);
+    expect(proxy.scrollTop()).toBe(window.scrollY);
     expect(document.documentElement.dataset.lenis).toBe("false");
     expect(scrollTrigger.refresh).toHaveBeenCalledOnce();
 
@@ -206,18 +223,34 @@ describe("ScrollRuntimeProvider", () => {
     const scrollListener = runtimeMocks.lenisOn.mock.calls[0][1] as () => void;
     const refreshListener = scrollTrigger.addEventListener.mock.calls[0][1] as () => void;
     const proxy = scrollTrigger.scrollerProxy.mock.calls[0][1] as {
+      getBoundingClientRect: () => {
+        height: number;
+        left: number;
+        top: number;
+        width: number;
+      };
       scrollTop: (value?: number) => number;
     };
+    const frameCallback = vi.mocked(requestAnimationFrame).mock.calls[0][0];
 
     scrollListener();
     refreshListener();
+    frameCallback(16);
     expect(proxy.scrollTop()).toBe(24);
     proxy.scrollTop(120);
 
     expect(scrollTrigger.update).toHaveBeenCalledOnce();
     expect(runtimeMocks.lenisResize).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisRaf).toHaveBeenCalledWith(16);
+    expect(requestAnimationFrame).toHaveBeenCalledTimes(2);
     expect(runtimeMocks.lenisScrollTo).toHaveBeenCalledWith(120, {
       immediate: true,
+    });
+    expect(proxy.getBoundingClientRect()).toEqual({
+      height: window.innerHeight,
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
     });
 
     await unmountProvider(root);
@@ -237,6 +270,24 @@ describe("ScrollRuntimeProvider", () => {
     expect(scrollTrigger.defaults).not.toHaveBeenCalled();
     expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
     expect(requestAnimationFrame).not.toHaveBeenCalled();
+  });
+
+  it("Provider 안에서는 현재 모션 정책을 반환한다", () => {
+    runtimeMocks.prefersReducedMotion = true;
+
+    const html = renderToString(
+      <ScrollRuntimeProvider>
+        <RuntimeProbe />
+      </ScrollRuntimeProvider>,
+    );
+
+    expect(html).toContain("true");
+  });
+
+  it("Provider 밖에서 사용하면 명확한 오류를 던진다", () => {
+    expect(() => renderToString(<RuntimeProbe />)).toThrow(
+      "useScrollRuntime must be used within ScrollRuntimeProvider",
+    );
   });
 });
 

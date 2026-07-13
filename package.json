@@ -5,10 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check-types": "tsc --noEmit",
     "start": "next start",
     "lint": "eslint",
+    "prepare": "husky",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "verify:push": "yarn test:coverage && yarn lint && yarn check-types"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
@@ -23,8 +27,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",
