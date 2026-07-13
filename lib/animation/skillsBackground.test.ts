@@ -31,9 +31,21 @@ type TimelineMock = ReturnType<typeof createTimelineMock>;
 
 type MotionHarness = {
   parallaxTimelines: TimelineMock[];
+  revealOptions: RevealOptions[];
   revealTimelines: TimelineMock[];
+  revealTriggerOptions: RevealTriggerOptions[];
   revealTriggers: Array<{ kill: ReturnType<typeof vi.fn> }>;
   runnerGroups: TimelineMock[][];
+};
+
+type RevealOptions = {
+  activeSvg: SVGSVGElement;
+  onComplete: () => void;
+  onRunnerStart: () => void;
+};
+
+type RevealTriggerOptions = {
+  onEnter: () => void;
 };
 
 type MediaMock = {
@@ -105,7 +117,9 @@ function createSkillsDom() {
 // GSAP 하위 모듈이 만든 자원을 세대별로 모아 cleanup 대상을 검증한다.
 function createMotionHarness(): MotionHarness {
   const parallaxTimelines: TimelineMock[] = [];
+  const revealOptions: RevealOptions[] = [];
   const revealTimelines: TimelineMock[] = [];
+  const revealTriggerOptions: RevealTriggerOptions[] = [];
   const revealTriggers: Array<{ kill: ReturnType<typeof vi.fn> }> = [];
   const runnerGroups: TimelineMock[][] = [];
   const gsap = {
@@ -117,8 +131,9 @@ function createMotionHarness(): MotionHarness {
     }),
   };
   const ScrollTrigger = {
-    create: vi.fn(() => {
+    create: vi.fn((options: RevealTriggerOptions) => {
       const trigger = { kill: vi.fn() };
+      revealTriggerOptions.push(options);
       revealTriggers.push(trigger);
       return trigger;
     }),
@@ -129,8 +144,9 @@ function createMotionHarness(): MotionHarness {
     runnerGroups.push(timelines);
     return timelines;
   });
-  motionMocks.createRevealTimeline.mockImplementation(() => {
+  motionMocks.createRevealTimeline.mockImplementation((options: RevealOptions) => {
     const timeline = createTimelineMock();
+    revealOptions.push(options);
     revealTimelines.push(timeline);
     return timeline;
   });
@@ -138,7 +154,9 @@ function createMotionHarness(): MotionHarness {
 
   return {
     parallaxTimelines,
+    revealOptions,
     revealTimelines,
+    revealTriggerOptions,
     revealTriggers,
     runnerGroups,
   };
@@ -232,5 +250,102 @@ describe("initSkillsBackgroundMotion breakpoint lifecycle", () => {
       expect(timeline.scrollTrigger?.kill).toHaveBeenCalledOnce();
       expect(timeline.kill).toHaveBeenCalledOnce();
     });
+  });
+});
+
+describe("initSkillsBackgroundMotion motion policy", () => {
+  it("브라우저 밖에서는 자원을 만들지 않는 cleanup을 반환한다", async () => {
+    const root = document.createElement("div");
+    const trigger = document.createElement("section");
+    vi.stubGlobal("window", undefined);
+
+    const cleanup = await initSkillsBackgroundMotion({
+      prefersReducedMotion: false,
+      root,
+      trigger,
+    });
+
+    expect(motionMocks.loadGsap).not.toHaveBeenCalled();
+    expect(() => cleanup()).not.toThrow();
+  });
+
+  it("reduced motion에서는 정적 상태만 적용하고 GSAP을 로드하지 않는다", async () => {
+    const { root, trigger } = createSkillsDom();
+    const reducedCleanup = vi.fn();
+    const matchMedia = vi.fn();
+    motionMocks.applyReducedState.mockReturnValue(reducedCleanup);
+    vi.stubGlobal("matchMedia", matchMedia);
+
+    const cleanup = await initSkillsBackgroundMotion({
+      prefersReducedMotion: true,
+      root,
+      trigger,
+    });
+
+    expect(motionMocks.applyReducedState).toHaveBeenCalledWith(root, trigger);
+    expect(motionMocks.loadGsap).not.toHaveBeenCalled();
+    expect(matchMedia).not.toHaveBeenCalled();
+
+    cleanup();
+    expect(reducedCleanup).toHaveBeenCalledOnce();
+  });
+
+  it("reveal 완료 후 breakpoint가 바뀌면 활성 상태만 복원한다", async () => {
+    const { mobileSvg, root, trigger } = createSkillsDom();
+    const mediaMock = createMediaMock();
+    const harness = createMotionHarness();
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue(mediaMock.media));
+
+    const cleanup = await initSkillsBackgroundMotion({
+      prefersReducedMotion: false,
+      root,
+      trigger,
+    });
+
+    harness.revealOptions[0].onRunnerStart();
+    harness.revealTriggerOptions[0].onEnter();
+    harness.revealOptions[0].onComplete();
+
+    harness.runnerGroups[0].forEach((timeline) => {
+      expect(timeline.play).toHaveBeenCalledOnce();
+    });
+    expect(harness.revealTimelines[0].play).toHaveBeenCalledWith(0);
+
+    mediaMock.changeBreakpoint(true);
+
+    expect(motionMocks.createRevealTimeline).toHaveBeenCalledOnce();
+    expect(harness.revealTriggers).toHaveLength(1);
+    expect(motionMocks.applyActiveState).toHaveBeenCalledWith(
+      expect.anything(),
+      root,
+      trigger,
+      mobileSvg,
+    );
+    harness.runnerGroups[1].forEach((timeline) => {
+      expect(timeline.play).toHaveBeenCalledOnce();
+    });
+
+    cleanup();
+  });
+
+  it("활성 SVG가 없으면 모션 자원을 만들지 않고 안전하게 종료한다", async () => {
+    const root = document.createElement("div");
+    const trigger = document.createElement("section");
+    const mediaMock = createMediaMock();
+    const harness = createMotionHarness();
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue(mediaMock.media));
+
+    const cleanup = await initSkillsBackgroundMotion({
+      prefersReducedMotion: false,
+      root,
+      trigger,
+    });
+
+    expect(motionMocks.createRunnerTimelines).not.toHaveBeenCalled();
+    expect(motionMocks.createRevealTimeline).not.toHaveBeenCalled();
+    expect(harness.parallaxTimelines).toHaveLength(0);
+    expect(harness.revealTriggers).toHaveLength(0);
+
+    expect(() => cleanup()).not.toThrow();
   });
 });
