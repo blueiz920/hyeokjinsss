@@ -40,12 +40,14 @@ type ParallaxTimelineOptions = {
 
 const MOBILE_QUERY = "(max-width: 767px)";
 
-const getActiveSvg = (root: HTMLElement, isMobile: boolean) =>
+// 현재 breakpoint에 표시할 desktop 또는 mobile 회로 SVG를 선택한다.
+const selectActiveSvg = (root: HTMLElement, isMobile: boolean) =>
   root.querySelector<SVGSVGElement>(
     `[data-skills-bg-svg="${isMobile ? "mobile" : "desktop"}"]`,
   );
 
-const getParallaxTargets = (
+// 배경 parallax에 참여하는 레이어와 활성 SVG를 한 객체로 모은다.
+const collectParallaxTargets = (
   root: HTMLElement,
   activeSvg: SVGSVGElement,
 ): ParallaxTargets => ({
@@ -54,7 +56,8 @@ const getParallaxTargets = (
   activeSvg,
 });
 
-const getParallaxElements = ({
+// 선택 요소가 없는 레이어를 제외하고 GSAP에 전달할 대상만 반환한다.
+const listParallaxElements = ({
   grid,
   atmosphere,
   activeSvg,
@@ -67,18 +70,21 @@ const GRID_PARALLAX_X = 8;
 const ATMOSPHERE_PARALLAX_X = 24;
 const DESKTOP_SVG_PARALLAX_X = 38;
 const MOBILE_SVG_PARALLAX_X = 24;
+
+// parallax가 요소에 남긴 transform과 성능 힌트 스타일을 제거한다.
 const clearParallaxStyles = (
   gsap: GsapInstance,
   targets: ParallaxTargets | null,
 ) => {
   if (!targets) return;
 
-  gsap.set(getParallaxElements(targets), {
+  gsap.set(listParallaxElements(targets), {
     clearProps: "transform,willChange",
   });
 };
 
-const clearActiveMotionStyles = (
+// reveal, runner, parallax가 남긴 인라인 스타일을 한 번에 정리한다.
+const clearMotionStyles = (
   gsap: GsapInstance,
   root: HTMLElement,
   trigger: HTMLElement,
@@ -89,15 +95,18 @@ const clearActiveMotionStyles = (
   clearParallaxStyles(gsap, parallaxTargets);
 };
 
-const killScrollTriggers = (triggers: ScrollTriggerInstance[]) => {
+// timeline에 속하지 않고 별도로 생성된 ScrollTrigger를 종료한다.
+const killTriggers = (triggers: ScrollTriggerInstance[]) => {
   triggers.forEach((triggerInstance) => triggerInstance.kill());
 };
 
-const killTimeline = (timeline: GsapTimeline) => {
+// timeline과 timeline이 소유한 ScrollTrigger를 함께 종료한다.
+const killMotionTimeline = (timeline: GsapTimeline) => {
   timeline.scrollTrigger?.kill();
   timeline.kill();
 };
 
+// 활성 SVG와 배경 레이어를 같은 진행률로 움직이는 parallax를 만든다.
 const createParallaxTimeline = ({
   gsap,
   isMobile,
@@ -118,7 +127,7 @@ const createParallaxTimeline = ({
     },
   }) as GsapTimeline;
 
-  gsap.set(getParallaxElements(targets), { willChange: "transform" });
+  gsap.set(listParallaxElements(targets), { willChange: "transform" });
 
   if (grid) {
     timeline.fromTo(
@@ -148,6 +157,8 @@ const createParallaxTimeline = ({
   return timeline;
 };
 
+// 스킬 배경의 reveal, runner, parallax를 현재 모션 정책에 맞춰 초기화한다.
+// 반환한 cleanup은 breakpoint listener와 활성 GSAP 자원을 모두 정리한다.
 export const initSkillsBackgroundMotion = async ({
   root,
   trigger,
@@ -169,24 +180,26 @@ export const initSkillsBackgroundMotion = async ({
   let activeParallaxTargets: ParallaxTargets | null = null;
   let hasRevealed = false;
 
-  const killActiveMotion = () => {
-    killScrollTriggers(activeTriggers);
+  // 현재 breakpoint가 소유한 trigger, timeline, 인라인 스타일을 초기화한다.
+  const clearActiveMotion = () => {
+    killTriggers(activeTriggers);
     activeTriggers = [];
-    activeTimelines.forEach(killTimeline);
+    activeTimelines.forEach(killMotionTimeline);
     activeTimelines = [];
-    clearActiveMotionStyles(gsap, root, trigger, activeParallaxTargets);
+    clearMotionStyles(gsap, root, trigger, activeParallaxTargets);
     activeParallaxTargets = null;
   };
 
-  const setupActiveSvg = () => {
-    killActiveMotion();
+  // 이전 모션을 정리한 뒤 현재 breakpoint의 SVG를 기준으로 다시 구성한다.
+  const buildActiveMotion = () => {
+    clearActiveMotion();
 
     // 브레이크포인트 기준으로 보이는 SVG 하나만 잡아서 중복 runner를 막음.
-    const activeSvg = getActiveSvg(root, mobileMedia.matches);
+    const activeSvg = selectActiveSvg(root, mobileMedia.matches);
     if (!activeSvg) return;
 
     // 이전 브레이크포인트의 parallax transform을 지우려고 active target을 저장함.
-    activeParallaxTargets = getParallaxTargets(root, activeSvg);
+    activeParallaxTargets = collectParallaxTargets(root, activeSvg);
 
     const runnerTimelines = createRunnerTimelines(gsap, activeSvg, {
       paused: true,
@@ -233,16 +246,16 @@ export const initSkillsBackgroundMotion = async ({
     activeTriggers = [revealTrigger];
   };
 
-  const handleBreakpointChange = () => {
-    // 화면 크기 변화마다 재생성하지 않고 breakpoint가 바뀔 때만 다시 맞춤.
-    setupActiveSvg();
+  // media query 경계가 바뀔 때만 활성 SVG와 모션을 다시 구성한다.
+  const onBreakpointChange = () => {
+    buildActiveMotion();
   };
 
-  setupActiveSvg();
-  mobileMedia.addEventListener("change", handleBreakpointChange);
+  buildActiveMotion();
+  mobileMedia.addEventListener("change", onBreakpointChange);
 
   return () => {
-    mobileMedia.removeEventListener("change", handleBreakpointChange);
-    killActiveMotion();
+    mobileMedia.removeEventListener("change", onBreakpointChange);
+    clearActiveMotion();
   };
 };
