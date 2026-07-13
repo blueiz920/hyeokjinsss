@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { startScrollRuntime } from "@/lib/animation/scrollRuntime";
 import { ScrollRuntimeProvider } from "./useScrollRuntime";
 
 type Deferred<T> = {
@@ -236,5 +237,21 @@ describe("ScrollRuntimeProvider", () => {
     expect(scrollTrigger.defaults).not.toHaveBeenCalled();
     expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
     expect(requestAnimationFrame).not.toHaveBeenCalled();
+  });
+});
+
+describe("startScrollRuntime", () => {
+  it("dispose를 여러 번 호출해도 runtime 자원을 한 번만 정리한다", async () => {
+    const runtime = startScrollRuntime({ prefersReducedMotion: false });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    runtime.dispose();
+    runtime.dispose();
+
+    expect(cancelAnimationFrame).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisDestroy).toHaveBeenCalledOnce();
+    expect(scrollTrigger.removeEventListener).toHaveBeenCalledOnce();
   });
 });
