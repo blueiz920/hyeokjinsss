@@ -21,6 +21,11 @@ export const startScrollRuntime = ({
   let rafId: number | null = null;
   let removeRefreshListener: (() => void) | null = null;
 
+  // Lenis를 사용할 수 없는 경로에서 문서 상태를 네이티브 스크롤로 명시한다.
+  const enableNativeScroll = () => {
+    document.documentElement.dataset.lenis = "false";
+  };
+
   // 현재 runtime이 소유한 listener, RAF, Lenis를 역순으로 정리한다.
   const clearRuntime = () => {
     removeRefreshListener?.();
@@ -70,7 +75,7 @@ export const startScrollRuntime = ({
     });
 
     if (!shouldUseLenis) {
-      document.documentElement.dataset.lenis = "false";
+      enableNativeScroll();
       ScrollTrigger.refresh();
       return;
     }
@@ -111,6 +116,22 @@ export const startScrollRuntime = ({
     ScrollTrigger.refresh();
   };
 
+  // 비동기 초기화 실패를 runtime 내부에서 끝내고 네이티브 스크롤을 유지한다.
+  const setupSafely = async () => {
+    try {
+      await setupRuntime();
+    } catch (error) {
+      if (disposed) return;
+
+      clearRuntime();
+      enableNativeScroll();
+      console.error(
+        "Scroll runtime initialization failed; using native scrolling.",
+        error,
+      );
+    }
+  };
+
   // 여러 번 호출되어도 처음 한 번만 runtime 자원을 폐기한다.
   const disposeRuntime = () => {
     if (disposed) return;
@@ -119,7 +140,7 @@ export const startScrollRuntime = ({
     clearRuntime();
   };
 
-  void setupRuntime();
+  void setupSafely();
 
   return { dispose: disposeRuntime };
 };

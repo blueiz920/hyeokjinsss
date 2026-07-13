@@ -254,4 +254,26 @@ describe("startScrollRuntime", () => {
     expect(runtimeMocks.lenisDestroy).toHaveBeenCalledOnce();
     expect(scrollTrigger.removeEventListener).toHaveBeenCalledOnce();
   });
+
+  it("GSAP 로딩이 실패하면 오류를 남기고 네이티브 스크롤을 유지한다", async () => {
+    const loadError = new Error("chunk load failed");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    runtimeMocks.loadGsap.mockRejectedValue(loadError);
+
+    const runtime = startScrollRuntime({ prefersReducedMotion: false });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(document.documentElement.dataset.lenis).toBe("false");
+    expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
+    expect(requestAnimationFrame).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("native scrolling"),
+      loadError,
+    );
+
+    runtime.dispose();
+  });
 });
