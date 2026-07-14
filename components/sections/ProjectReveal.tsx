@@ -102,22 +102,18 @@ export const ProjectReveal = () => {
       threshold: 0,
     };
 
-    const sectionObserver = new IntersectionObserver(
-      syncProjectIndicator,
-      indicatorOptions,
-    );
-    const cardObserver = new IntersectionObserver(
+    // 같은 중앙 기준을 쓰므로 하나의 observer가 section과 모든 카드를 관찰한다.
+    const indicatorObserver = new IntersectionObserver(
       syncProjectIndicator,
       indicatorOptions,
     );
 
-    sectionObserver.observe(section);
-    projectCards.forEach((card) => cardObserver.observe(card));
+    indicatorObserver.observe(section);
+    projectCards.forEach((card) => indicatorObserver.observe(card));
     syncProjectIndicator();
 
     return () => {
-      sectionObserver.disconnect();
-      cardObserver.disconnect();
+      indicatorObserver.disconnect();
       setProjectsActive(false);
     };
   }, [setProjectsActive, setProjectsStep]);
