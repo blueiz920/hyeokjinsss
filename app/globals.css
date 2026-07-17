@@ -357,11 +357,15 @@ html::-webkit-scrollbar {
     z-index: 1;
   }
 
+  /*
+   * 초기화 도중 실패하면 GSAP의 inline 높이·모션 스타일이 남을 수 있다.
+   * static 상태에서만 해당 inline 속성을 덮어 정상적인 문서 흐름으로 복구한다.
+   */
   .skills-pin[data-layout="static"] {
     @apply pb-24;
     height: auto !important;
     max-height: none !important;
-    overflow: visible !important;
+    overflow: visible;
   }
 
   .skills-pin[data-layout="static"] .skills-track {
@@ -376,10 +380,10 @@ html::-webkit-scrollbar {
     width: 100%;
     height: auto;
     min-height: 200px;
-    transform: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    will-change: auto !important;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    will-change: auto;
   }
 
   .skills-bg {

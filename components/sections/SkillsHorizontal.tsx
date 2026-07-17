@@ -32,11 +32,11 @@ export const SkillsHorizontal = () => {
     const track = trackRef.current;
     if (!sectionRef.current || !pinFrame || !track) return;
 
-    let alive = true;
-    let destroy: (() => void) | null = null;
+    let isActive = true;
+    let cleanupMotion: (() => void) | null = null;
 
     // 가로 모션 초기화에 실패한 현재 effect만 정적 목록으로 복구한다.
-    // 성공한 현재 effect만 가로 배치로 복귀하고, 종료 후 성공한 자원은 즉시 정리한다.
+    // 종료된 effect의 늦은 결과는 상태를 바꾸지 않고 성공한 자원만 즉시 정리한다.
     (async () => {
       try {
         const cleanup = await initSkillsHorizontal({
@@ -45,14 +45,14 @@ export const SkillsHorizontal = () => {
           prefersReducedMotion,
         });
 
-        if (!alive) {
+        if (!isActive) {
           cleanup();
           return;
         }
-        destroy = cleanup;
+        cleanupMotion = cleanup;
         setLayoutMode("horizontal");
       } catch (error) {
-        if (!alive) return;
+        if (!isActive) return;
         setLayoutMode("static");
         console.error(
           "Skills horizontal motion failed; using the static layout.",
@@ -62,38 +62,38 @@ export const SkillsHorizontal = () => {
     })();
 
     return () => {
-      alive = false;
-      destroy?.();
+      isActive = false;
+      cleanupMotion?.();
     };
   }, [prefersReducedMotion]);
 
   useEffect(() => {
-    const root = backgroundRef.current;
-    const trigger = pinRef.current;
-    if (!root || !trigger) return;
+    const backgroundRoot = backgroundRef.current;
+    const pinFrame = pinRef.current;
+    if (!backgroundRoot || !pinFrame) return;
 
-    let alive = true;
-    let destroy: (() => void) | null = null;
+    let isActive = true;
+    let cleanupMotion: (() => void) | null = null;
 
     // 배경 모션 실패는 카드 레이아웃과 분리해 기본 비활성 배경으로 복구한다.
-    // 종료된 effect의 늦은 결과는 무시하고 성공한 자원만 즉시 정리한다.
+    // 종료된 effect의 늦은 실패는 기록하지 않고 성공한 자원만 즉시 정리한다.
     (async () => {
       try {
         const cleanup = await initSkillsBackgroundMotion({
-          root,
-          trigger,
+          root: backgroundRoot,
+          trigger: pinFrame,
           prefersReducedMotion,
         });
 
-        if (!alive) {
+        if (!isActive) {
           cleanup();
           return;
         }
 
-        destroy = cleanup;
+        cleanupMotion = cleanup;
       } catch (error) {
-        if (!alive) return;
-        root.dataset.circuitActive = "false";
+        if (!isActive) return;
+        backgroundRoot.dataset.circuitActive = "false";
         console.error(
           "Skills background motion failed; using the static background.",
           error,
@@ -102,8 +102,8 @@ export const SkillsHorizontal = () => {
     })();
 
     return () => {
-      alive = false;
-      destroy?.();
+      isActive = false;
+      cleanupMotion?.();
     };
   }, [prefersReducedMotion]);
 

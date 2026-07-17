@@ -13,8 +13,8 @@ import {
 import { SkillsHorizontal } from "./SkillsHorizontal";
 
 const skillsMocks = vi.hoisted(() => ({
-  initBackground: vi.fn(),
-  initHorizontal: vi.fn(),
+  initBackgroundMotion: vi.fn(),
+  initHorizontalMotion: vi.fn(),
   register: vi.fn(),
   unregister: vi.fn(),
 }));
@@ -44,11 +44,11 @@ vi.mock("@/hooks/useSectionRegistry", () => ({
 }));
 
 vi.mock("@/lib/animation/skillsBackground", () => ({
-  initSkillsBackgroundMotion: skillsMocks.initBackground,
+  initSkillsBackgroundMotion: skillsMocks.initBackgroundMotion,
 }));
 
 vi.mock("@/lib/animation/skillsHorizontal", () => ({
-  initSkillsHorizontal: skillsMocks.initHorizontal,
+  initSkillsHorizontal: skillsMocks.initHorizontalMotion,
 }));
 
 let mountedRoots: Root[] = [];
@@ -92,8 +92,12 @@ const unmountSkills = async (root: Root) => {
 beforeEach(() => {
   backgroundCleanup = vi.fn();
   horizontalCleanup = vi.fn();
-  skillsMocks.initBackground.mockReset().mockResolvedValue(backgroundCleanup);
-  skillsMocks.initHorizontal.mockReset().mockResolvedValue(horizontalCleanup);
+  skillsMocks.initBackgroundMotion
+    .mockReset()
+    .mockResolvedValue(backgroundCleanup);
+  skillsMocks.initHorizontalMotion
+    .mockReset()
+    .mockResolvedValue(horizontalCleanup);
 });
 
 afterEach(async () => {
@@ -122,7 +126,7 @@ describe("SkillsHorizontal motion fallback", () => {
 
   it("가로 모션 초기화 실패 시 정적 배치로 전환하고 배경은 유지한다", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    skillsMocks.initHorizontal.mockRejectedValue(
+    skillsMocks.initHorizontalMotion.mockRejectedValue(
       new Error("horizontal load failed"),
     );
 
@@ -131,7 +135,7 @@ describe("SkillsHorizontal motion fallback", () => {
     expect(
       container.querySelector(".skills-pin")?.getAttribute("data-layout"),
     ).toBe("static");
-    expect(skillsMocks.initBackground).toHaveBeenCalledOnce();
+    expect(skillsMocks.initBackgroundMotion).toHaveBeenCalledOnce();
 
     await unmountSkills(root);
 
@@ -140,7 +144,7 @@ describe("SkillsHorizontal motion fallback", () => {
 
   it("배경 모션 초기화 실패를 처리하고 가로 배치는 유지한다", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    skillsMocks.initBackground.mockRejectedValue(
+    skillsMocks.initBackgroundMotion.mockRejectedValue(
       new Error("background load failed"),
     );
 
