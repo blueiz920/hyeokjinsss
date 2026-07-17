@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { SkillsBackground } from "@/components/sections/SkillsBackground";
@@ -14,6 +14,9 @@ export const SkillsHorizontal = () => {
   const backgroundRef = useRef<HTMLDivElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const [layoutMode, setLayoutMode] = useState<"horizontal" | "static">(
+    "horizontal",
+  );
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -25,23 +28,37 @@ export const SkillsHorizontal = () => {
   }, [register, unregister]);
 
   useEffect(() => {
-    if (!sectionRef.current || !pinRef.current || !trackRef.current) return;
+    const pinFrame = pinRef.current;
+    const track = trackRef.current;
+    if (!sectionRef.current || !pinFrame || !track) return;
 
     let alive = true;
     let destroy: (() => void) | null = null;
 
+    // 가로 모션 초기화에 실패한 현재 effect만 정적 목록으로 복구한다.
+    // 성공한 현재 effect만 가로 배치로 복귀하고, 종료 후 성공한 자원은 즉시 정리한다.
     (async () => {
-      const d = await initSkillsHorizontal({
-        pinFrame: pinRef.current!,
-        track: trackRef.current!,
-        prefersReducedMotion,
-      });
+      try {
+        const cleanup = await initSkillsHorizontal({
+          pinFrame,
+          track,
+          prefersReducedMotion,
+        });
 
-      if (!alive) {
-        d();
-        return;
+        if (!alive) {
+          cleanup();
+          return;
+        }
+        destroy = cleanup;
+        setLayoutMode("horizontal");
+      } catch (error) {
+        if (!alive) return;
+        setLayoutMode("static");
+        console.error(
+          "Skills horizontal motion failed; using the static layout.",
+          error,
+        );
       }
-      destroy = d;
     })();
 
     return () => {
@@ -58,19 +75,30 @@ export const SkillsHorizontal = () => {
     let alive = true;
     let destroy: (() => void) | null = null;
 
+    // 배경 모션 실패는 카드 레이아웃과 분리해 기본 비활성 배경으로 복구한다.
+    // 종료된 effect의 늦은 결과는 무시하고 성공한 자원만 즉시 정리한다.
     (async () => {
-      const d = await initSkillsBackgroundMotion({
-        root,
-        trigger,
-        prefersReducedMotion,
-      });
+      try {
+        const cleanup = await initSkillsBackgroundMotion({
+          root,
+          trigger,
+          prefersReducedMotion,
+        });
 
-      if (!alive) {
-        d();
-        return;
+        if (!alive) {
+          cleanup();
+          return;
+        }
+
+        destroy = cleanup;
+      } catch (error) {
+        if (!alive) return;
+        root.dataset.circuitActive = "false";
+        console.error(
+          "Skills background motion failed; using the static background.",
+          error,
+        );
       }
-
-      destroy = d;
     })();
 
     return () => {
@@ -87,7 +115,11 @@ export const SkillsHorizontal = () => {
       className="section-padding relative overflow-hidden bg-neutral-950 text-white"
       aria-labelledby="skills-title"
     >
-      <div ref={pinRef} className="skills-pin relative z-10">
+      <div
+        ref={pinRef}
+        className="skills-pin relative z-10"
+        data-layout={layoutMode}
+      >
         <SkillsBackground ref={backgroundRef} />
 
         <Container className="relative z-10 space-y-6">

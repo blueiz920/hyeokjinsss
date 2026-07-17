@@ -357,6 +357,31 @@ html::-webkit-scrollbar {
     z-index: 1;
   }
 
+  .skills-pin[data-layout="static"] {
+    @apply pb-24;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .skills-pin[data-layout="static"] .skills-track {
+    @apply grid h-auto w-full max-w-6xl grid-cols-1 gap-6 px-6 md:grid-cols-2 md:px-16;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    will-change: auto !important;
+  }
+
+  .skills-pin[data-layout="static"] .skills-card {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    will-change: auto !important;
+  }
+
   .skills-bg {
     position: absolute;
     inset: 0;
