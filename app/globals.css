@@ -359,7 +359,7 @@ html::-webkit-scrollbar {
 
   /*
    * 초기화 도중 실패하면 GSAP의 inline 높이·모션 스타일이 남을 수 있다.
-   * static 상태에서만 해당 inline 속성을 덮어 정상적인 문서 흐름으로 복구한다.
+   * !important는 해당 inline 값을 이기기 위해 필요하며 static 상태에만 제한한다.
    */
   .skills-pin[data-layout="static"] {
     @apply pb-24;
