@@ -51,5 +51,10 @@ subagent-*
 # Local analysis artifacts
 .audit/
 
+# Local Superloopy artifacts
+/.superloopy/
+/docs/research/dennissnellenberg.com/
+/docs/design-references/dennissnellenberg.com/
+
 # Local guardrail notes
 lib/perf/guardrails.md
