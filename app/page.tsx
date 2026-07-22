@@ -25,8 +25,8 @@ export default function Home() {
           </Container>
         </section>
         <SkillsHorizontal />
-        <Footer />
       </main>
+      <Footer />
     </div>
   );
 }

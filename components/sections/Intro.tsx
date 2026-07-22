@@ -22,7 +22,7 @@ export const Intro = () => {
     : "";
 
   const { prefersReducedMotion } = useScrollRuntime();
-  const { register, unregister } = useSectionRegistry();
+  const { register, unregister, scrollTo } = useSectionRegistry();
   const shouldGateTitleTexture = hasIntroMaskPhrase && !prefersReducedMotion;
   const [isTitleTextureReady, setIsTitleTextureReady] = useState(!shouldGateTitleTexture);
 
@@ -169,6 +169,22 @@ export const Intro = () => {
         <p className="max-w-2xl text-lg text-white/70 md:text-xl" data-intro-item>
           {portfolio.introSubhead}
         </p>
+
+        <div className="flex flex-wrap gap-3" data-intro-item>
+          <button
+            type="button"
+            onClick={() => scrollTo("projects")}
+            className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+          >
+            프로젝트 보기
+          </button>
+          <a
+            href={`mailto:${portfolio.contactEmail}`}
+            className="rounded-full border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/60"
+          >
+            연락하기
+          </a>
+        </div>
 
         <div className="flex flex-wrap gap-3" data-intro-item>
           {portfolio.introHighlights.map((item) => (
