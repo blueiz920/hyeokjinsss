@@ -1,10 +1,52 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
+import { useScrollRuntime } from "@/hooks/useScrollRuntime";
+import { initFooterCurve } from "@/lib/animation/footerCurve";
 import { Container } from "./Container";
 
 export const Footer = () => {
+  const footerRef = useRef<HTMLElement | null>(null);
+  const curveRef = useRef<HTMLDivElement | null>(null);
+  const { prefersReducedMotion } = useScrollRuntime();
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    const curve = curveRef.current;
+    if (!footer || !curve || prefersReducedMotion) return;
+
+    let isActive = true;
+    let cleanupMotion: (() => void) | null = null;
+
+    void initFooterCurve({ footer, curve })
+      .then((cleanup) => {
+        if (!isActive) {
+          cleanup();
+          return;
+        }
+
+        cleanupMotion = cleanup;
+      })
+      .catch((error) => {
+        if (!isActive) return;
+        console.error(
+          "Footer curve motion failed; using the static curve.",
+          error,
+        );
+      });
+
+    return () => {
+      isActive = false;
+      cleanupMotion?.();
+    };
+  }, [prefersReducedMotion]);
+
   return (
-    <footer id="contact" className="site-footer">
-      <div className="site-footer-curve" aria-hidden="true" />
+    <footer ref={footerRef} id="contact" className="site-footer">
+      <div ref={curveRef} className="site-footer-curve" aria-hidden="true">
+        <div className="site-footer-curve-shape" />
+      </div>
 
       <Container className="relative z-10 pb-10 pt-20 md:pb-12 md:pt-28">
         <div className="space-y-8 md:space-y-10">
