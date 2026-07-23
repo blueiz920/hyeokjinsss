@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={pretendard.variable} suppressHydrationWarning>
+    <html lang="ko" className={pretendard.variable}>
       <body className="bg-neutral-950 font-sans text-white antialiased">
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>

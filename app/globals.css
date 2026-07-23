@@ -120,10 +120,6 @@ html::-webkit-scrollbar {
     cursor: wait;
   }
 
-  html[data-intro-skip="true"] .intro-loader {
-    display: none;
-  }
-
   .intro-loader {
     --intro-loader-bg: rgb(24 23 21);
     position: fixed;
