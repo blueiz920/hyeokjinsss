@@ -505,21 +505,23 @@ html::-webkit-scrollbar {
   }
 
   .project-desktop-preview-slide[data-project="moum-zip"] {
-    background: #6f9f92;
+    background: #925f64;
   }
 
   .project-desktop-preview-slide[data-project="k-festival"] {
-    background: #766fa3;
+    background: #47766c;
   }
 
   .project-desktop-preview-slide[data-project="yajoba"] {
-    background: #a76a49;
+    background: #526b94;
   }
 
   .project-desktop-preview-image {
     position: absolute;
-    inset: clamp(1.55rem, 2.4vw, 2.25rem);
+    inset: 50% clamp(1.55rem, 2.4vw, 2.25rem) auto;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
+    transform: translateY(-50%);
   }
 
   .project-desktop-preview-action {
