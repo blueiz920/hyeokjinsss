@@ -58,7 +58,7 @@ html::-webkit-scrollbar {
     height: 10vh;
     overflow: hidden;
     pointer-events: none;
-    transform: translateY(-100%);
+    transform: translateY(-1px);
     will-change: height;
   }
 
@@ -69,8 +69,8 @@ html::-webkit-scrollbar {
     width: 150%;
     height: 750%;
     border-radius: 50%;
-    background: #f3ede3;
-    transform: translateX(-50%);
+    background: rgb(10 10 10);
+    transform: translate(-50%, -86.666%);
   }
 
   @media (max-width: 720px) {
