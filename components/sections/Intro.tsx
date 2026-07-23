@@ -5,6 +5,7 @@ import { portfolio } from "@/data/portfolio";
 import { Container } from "@/components/layout/Container";
 import { IntroTextureOverlay } from "@/components/sections/IntroTextureOverlay";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
+import { waitIntroReady } from "@/lib/animation/introLoader";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
@@ -52,20 +53,26 @@ export const Intro = () => {
   useEffect(() => {
     if (!sectionRef.current) return;
 
+    const root = sectionRef.current;
     let alive = true;
     let destroy: (() => void) | null = null;
 
-    (async () => {
-      const d = await initIntroAnimation(sectionRef.current!, prefersReducedMotion);
-      if (!alive) {
-        d();
-        return;
-      }
-      destroy = d;
-    })();
+    const startAnimation = () => {
+      (async () => {
+        const dispose = await initIntroAnimation(root, prefersReducedMotion);
+        if (!alive) {
+          dispose();
+          return;
+        }
+        destroy = dispose;
+      })();
+    };
+
+    const stopWaiting = waitIntroReady(startAnimation);
 
     return () => {
       alive = false;
+      stopWaiting();
       destroy?.();
     };
   }, [prefersReducedMotion]);

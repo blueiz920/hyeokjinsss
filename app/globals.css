@@ -114,6 +114,107 @@ html::-webkit-scrollbar {
     @apply inline-flex w-full items-center justify-center rounded-full border border-neutral-950/25 px-6 py-4 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-950 hover:text-[#f3ede3] sm:w-fit;
   }
 
+  html[data-intro-loading="true"],
+  html[data-intro-loading="true"] body {
+    overflow: hidden;
+    cursor: wait;
+  }
+
+  html[data-intro-skip="true"] .intro-loader {
+    display: none;
+  }
+
+  .intro-loader {
+    --intro-loader-bg: rgb(24 23 21);
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    pointer-events: auto;
+  }
+
+  .intro-loader-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    background: var(--intro-loader-bg);
+    will-change: transform;
+  }
+
+  .intro-loader-words {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding-inline: 1.5rem;
+    color: #f3ede3;
+    text-align: center;
+    will-change: opacity;
+  }
+
+  .intro-loader-word {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    margin: 0;
+    font-size: clamp(2rem, 3.75vw, 3.375rem);
+    font-weight: 550;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .intro-loader-dot {
+    width: 0.16em;
+    height: 0.16em;
+    margin-top: 0.58em;
+    flex: none;
+    border-radius: 999px;
+    background: rgb(245 158 11);
+    box-shadow: 0 0 1.1em rgba(245, 158, 11, 0.38);
+  }
+
+  .intro-loader-curve {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 2;
+    height: 10vh;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateY(99%);
+    will-change: height;
+  }
+
+  .intro-loader-curve-shape {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 150%;
+    height: 750%;
+    border-radius: 50%;
+    background: var(--intro-loader-bg);
+    transform: translate(-50%, -86.666%);
+  }
+
+  @media (max-width: 539px) {
+    .intro-loader-curve {
+      height: 5vh;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-loader {
+      display: none;
+    }
+  }
+
   .intro-video-poster {
     background-image: url("/intro/intro-cinematic-poster.png");
     background-position: left top;

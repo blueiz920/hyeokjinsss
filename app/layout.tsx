@@ -6,6 +6,7 @@ import { SectionRegistryProvider } from "@/hooks/useSectionRegistry";
 import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
 import { PointerGlow } from "@/components/common/PointerGlow";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
+import { IntroLoader } from "@/components/layout/IntroLoader";
 import { siteConfig } from "@/data/site";
 
 const pretendard = localFont({
@@ -35,11 +36,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={pretendard.variable}>
+    <html lang="ko" className={pretendard.variable} suppressHydrationWarning>
       <body className="bg-neutral-950 font-sans text-white antialiased">
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
             <ScrollIndicatorsProvider>
+              <IntroLoader />
               <PointerGlow />
               <ScrollProgress />
               {children}
