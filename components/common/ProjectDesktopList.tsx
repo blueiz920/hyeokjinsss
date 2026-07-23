@@ -152,7 +152,7 @@ export const ProjectDesktopList = ({
                       src={project.thumbnail}
                       alt=""
                       fill
-                      className="object-contain"
+                      className="object-cover"
                       sizes="396px"
                       loading="eager"
                     />

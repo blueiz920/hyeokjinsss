@@ -475,7 +475,6 @@ html::-webkit-scrollbar {
     height: 100%;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 1.25rem;
     background: rgb(23 23 23);
     box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.48);
     opacity: 0;
@@ -506,23 +505,21 @@ html::-webkit-scrollbar {
   }
 
   .project-desktop-preview-slide[data-project="moum-zip"] {
-    background: #d7eee7;
+    background: #6f9f92;
   }
 
   .project-desktop-preview-slide[data-project="k-festival"] {
-    background: #d9d7f4;
+    background: #766fa3;
   }
 
   .project-desktop-preview-slide[data-project="yajoba"] {
-    background: #ead8c6;
+    background: #a76a49;
   }
 
   .project-desktop-preview-image {
     position: absolute;
     inset: clamp(1.55rem, 2.4vw, 2.25rem);
     overflow: hidden;
-    border-radius: 0.55rem;
-    box-shadow: 0 1rem 2.5rem rgba(23, 23, 23, 0.16);
   }
 
   .project-desktop-preview-action {
