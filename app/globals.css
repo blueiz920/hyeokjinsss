@@ -399,6 +399,174 @@ html::-webkit-scrollbar {
     opacity: 1;
   }
 
+  .project-desktop-list {
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+  }
+
+  .project-desktop-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  }
+
+  .project-desktop-row {
+    display: grid;
+    min-height: 10.75rem;
+    grid-template-columns: minmax(0, 1.22fr) minmax(18rem, 0.78fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    padding: 2.5rem 0 2.75rem;
+    transition:
+      opacity 300ms cubic-bezier(0.7, 0, 0.3, 1),
+      background-color 300ms ease;
+  }
+
+  .project-desktop-heading {
+    min-width: 0;
+  }
+
+  .project-desktop-role {
+    margin-bottom: 0.6rem;
+    color: rgba(253, 230, 138, 0.72);
+    font-size: 0.7rem;
+    line-height: 1rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .project-desktop-title {
+    font-size: clamp(3.25rem, 5.25vw, 4.75rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    transition:
+      color 300ms ease,
+      transform 300ms cubic-bezier(0.7, 0, 0.3, 1);
+  }
+
+  .project-desktop-impact {
+    max-width: 44rem;
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .project-desktop-meta {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .project-desktop-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1.1rem;
+  }
+
+  .project-desktop-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: rgba(255, 255, 255, 0.96);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration-color: rgba(252, 211, 77, 0.55);
+    text-decoration-line: underline;
+    text-underline-offset: 0.3rem;
+    transition: color 200ms ease;
+  }
+
+  .project-desktop-links a:hover {
+    color: rgb(253 230 138);
+  }
+
+  .project-desktop-item:focus-within .project-desktop-title {
+    color: rgb(253 230 138);
+    transform: translateX(-1.15rem);
+  }
+
+  .project-desktop-preview {
+    --project-preview-size: clamp(19rem, 27.5vw, 24.75rem);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 25;
+    width: var(--project-preview-size);
+    height: var(--project-preview-size);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .project-desktop-preview-surface {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1.25rem;
+    background: rgb(23 23 23);
+    box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.48);
+    opacity: 0;
+    transform: scale(0.68);
+    transition:
+      opacity 260ms ease,
+      transform 400ms cubic-bezier(0.34, 1, 0.64, 1);
+  }
+
+  .project-desktop-preview[data-visible="true"]
+    .project-desktop-preview-surface {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .project-desktop-preview-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.28)),
+      radial-gradient(circle at center, transparent 28%, rgba(0, 0, 0, 0.08));
+  }
+
+  .project-desktop-preview-action {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: inline-flex;
+    width: 5rem;
+    height: 5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    border-radius: 9999px;
+    background: rgb(245 158 11);
+    color: rgb(23 23 23);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    transform: translate(-50%, -50%);
+  }
+
+  .project-desktop-preview-action span {
+    font-size: 0.95rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project-desktop-item:hover .project-desktop-row {
+      opacity: 0.36;
+    }
+
+    .project-desktop-item:hover .project-desktop-title {
+      transform: translateX(-1.15rem);
+    }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .project-desktop-preview {
+      display: none;
+    }
+  }
+
   .project-reveal-bg {
     background-image: url("/project/projectBg-mb.png");
     background-image: image-set(
@@ -903,6 +1071,27 @@ html::-webkit-scrollbar {
   .project-reveal-stage[data-bg-active="true"] .project-reveal-bg,
   .project-reveal-stage[data-bg-active="true"] .project-reveal-veil {
     transform: none;
+  }
+
+  .project-desktop-row,
+  .project-desktop-title,
+  .project-desktop-links a,
+  .project-desktop-preview-surface {
+    transition: none;
+  }
+
+  .project-desktop-item:hover .project-desktop-row {
+    opacity: 1;
+  }
+
+  .project-desktop-item:hover .project-desktop-title,
+  .project-desktop-item:focus-within .project-desktop-title {
+    transform: none;
+  }
+
+  .project-desktop-preview {
+    display: none;
+    will-change: auto;
   }
 
   .skills-bg__runner {

@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/Container";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { ProjectDesktopList } from "@/components/common/ProjectDesktopList";
 import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
 import { getProjectCardIndex } from "@/lib/animation/projectReveal";
 
@@ -13,7 +14,8 @@ import { getProjectCardIndex } from "@/lib/animation/projectReveal";
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const bgFrameRef = useRef<HTMLDivElement | null>(null);
-  const projectCardsRef = useRef<Array<HTMLElement | null>>([]);
+  const mobileCardsRef = useRef<Array<HTMLElement | null>>([]);
+  const desktopRowsRef = useRef<Array<HTMLElement | null>>([]);
   const [bgActive, setBgActive] = useState(false);
 
   const { prefersReducedMotion } = useScrollRuntime();
@@ -75,14 +77,20 @@ export const ProjectReveal = () => {
   // section과 카드가 화면 중앙을 지날 때 indicator의 표시 여부와 단계를 갱신한다.
   useEffect(() => {
     const section = sectionRef.current;
-    const projectCards = projectCardsRef.current.filter(
-      (card): card is HTMLElement => Boolean(card),
-    );
 
-    if (!section || projectCards.length === 0) return;
+    if (!section) return;
+
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const getProjectCards = () =>
+      (
+        desktopQuery.matches
+          ? desktopRowsRef.current
+          : mobileCardsRef.current
+      ).filter((card): card is HTMLElement => Boolean(card));
 
     // 현재 DOM 위치를 다시 읽어 section 활성 상태와 가장 가까운 카드를 계산한다.
     const syncProjectIndicator = () => {
+      const projectCards = getProjectCards();
       const sectionRect = section.getBoundingClientRect();
       const viewportCenter = window.innerHeight / 2;
       const sectionActive =
@@ -90,7 +98,7 @@ export const ProjectReveal = () => {
 
       setProjectsActive(sectionActive);
 
-      if (sectionActive) {
+      if (sectionActive && projectCards.length > 0) {
         setProjectsStep(getProjectCardIndex(projectCards));
       }
     };
@@ -109,11 +117,15 @@ export const ProjectReveal = () => {
     );
 
     indicatorObserver.observe(section);
-    projectCards.forEach((card) => indicatorObserver.observe(card));
+    [...mobileCardsRef.current, ...desktopRowsRef.current].forEach((card) => {
+      if (card) indicatorObserver.observe(card);
+    });
+    desktopQuery.addEventListener("change", syncProjectIndicator);
     syncProjectIndicator();
 
     return () => {
       indicatorObserver.disconnect();
+      desktopQuery.removeEventListener("change", syncProjectIndicator);
       setProjectsActive(false);
     };
   }, [setProjectsActive, setProjectsStep]);
@@ -140,27 +152,40 @@ export const ProjectReveal = () => {
       </div>
 
       <Container className="relative z-10">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-14">
-          <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+        <div className="grid gap-10 lg:gap-16">
+          <header className="space-y-6 lg:flex lg:items-end lg:justify-between lg:gap-12">
             <p className="text-xs uppercase tracking-[0.4em] text-white/50">
               Project
             </p>
-            <h2 id="projects-title" className="text-3xl font-semibold md:text-4xl">
+            <h2
+              id="projects-title"
+              className="text-3xl font-semibold md:text-4xl lg:max-w-xl lg:text-right"
+            >
               이런 프로젝트에 참여했어요
             </h2>
-          </aside>
+          </header>
 
-          <div className="space-y-8">
+          <div className="space-y-8 lg:hidden">
             {portfolio.projects.map((project, index) => (
               <ProjectRevealCard
                 key={project.slug}
                 ref={(cardNode) => {
-                  projectCardsRef.current[index] = cardNode;
+                  mobileCardsRef.current[index] = cardNode;
                 }}
                 project={project}
                 prefersReducedMotion={prefersReducedMotion}
               />
             ))}
+          </div>
+
+          <div className="hidden lg:block lg:pl-16 xl:pl-0">
+            <ProjectDesktopList
+              projects={portfolio.projects}
+              prefersReducedMotion={prefersReducedMotion}
+              setRowRef={(index, rowNode) => {
+                desktopRowsRef.current[index] = rowNode;
+              }}
+            />
           </div>
         </div>
       </Container>
