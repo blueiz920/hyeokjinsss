@@ -15,3 +15,11 @@ Examples:
 - Allow `useIntroPhraseMask` when the extra context prevents ambiguity at the call site.
 - Prefer `supportsCssMask` over `canUseCssMask`.
 - Prefer `measureIntroMask` over `getIntroMaskRect`.
+
+# Superloopy Routing
+
+- Treat every Superloopy skill as explicit-only in this repository.
+- Invoke Superloopy only when the user starts the request with `loopy` or names a `superloopy-*` skill directly.
+- Use `loopy clone` for authorized website or section cloning. Ordinary design, frontend, research, review, and coding requests must use normal Codex workflows.
+- Do not use `loopy team`, crew agents, or a full evidence loop unless the user explicitly requests team or crew mode.
+- Prefer cloning one bounded section into a temporary lab route before adapting it into production pages.

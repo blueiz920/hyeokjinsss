@@ -46,7 +46,7 @@ export const initIntroLoader = async ({ root, onComplete }: IntroLoaderOptions) 
   const wordStep = 0.32;
 
   words.forEach((word, index) => {
-    const start = 0.08 + index * wordStep;
+    const start = 0.4 + index * wordStep;
     const isLast = index === words.length - 1;
 
     timeline.to(
