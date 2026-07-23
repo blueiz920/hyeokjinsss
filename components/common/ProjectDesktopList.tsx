@@ -97,8 +97,6 @@ export const ProjectDesktopList = ({
     [],
   );
 
-  const previewProject = projects[previewIndex] ?? projects[0];
-
   return (
     <>
       <ul className="project-desktop-list" aria-label="프로젝트 목록">
@@ -123,27 +121,13 @@ export const ProjectDesktopList = ({
 
               <div className="project-desktop-meta">
                 <p>{project.summary}</p>
-                <div className="project-desktop-links">
-                  {project.links.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${project.title} ${link.label} 새 탭에서 열기`}
-                    >
-                      {link.label}
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  ))}
-                </div>
               </div>
             </article>
           </li>
         ))}
       </ul>
 
-      {previewProject ? (
+      {projects.length > 0 ? (
         <div
           ref={previewRef}
           className="project-desktop-preview"
@@ -151,14 +135,31 @@ export const ProjectDesktopList = ({
           aria-hidden="true"
         >
           <div className="project-desktop-preview-surface">
-            <Image
-              src={previewProject.thumbnail}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="396px"
-            />
-            <div className="project-desktop-preview-shade" />
+            <div
+              className="project-desktop-preview-track"
+              style={{
+                transform: `translate3d(0, -${previewIndex * 100}%, 0)`,
+              }}
+            >
+              {projects.map((project) => (
+                <div
+                  key={project.slug}
+                  className="project-desktop-preview-slide"
+                  data-project={project.slug}
+                >
+                  <div className="project-desktop-preview-image">
+                    <Image
+                      src={project.thumbnail}
+                      alt=""
+                      fill
+                      className="object-contain"
+                      sizes="396px"
+                      loading="eager"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
             <span className="project-desktop-preview-action">
               보기
               <span>↗</span>

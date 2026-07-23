@@ -454,36 +454,7 @@ html::-webkit-scrollbar {
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
     line-height: 1.65;
-  }
-
-  .project-desktop-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    margin-top: 1.1rem;
-  }
-
-  .project-desktop-links a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: rgba(255, 255, 255, 0.96);
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-decoration-color: rgba(252, 211, 77, 0.55);
-    text-decoration-line: underline;
-    text-underline-offset: 0.3rem;
-    transition: color 200ms ease;
-  }
-
-  .project-desktop-links a:hover {
-    color: rgb(253 230 138);
-  }
-
-  .project-desktop-item:focus-within .project-desktop-title {
-    color: rgb(253 230 138);
-    transform: translateX(-1.15rem);
+    transition: transform 300ms cubic-bezier(0.7, 0, 0.3, 1);
   }
 
   .project-desktop-preview {
@@ -520,12 +491,38 @@ html::-webkit-scrollbar {
     transform: scale(1);
   }
 
-  .project-desktop-preview-shade {
+  .project-desktop-preview-track {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.28)),
-      radial-gradient(circle at center, transparent 28%, rgba(0, 0, 0, 0.08));
+    height: 100%;
+    transition: transform 600ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .project-desktop-preview-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .project-desktop-preview-slide[data-project="moum-zip"] {
+    background: #d7eee7;
+  }
+
+  .project-desktop-preview-slide[data-project="k-festival"] {
+    background: #d9d7f4;
+  }
+
+  .project-desktop-preview-slide[data-project="yajoba"] {
+    background: #ead8c6;
+  }
+
+  .project-desktop-preview-image {
+    position: absolute;
+    inset: clamp(1.55rem, 2.4vw, 2.25rem);
+    overflow: hidden;
+    border-radius: 0.55rem;
+    box-shadow: 0 1rem 2.5rem rgba(23, 23, 23, 0.16);
   }
 
   .project-desktop-preview-action {
@@ -558,6 +555,10 @@ html::-webkit-scrollbar {
 
     .project-desktop-item:hover .project-desktop-title {
       transform: translateX(-1.15rem);
+    }
+
+    .project-desktop-item:hover .project-desktop-meta {
+      transform: translateX(1.15rem);
     }
   }
 
@@ -1075,7 +1076,8 @@ html::-webkit-scrollbar {
 
   .project-desktop-row,
   .project-desktop-title,
-  .project-desktop-links a,
+  .project-desktop-meta,
+  .project-desktop-preview-track,
   .project-desktop-preview-surface {
     transition: none;
   }
@@ -1085,7 +1087,7 @@ html::-webkit-scrollbar {
   }
 
   .project-desktop-item:hover .project-desktop-title,
-  .project-desktop-item:focus-within .project-desktop-title {
+  .project-desktop-item:hover .project-desktop-meta {
     transform: none;
   }
 
