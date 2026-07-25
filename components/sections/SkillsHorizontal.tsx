@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
@@ -24,9 +25,7 @@ export const SkillsHorizontal = () => {
     >
       <div className="skills-expertise-grid">
         <header className="skills-expertise-intro" data-skill-intro>
-          <p className="skills-expertise-eyebrow">
-            Skills
-          </p>
+          <p className="skills-expertise-eyebrow">Skills</p>
           <h2 id="skills-title" className="skills-expertise-title">
             문제를 해결하는{" "}
             <span className="block">다섯 가지 방식</span>
@@ -37,21 +36,32 @@ export const SkillsHorizontal = () => {
           </p>
         </header>
 
-        <div
-          className="skills-expertise-visual"
-          data-skill-board
-          aria-hidden="true"
-        >
+        <div className="skills-expertise-visual" aria-hidden="true">
           <div className="skills-expertise-visual-inner">
-            <p className="skills-expertise-label">Selected stack</p>
-            <div className="skills-expertise-tools" data-skill-tools>
-              {portfolio.skills
-                .flatMap((skill) => skill.tools)
-                .map((tool) => (
-                  <span key={tool} className="skills-tool-wordmark">
-                    {tool}
-                  </span>
-                ))}
+            <div className="skills-expertise-photo" data-skill-photo>
+              <Image
+                src="/skills/skills-editorial.webp"
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 50vw, 0px"
+              />
+            </div>
+
+            <div
+              className="skills-expertise-board"
+              data-skill-board
+              aria-hidden="true"
+            >
+              <p className="skills-expertise-label">Selected stack</p>
+              <div className="skills-expertise-tools" data-skill-tools>
+                {portfolio.skills
+                  .flatMap((skill) => skill.tools)
+                  .map((tool) => (
+                    <span key={tool} className="skills-tool-wordmark">
+                      {tool}
+                    </span>
+                  ))}
+              </div>
             </div>
           </div>
         </div>

@@ -121,6 +121,8 @@ describe("SkillsHorizontal static capabilities", () => {
     const section = container.querySelector("#skills");
     const grid = container.querySelector(".skills-expertise-grid");
     const intro = container.querySelector("[data-skill-intro]");
+    const visual = container.querySelector(".skills-expertise-visual");
+    const photo = container.querySelector("[data-skill-photo] img");
     const board = container.querySelector("[data-skill-board]");
     const content = container.querySelector(".skills-expertise-content");
     const capabilities = container.querySelectorAll("[data-skill-capability]");
@@ -131,8 +133,10 @@ describe("SkillsHorizontal static capabilities", () => {
       "문제를 해결하는 다섯 가지 방식",
     );
     expect(grid?.children[0]).toBe(intro);
-    expect(grid?.children[1]).toBe(board);
+    expect(grid?.children[1]).toBe(visual);
     expect(grid?.children[2]).toBe(content);
+    expect(photo?.getAttribute("alt")).toBe("");
+    expect(photo?.getAttribute("src")).toContain("skills-editorial.webp");
     expect(board?.getAttribute("aria-hidden")).toBe("true");
     expect(capabilities).toHaveLength(5);
     expect(

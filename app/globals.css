@@ -738,8 +738,22 @@ html::-webkit-scrollbar {
   }
 
   .skills-expertise-visual-inner {
-    display: grid;
+    position: relative;
     aspect-ratio: 358 / 422;
+  }
+
+  .skills-expertise-photo {
+    display: none;
+  }
+
+  .skills-expertise-photo img {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .skills-expertise-board {
+    display: grid;
+    height: 100%;
     grid-template-rows: auto 1fr;
     gap: 2rem;
     padding: 1.5rem;
@@ -1180,7 +1194,7 @@ html::-webkit-scrollbar {
     transform: scaleY(0.86);
   }
 
-  .skills-expertise-visual-inner {
+  .skills-expertise-board {
     padding: 2.5rem;
   }
 
@@ -1228,7 +1242,22 @@ html::-webkit-scrollbar {
     width: 100%;
     height: 100svh;
     aspect-ratio: auto;
+    overflow: hidden;
+  }
+
+  .skills-expertise-photo {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .skills-expertise-board {
+    position: absolute;
+    inset: 0;
+    height: auto;
     padding: clamp(2rem, 4vw, 4rem);
+    opacity: 0;
+    visibility: hidden;
   }
 
   .skills-tool-wordmark {
