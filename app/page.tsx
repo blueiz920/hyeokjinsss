@@ -17,10 +17,10 @@ export default function Home() {
         <section className="breather">
           <Container className="text-center">
             <p className="text-sm uppercase tracking-[0.4em] text-white/50">
-              사용자경험을 최우선으로 생각해요
+              기술을 나열하기보다
             </p>
             <p className="mt-4 text-lg text-white/70">
-              빠르고 편한 경험을 위해 항상 고민해요
+              어떤 문제에 사용했는지 보여드릴게요
             </p>
           </Container>
         </section>

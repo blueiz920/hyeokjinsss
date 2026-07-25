@@ -14,11 +14,12 @@ export type Project = {
   links: ProjectLink[];
 };
 
-type SkillCard = {
+export type SkillCapability = {
   title: string;
-  problem: string;
-  approach: string;
-  result: string;
+  tools: string[];
+  summary: string;
+  project: string;
+  evidence: string;
 };
 
 export type NavItem = {
@@ -34,7 +35,7 @@ export type PortfolioData = {
   introSubhead: string;
   introHighlights: string[];
   projects: Project[];
-  skills: SkillCard[];
+  skills: SkillCapability[];
   // skillsSummary: string;
   contactEmail: string;
   socials: ProjectLink[];

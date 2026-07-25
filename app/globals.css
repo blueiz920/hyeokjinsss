@@ -687,6 +687,108 @@ html::-webkit-scrollbar {
     transform: scaleY(0.92);
   }
 
+  .skills-static-section {
+    background: rgb(10 10 10);
+  }
+
+  .skills-static-header {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(3rem, 8vw, 6.5rem);
+  }
+
+  .skills-expertise-grid {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .skills-expertise-visual {
+    min-width: 0;
+    background-color: rgb(23 31 38);
+    background-image:
+      radial-gradient(circle, rgba(255, 255, 255, 0.12) 0.75px, transparent 0.9px),
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-position: 0 0, -1px -1px, -1px -1px;
+    background-size: 18px 18px, 72px 72px, 72px 72px;
+  }
+
+  .skills-expertise-visual-inner {
+    display: flex;
+    min-height: 19rem;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 3rem;
+    padding: 1.5rem;
+  }
+
+  .skills-expertise-label,
+  .skills-capability-label,
+  .skills-capability-details dt {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .skills-expertise-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.65rem 1.15rem;
+  }
+
+  .skills-tool-wordmark {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: clamp(1.3rem, 4.8vw, 2rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+  }
+
+  .skills-expertise-content {
+    background: rgb(10 10 10);
+  }
+
+  .skills-capability {
+    padding: 2rem 1.5rem 2.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .skills-capability-title {
+    margin-top: 0.7rem;
+    font-size: clamp(2rem, 7vw, 3.25rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  .skills-capability-summary {
+    max-width: 37rem;
+    margin-top: 1.35rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .skills-capability-details {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.75rem;
+  }
+
+  .skills-capability-details > div {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .skills-capability-details dd {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
   .skills-pin {
     @apply relative h-screen overflow-hidden pt-36 ;
 
@@ -1043,6 +1145,61 @@ html::-webkit-scrollbar {
   .project-reveal-stage[data-bg-active="true"] .project-reveal-veil {
     opacity: 0.98;
     transform: scaleY(0.86);
+  }
+
+  .skills-expertise-visual-inner {
+    min-height: 23rem;
+    padding: 2rem;
+  }
+
+  .skills-capability {
+    padding: 2.5rem 2.5rem 2.75rem;
+  }
+
+  .skills-capability-details {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .skills-expertise-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    align-items: stretch;
+  }
+
+  .skills-expertise-visual {
+    border-right: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .skills-expertise-visual-inner {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+    padding: clamp(2rem, 4vw, 4rem);
+  }
+
+  .skills-expertise-tools {
+    max-width: 26rem;
+    gap: 0.8rem 1.35rem;
+  }
+
+  .skills-tool-wordmark {
+    font-size: clamp(1.8rem, 3.25vw, 3.25rem);
+  }
+
+  .skills-capability {
+    min-height: 23rem;
+    padding: clamp(2rem, 4vw, 4rem);
+  }
+
+  .skills-capability-summary {
+    margin-top: 1.75rem;
+  }
+
+  .skills-capability-details {
+    margin-top: 2.5rem;
   }
 }
 

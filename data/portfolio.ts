@@ -100,68 +100,44 @@ export const portfolio: PortfolioData = {
   ],
   skills: [
     {
-      title: "React",
-      problem: "검색·채팅·계약서처럼 흐름이 긴 화면을 기능별로 나눠야 했습니다.",
-      approach:
-        "화면을 컴포넌트 단위로 쪼개고, 상태와 API 호출 위치를 분리했습니다.",
-      result:
-        "수정 범위가 작아져 QA 피드백을 빠르게 반영할 수 있었습니다.",
+      title: "Product UI",
+      tools: ["React", "TypeScript", "Tailwind CSS"],
+      summary:
+        "검색·계약·온보딩처럼 단계가 긴 화면을 사용자가 다음 행동을 자연스럽게 이해하도록 설계합니다.",
+      project: "모음.zip · K-Festival · Yajoba",
+      evidence: "기능 단위 컴포넌트 분리로 QA 피드백 반영 범위를 작게 유지했습니다.",
     },
     {
-      title: "TypeScript",
-      problem: "API 응답과 UI 상태 기준이 흐려지면 작은 변경도 오류로 이어졌습니다.",
-      approach:
-        "응답 DTO, props, 이벤트 타입을 명확히 두고 흐름별 기준을 맞췄습니다.",
-      result:
-        "채팅·계약서·검색 기능의 리팩토링 부담을 줄였습니다.",
+      title: "Data & State",
+      tools: ["TanStack Query", "Zustand", "STOMP WebSocket"],
+      summary:
+        "서버 데이터와 화면 상태의 책임을 나눠, 화면마다 다른 기준으로 흔들리지 않게 만듭니다.",
+      project: "K-Festival · Yajoba",
+      evidence: "언어·인증 상태와 API 데이터를 분리해 중복 요청과 표시 기준의 충돌을 줄였습니다.",
     },
     {
-      title: "Tailwind CSS",
-      problem: "반응형 화면을 빠르게 만들면서도 스타일 기준이 흩어지지 않아야 했습니다.",
-      approach:
-        "유틸리티 클래스로 레이아웃을 잡고, 반복되는 패턴은 공통 레이어로 정리했습니다.",
-      result:
-        "모바일부터 데스크탑까지 화면 수정 속도를 높였습니다.",
+      title: "Performance & SEO",
+      tools: ["Next.js", "Rendering", "Sitemap"],
+      summary:
+        "첫 화면의 체감 속도와 검색 엔진이 읽는 경로를 함께 점검해 발견 가능한 서비스를 만듭니다.",
+      project: "모음.zip",
+      evidence: "검색 페이지 LCP를 1.5s에서 0.8s로 개선하고 동적 sitemap을 구성했습니다.",
     },
     {
-      title: "Next.js",
-      problem: "검색 페이지 첫 화면과 SEO 경로가 데이터 대기 때문에 늦어질 수 있었습니다.",
-      approach:
-        "히어로와 데이터 영역을 분리하고, 동적 sitemap으로 상세 URL을 수집했습니다.",
-      result:
-        "LCP를 1.5s에서 0.8s로 줄이고 크롤링 경로를 넓혔습니다.",
+      title: "Motion & Interaction",
+      tools: ["Framer Motion", "GSAP", "Lenis"],
+      summary:
+        "정보의 우선순위를 해치지 않는 범위에서 전환과 피드백을 설계해 흐름을 선명하게 만듭니다.",
+      project: "개인 포트폴리오",
+      evidence: "섹션별 모션과 스크롤 감도를 분리해 텍스트 가독성을 유지했습니다.",
     },
     {
-      title: "Framer Motion / GSAP",
-      problem: "인터랙션은 강하게 보여도 콘텐츠 읽기를 방해하면 안 됐습니다.",
-      approach:
-        "섹션별 모션을 분리하고, 스크롤·카드 전환 타이밍을 따로 조정했습니다.",
-      result:
-        "배경과 카드가 함께 살아나되 텍스트 가독성은 유지했습니다.",
-    },
-    {
-      title: "Lenis",
-      problem: "스크롤 기반 섹션에서 기기별 감도 차이가 크게 느껴졌습니다.",
-      approach:
-        "Lenis 스크롤러를 기준으로 ScrollTrigger scrollerProxy를 통합하고, wheelMultiplier/lerp로 체감을 조정했습니다.",
-      result:
-        "가로 전환과 배경 모션이 더 부드럽게 이어졌습니다.",
-    },
-    {
-      title: "React Query / Zustand",
-      problem: "서버 데이터와 언어·인증 같은 전역 상태가 섞이면 화면 기준이 흔들렸습니다.",
-      approach:
-        "API 데이터는 TanStack Query, UI·언어 상태는 Zustand로 나눴습니다.",
-      result:
-        "불필요한 요청을 줄이고 선택 언어와 데이터 표시 기준을 맞췄습니다.",
-    },
-    {
-      title: "GitHub Actions / Vercel",
-      problem: "반복 배포와 운영 환경 이슈가 기능 검증 시간을 잡아먹었습니다.",
-      approach:
-        "GitHub Actions와 Vercel 배포 흐름을 연결하고, 프록시로 HTTPS 요청 경로를 정리했습니다.",
-      result:
-        "배포 확인 시간을 줄이고 Mixed Content 문제를 해결했습니다.",
+      title: "Delivery & Reliability",
+      tools: ["Vitest", "GitHub Actions", "Vercel"],
+      summary:
+        "기능 완성 뒤에도 재현 가능한 검증과 배포 흐름을 만들어 팀의 개선 속도를 지킵니다.",
+      project: "모음.zip · K-Festival",
+      evidence: "URL 상태 동기화 43개 테스트와 HTTPS 프록시로 배포 이슈를 안정화했습니다.",
     },
   ],
 

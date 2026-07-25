@@ -55,6 +55,8 @@ subagent-*
 /.superloopy/
 /docs/research/dennissnellenberg.com/
 /docs/design-references/dennissnellenberg.com/
+/docs/research/www.buildinamsterdam.com/
+/docs/design-references/www.buildinamsterdam.com/
 
 # Local guardrail notes
 lib/perf/guardrails.md
