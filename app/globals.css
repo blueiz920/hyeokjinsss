@@ -46,7 +46,7 @@ html::-webkit-scrollbar {
   }
 
   .site-footer {
-    @apply relative z-10 mt-16 bg-[#f3ede3] text-neutral-950 md:mt-24;
+    @apply relative z-10 bg-[#f3ede3] text-neutral-950;
     isolation: isolate;
   }
 
@@ -54,7 +54,7 @@ html::-webkit-scrollbar {
     position: absolute;
     inset-inline: 0;
     top: 0;
-    z-index: 0;
+    z-index: 1;
     height: 10vh;
     overflow: hidden;
     pointer-events: none;
@@ -689,6 +689,7 @@ html::-webkit-scrollbar {
 
   .skills-static-section {
     background: rgb(10 10 10);
+    padding-bottom: 0;
   }
 
   .skills-static-header {
@@ -1163,9 +1164,17 @@ html::-webkit-scrollbar {
 }
 
 @media (min-width: 1024px) {
+  .site-footer-curve-shape {
+    background: linear-gradient(
+      90deg,
+      rgb(23 31 38) 0 50%,
+      rgb(10 10 10) 50% 100%
+    );
+  }
+
   .skills-expertise-grid {
     display: grid;
-    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
   }
 
