@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
-import { Container } from "@/components/layout/Container";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 export const SkillsHorizontal = () => {
@@ -20,25 +19,31 @@ export const SkillsHorizontal = () => {
       id="skills"
       ref={sectionRef}
       tabIndex={-1}
-      className="skills-static-section section-padding bg-neutral-950 text-white"
+      className="skills-static-section bg-neutral-950 text-white"
       aria-labelledby="skills-title"
     >
-      <Container>
-        <div className="skills-static-header">
-          <p className="text-xs uppercase tracking-[0.4em] text-white/50">
+      <div className="skills-expertise-grid">
+        <header className="skills-expertise-intro" data-skill-intro>
+          <p className="skills-expertise-eyebrow">
             Skills
           </p>
-          <h2 id="skills-title" className="text-3xl font-semibold md:text-4xl">
+          <h2 id="skills-title" className="skills-expertise-title">
             문제를 해결하는{" "}
-            <span className="block sm:inline">다섯 가지 방식</span>
+            <span className="block">다섯 가지 방식</span>
           </h2>
-        </div>
-      </Container>
+          <p className="skills-expertise-description">
+            기술을 나열하기보다, 실제 사용자 흐름과 엔지니어링 결과를 만든
+            방식으로 묶었습니다.
+          </p>
+        </header>
 
-      <div className="skills-expertise-grid">
-        <div className="skills-expertise-visual">
+        <div
+          className="skills-expertise-visual"
+          data-skill-board
+          aria-hidden="true"
+        >
           <div className="skills-expertise-visual-inner">
-            <p className="skills-expertise-label">Core stack</p>
+            <p className="skills-expertise-label">Selected stack</p>
             <div className="skills-expertise-tools" data-skill-tools>
               {portfolio.skills
                 .flatMap((skill) => skill.tools)
@@ -61,7 +66,8 @@ export const SkillsHorizontal = () => {
               aria-labelledby={`skill-title-${index}`}
             >
               <p className="skills-capability-label">
-                Capability {String(index + 1).padStart(2, "0")}
+                {String(index + 1).padStart(2, "0")} /{" "}
+                {String(portfolio.skills.length).padStart(2, "0")}
               </p>
               <h3
                 id={`skill-title-${index}`}
@@ -69,14 +75,18 @@ export const SkillsHorizontal = () => {
               >
                 {skill.title}
               </h3>
+              <p className="skills-capability-tools">
+                <span>Tools</span>
+                {skill.tools.join(" · ")}
+              </p>
               <p className="skills-capability-summary">{skill.summary}</p>
               <dl className="skills-capability-details">
                 <div>
-                  <dt>Project</dt>
+                  <dt>적용 프로젝트</dt>
                   <dd>{skill.project}</dd>
                 </div>
                 <div>
-                  <dt>Evidence</dt>
+                  <dt>결과</dt>
                   <dd>{skill.evidence}</dd>
                 </div>
               </dl>

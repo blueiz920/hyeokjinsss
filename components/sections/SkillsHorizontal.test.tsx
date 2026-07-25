@@ -116,10 +116,13 @@ afterEach(async () => {
 });
 
 describe("SkillsHorizontal static capabilities", () => {
-  it("하나의 tool field와 다섯 개 capability narrative를 렌더링한다", async () => {
+  it("인트로, 장식 기술 보드, 다섯 개 역량 서사를 순서대로 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
-    const visualPanels = container.querySelectorAll(".skills-expertise-visual");
+    const grid = container.querySelector(".skills-expertise-grid");
+    const intro = container.querySelector("[data-skill-intro]");
+    const board = container.querySelector("[data-skill-board]");
+    const content = container.querySelector(".skills-expertise-content");
     const capabilities = container.querySelectorAll("[data-skill-capability]");
 
     expect(section?.getAttribute("tabindex")).toBe("-1");
@@ -127,7 +130,10 @@ describe("SkillsHorizontal static capabilities", () => {
     expect(container.querySelector("#skills-title")?.textContent).toBe(
       "문제를 해결하는 다섯 가지 방식",
     );
-    expect(visualPanels).toHaveLength(1);
+    expect(grid?.children[0]).toBe(intro);
+    expect(grid?.children[1]).toBe(board);
+    expect(grid?.children[2]).toBe(content);
+    expect(board?.getAttribute("aria-hidden")).toBe("true");
     expect(capabilities).toHaveLength(5);
     expect(
       container.querySelectorAll(
@@ -136,6 +142,11 @@ describe("SkillsHorizontal static capabilities", () => {
     ).toHaveLength(5);
     expect(capabilities[0]?.textContent).toContain("Product UI");
     expect(container.querySelectorAll("[data-skill-tools] span")).toHaveLength(10);
+    for (const capability of capabilities) {
+      expect(capability.querySelector(".skills-capability-tools")).not.toBeNull();
+      expect(capability.textContent).toContain("적용 프로젝트");
+      expect(capability.textContent).toContain("결과");
+    }
     expect(container.querySelector(".skills-pin")).toBeNull();
     expect(container.querySelector(".skills-bg")).toBeNull();
   });
