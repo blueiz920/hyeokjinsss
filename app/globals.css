@@ -333,70 +333,139 @@ html::-webkit-scrollbar {
     outline-offset: 2px;
   }
 
-  .project-card {
-    @apply relative rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.4)] sm:p-6 md:p-8;
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.001), rgba(255, 255, 255, 0.000)) padding-box,
-      linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025) 45%, rgba(251, 255, 255, 0.01)) border-box;
-    border-color: transparent;
-    isolation: isolate;
-    transition: box-shadow 700ms ease;
+  .project-mobile-card {
+    background: transparent;
   }
 
-  .project-card::before,
-  .project-card::after {
-    content: "";
+  .project-mobile-media {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+
+  .project-mobile-media[data-project="moum-zip"] {
+    background: #928a86;
+  }
+
+  .project-mobile-media[data-project="k-festival"] {
+    background: #7f8b87;
+  }
+
+  .project-mobile-media[data-project="yajoba"] {
+    background: #747d8a;
+  }
+
+  .project-mobile-image-track {
     position: absolute;
     inset: 0;
-    z-index: 0;
-    border-radius: inherit;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 700ms ease;
+    display: grid;
+    place-items: center;
   }
 
-  .project-card::before {
-    /* 앰버 레이어만 opacity로 켜서 gradient 전환 끊김을 피함. */
-    background: radial-gradient(
-      circle at 0% 0%,
-      rgba(255, 191, 36, 0.16),
-      rgba(255, 191, 36, 0.07) 30%,
-      transparent 58%
-    );
-  }
-
-  .project-card::after {
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 200, 125, 0.12),
-      rgba(255, 255, 255, 0.025) 45%,
-      rgba(251, 255, 255, 0.01)
-    );
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-  }
-
-  .project-card > * {
+  .project-mobile-image {
     position: relative;
-    z-index: 1;
+    width: 85%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
   }
 
-  .project-section[data-bg-active="true"] .project-card {
-    box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.4),
-      0 0 36px rgba(245, 158, 11, 0.045);
+  .project-mobile-content {
+    padding-top: 1.5rem;
   }
 
-  .project-section[data-bg-active="true"] .project-card::before,
-  .project-section[data-bg-active="true"] .project-card::after {
-    opacity: 1;
+  .project-mobile-title {
+    font-size: 1.96875rem;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  .project-mobile-hairline {
+    height: 1px;
+    margin-top: 1.25rem;
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .project-mobile-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .project-mobile-role,
+  .project-mobile-index {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.7rem;
+    line-height: 1rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .project-mobile-index {
+    flex: none;
+    color: rgba(255, 255, 255, 0.72);
+    letter-spacing: 0.12em;
+  }
+
+  .project-mobile-summary {
+    margin-top: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .project-mobile-impact {
+    margin-top: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  .project-mobile-stack {
+    margin-top: 1rem;
+    color: rgba(253, 230, 138, 0.75);
+    font-size: 0.7rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+  }
+
+  .project-mobile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .project-mobile-link {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    text-decoration: underline;
+    text-decoration-color: rgba(252, 211, 77, 0.58);
+    text-underline-offset: 0.3rem;
+    transition: color 180ms ease, text-decoration-color 180ms ease;
+  }
+
+  .project-mobile-link:hover {
+    color: rgb(254 243 199);
+    text-decoration-color: rgb(252 211 77);
+  }
+
+  .project-mobile-link:focus-visible {
+    outline: 2px solid rgb(253 230 138);
+    outline-offset: 4px;
+  }
+
+  @media (min-width: 48rem) and (max-width: 63.999rem) {
+    .project-mobile-card:nth-child(even) {
+      margin-top: clamp(3rem, 8vw, 5rem);
+    }
   }
 
   .project-desktop-list {
@@ -1060,9 +1129,7 @@ html::-webkit-scrollbar {
 @media (prefers-reduced-motion: reduce) {
   .project-reveal-bg,
   .project-reveal-veil,
-  .project-card,
-  .project-card::before,
-  .project-card::after {
+  .project-mobile-link {
     transition: none;
     transform: none;
     will-change: auto;

@@ -165,7 +165,7 @@ export const ProjectReveal = () => {
             </h2>
           </header>
 
-          <div className="space-y-8 lg:hidden">
+          <div className="-mx-1 grid gap-y-12 md:mx-0 md:grid-cols-2 md:items-start md:gap-x-6 md:gap-y-14 lg:hidden">
             {portfolio.projects.map((project, index) => (
               <ProjectRevealCard
                 key={project.slug}
@@ -173,6 +173,8 @@ export const ProjectReveal = () => {
                   mobileCardsRef.current[index] = cardNode;
                 }}
                 project={project}
+                index={index}
+                total={portfolio.projects.length}
                 prefersReducedMotion={prefersReducedMotion}
               />
             ))}

@@ -9,9 +9,9 @@ const CARD_Y_POINTS = [0, 0.3, 0.7, 1];
 const CARD_SCALE_POINTS = [0.2, 0.4, 0.6, 0.8];
 
 const CARD_OPACITY_RANGE = [0.4, 1, 1, 0.4];
-const CARD_Y_RANGE = [200, 0, 0, -200];
-const CARD_SCALE_RANGE = [0.882, 1, 1, 0.886];
-const IMAGE_Y_RANGE = [-34, 34];
+const CARD_Y_RANGE = [88, 0, 0, -88];
+const CARD_SCALE_RANGE = [0.96, 1, 1, 0.96];
+const IMAGE_Y_RANGE = [-12, 12];
 
 const STATIC_CARD_RANGE = [1, 1, 1, 1];
 const STATIC_Y_RANGE = [0, 0, 0, 0];
