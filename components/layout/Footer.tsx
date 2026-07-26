@@ -48,7 +48,7 @@ export const Footer = () => {
         <div className="site-footer-curve-shape" />
       </div>
 
-      <Container className="relative z-10 pb-10 pt-20 md:pb-12 md:pt-28">
+      <Container className="site-footer-content relative z-10 pb-10 pt-20 md:pb-12 md:pt-28">
         <div className="space-y-8 md:space-y-10">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-950/50">
             Contact
@@ -90,7 +90,7 @@ export const Footer = () => {
           </p>
         </div>
 
-        <div className="mt-12 flex flex-col gap-8 border-t border-neutral-950/15 pt-8 md:mt-16 md:flex-row md:items-end md:justify-between">
+        <div className="site-footer-meta mt-12 flex flex-col gap-8 border-t border-neutral-950/15 pt-8 md:mt-16 md:flex-row md:items-end md:justify-between">
           <a
             className="site-footer-pill"
             href={`mailto:${portfolio.contactEmail}`}

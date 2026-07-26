@@ -1206,6 +1206,20 @@ html::-webkit-scrollbar {
 }
 
 @media (min-width: 1024px) {
+  .site-footer,
+  .site-footer-content {
+    min-height: calc(100svh - 80px);
+  }
+
+  .site-footer-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer-meta {
+    margin-top: auto;
+  }
+
   .site-footer-curve-shape {
     background: linear-gradient(
       90deg,
