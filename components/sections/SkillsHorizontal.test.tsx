@@ -13,6 +13,7 @@ import {
 import { SkillsHorizontal } from "./SkillsHorizontal";
 
 const skillsMocks = vi.hoisted(() => ({
+  initSkillsVisual: vi.fn(),
   register: vi.fn(),
   unregister: vi.fn(),
 }));
@@ -66,6 +67,16 @@ vi.mock("@/hooks/useSectionRegistry", () => ({
   }),
 }));
 
+vi.mock("@/hooks/useScrollRuntime", () => ({
+  useScrollRuntime: () => ({
+    prefersReducedMotion: false,
+  }),
+}));
+
+vi.mock("@/lib/animation/skillsVisual", () => ({
+  initSkillsVisual: skillsMocks.initSkillsVisual,
+}));
+
 let mountedRoots: Root[] = [];
 
 beforeAll(() => {
@@ -101,6 +112,8 @@ const unmountSkills = async (root: Root) => {
 };
 
 beforeEach(() => {
+  skillsMocks.initSkillsVisual.mockReset();
+  skillsMocks.initSkillsVisual.mockResolvedValue(vi.fn());
   skillsMocks.register.mockReset();
   skillsMocks.unregister.mockReset();
 });
@@ -136,7 +149,7 @@ describe("SkillsHorizontal static capabilities", () => {
     expect(grid?.children[1]).toBe(visual);
     expect(grid?.children[2]).toBe(content);
     expect(photo?.getAttribute("alt")).toBe("");
-    expect(photo?.getAttribute("src")).toContain("skills-editorial.webp");
+    expect(photo?.getAttribute("src")).toContain("skills-editorial-v2.webp");
     expect(board?.getAttribute("aria-hidden")).toBe("true");
     expect(capabilities).toHaveLength(5);
     expect(
@@ -164,5 +177,15 @@ describe("SkillsHorizontal static capabilities", () => {
     await unmountSkills(root);
 
     expect(skillsMocks.unregister).toHaveBeenCalledWith("skills");
+  });
+
+  it("visual motion을 현재 section에 연결한다", async () => {
+    const { container } = await mountSkills();
+    const section = container.querySelector("#skills");
+
+    expect(skillsMocks.initSkillsVisual).toHaveBeenCalledWith({
+      prefersReducedMotion: false,
+      root: section,
+    });
   });
 });

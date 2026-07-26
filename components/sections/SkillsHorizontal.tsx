@@ -3,10 +3,13 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
+import { initSkillsVisual } from "@/lib/animation/skillsVisual";
+import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 export const SkillsHorizontal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
 
   useEffect(() => {
@@ -14,6 +17,35 @@ export const SkillsHorizontal = () => {
     register("skills", sectionRef);
     return () => unregister("skills");
   }, [register, unregister]);
+
+  useEffect(() => {
+    const root = sectionRef.current;
+    if (!root) return;
+
+    let isActive = true;
+    let cleanupMotion: (() => void) | null = null;
+
+    void initSkillsVisual({ prefersReducedMotion, root })
+      .then((cleanup) => {
+        if (!isActive) {
+          cleanup();
+          return;
+        }
+        cleanupMotion = cleanup;
+      })
+      .catch((error) => {
+        if (!isActive) return;
+        console.error(
+          "Skills visual motion failed; using the static visual.",
+          error,
+        );
+      });
+
+    return () => {
+      isActive = false;
+      cleanupMotion?.();
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <section
@@ -36,11 +68,15 @@ export const SkillsHorizontal = () => {
           </p>
         </header>
 
-        <div className="skills-expertise-visual" aria-hidden="true">
+        <div
+          className="skills-expertise-visual"
+          data-reduced-motion={prefersReducedMotion ? "true" : undefined}
+          aria-hidden="true"
+        >
           <div className="skills-expertise-visual-inner">
             <div className="skills-expertise-photo" data-skill-photo>
               <Image
-                src="/skills/skills-editorial.webp"
+                src="/skills/skills-editorial-v2.webp"
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 50vw, 0px"

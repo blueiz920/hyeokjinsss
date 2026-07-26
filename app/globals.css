@@ -743,6 +743,7 @@ html::-webkit-scrollbar {
   }
 
   .skills-expertise-photo {
+    position: relative;
     display: none;
   }
 
@@ -1258,6 +1259,17 @@ html::-webkit-scrollbar {
     padding: clamp(2rem, 4vw, 4rem);
     opacity: 0;
     visibility: hidden;
+  }
+
+  .skills-expertise-visual[data-reduced-motion="true"]
+    .skills-expertise-photo {
+    display: none;
+  }
+
+  .skills-expertise-visual[data-reduced-motion="true"]
+    .skills-expertise-board {
+    opacity: 1;
+    visibility: visible;
   }
 
   .skills-tool-wordmark {
