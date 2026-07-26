@@ -119,14 +119,18 @@ export const OverlayNav = ({
         aria-labelledby="site-nav-title"
         tabIndex={-1}
         data-nav-drawer
-        className="fixed right-0 top-0 z-[51] h-[100svh] w-full translate-x-[calc(100%+var(--nav-curve-width))] bg-[#181715] text-[#f3ede3] transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:transform] group-data-[open=true]/nav:translate-x-0 md:w-[min(42rem,44vw)] motion-reduce:duration-0"
+        className="fixed right-0 top-0 z-[51] h-[100svh] w-full bg-[#181715] text-[#f3ede3] [transform:translate(calc(100%+var(--nav-curve-width)),0)_rotate(0.001deg)] transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:transform] group-data-[open=true]/nav:[transform:translate(0,0)_rotate(0.001deg)] md:w-[min(42rem,44vw)] motion-reduce:duration-0"
       >
         <div
           aria-hidden="true"
-          data-nav-curve
-          className="absolute left-px top-0 h-full w-[var(--nav-curve-width)] -translate-x-full overflow-hidden transition-[width] duration-[850ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:width] group-data-[open=true]/nav:w-0 motion-reduce:duration-0"
+          className="absolute left-px top-0 h-full [transform:translateX(-100%)]"
         >
-          <span className="absolute left-0 top-1/2 block h-[150%] w-[775%] -translate-x-[6.5%] -translate-y-1/2 rounded-[50%] bg-[#181715]" />
+          <div
+            data-nav-curve
+            className="relative h-full w-[var(--nav-curve-width)] overflow-hidden transition-all duration-[850ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:width] group-data-[open=true]/nav:w-0 motion-reduce:duration-0"
+          >
+            <div className="absolute left-1/2 top-1/2 z-[1] block h-[150%] w-[775%] rounded-[50%] bg-[#181715] [transform:translate(-6.5%,-50%)]" />
+          </div>
         </div>
 
         <div className="flex h-full flex-col px-6 pb-8 pt-6 sm:px-10 sm:pb-10 sm:pt-8 md:px-[clamp(3rem,6vw,6.5rem)] md:pb-[8vh] md:pt-[7vh]">
