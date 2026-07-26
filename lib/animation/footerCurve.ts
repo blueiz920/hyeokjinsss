@@ -20,7 +20,7 @@ export const initFooterCurve = async ({
     scrollTrigger: {
       trigger: footer,
       start: "top bottom",
-      end: "top top",
+      end: "bottom bottom",
       scrub: true,
       invalidateOnRefresh: true,
     },
