@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import type { NavItem } from "@/data/types";
@@ -45,7 +44,6 @@ export const OverlayNav = ({
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }) => {
   const { scrollTo } = useSectionRegistry();
-  const prefersReducedMotion = useReducedMotion();
   const dialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -119,7 +117,7 @@ export const OverlayNav = ({
       data-open={open ? "true" : "false"}
       aria-hidden={!open}
       inert={!open}
-      className="group/nav invisible pointer-events-none fixed inset-0 z-50 transition-[visibility] delay-[850ms] duration-0 [--nav-curve-width:20vw] data-[open=true]:visible data-[open=true]:pointer-events-auto data-[open=true]:delay-0 md:[--nav-curve-width:6vw] motion-reduce:delay-0"
+      className="group/nav invisible pointer-events-none fixed inset-0 z-50 transition-[visibility] delay-[950ms] duration-0 [--nav-curve-width:20vw] data-[open=true]:visible data-[open=true]:pointer-events-auto data-[open=true]:delay-0 md:[--nav-curve-width:6vw] motion-reduce:delay-0"
     >
       <div
         aria-hidden="true"
@@ -164,16 +162,10 @@ export const OverlayNav = ({
             className="flex min-h-0 flex-1 items-center py-8 sm:py-10"
           >
             <ul className="w-full">
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <li
                   key={item.id}
-                  className="translate-x-[15vw] opacity-0 transition-[opacity,transform] duration-[800ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:transform,opacity] group-data-[open=true]/nav:translate-x-0 group-data-[open=true]/nav:opacity-100 motion-reduce:duration-0 motion-reduce:delay-0"
-                  style={{
-                    transitionDelay:
-                      open && !prefersReducedMotion
-                        ? `${index * 30}ms`
-                        : "0ms",
-                  }}
+                  className="nav-menu-item motion-reduce:duration-0 motion-reduce:delay-0"
                 >
                   <button
                     type="button"

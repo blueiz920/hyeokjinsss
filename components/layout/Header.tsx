@@ -100,8 +100,9 @@ export const Header = () => {
         aria-expanded={open}
         aria-controls="site-navigation"
         data-nav-trigger
+        data-open={open ? "true" : "false"}
         data-visible={isTriggerVisible ? "true" : "false"}
-        className={`group fixed right-[clamp(1rem,2vw,1.8rem)] top-[clamp(1rem,2vw,1.8rem)] z-[60] size-[clamp(4rem,5.5vw,5rem)] overflow-hidden rounded-full text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] rotate-[0.001deg] transition-transform duration-[400ms] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 motion-reduce:duration-0 ${
+        className={`nav-trigger group fixed right-[clamp(1rem,2vw,1.8rem)] top-[clamp(1rem,2vw,1.8rem)] z-[60] size-[clamp(4rem,5.5vw,5rem)] overflow-hidden rounded-full rotate-[0.001deg] transition-transform duration-[400ms] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 motion-reduce:duration-0 ${
           isTriggerVisible
             ? "pointer-events-auto scale-100 [transition-timing-function:cubic-bezier(0.34,1.5,0.64,1)]"
             : "pointer-events-none scale-0 [transition-timing-function:cubic-bezier(0.36,0,0.66,0)]"
@@ -109,11 +110,11 @@ export const Header = () => {
       >
         <span
           aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-[#181715]"
+          className="absolute inset-0 rounded-full bg-[#f3ede3]"
         />
         <span
           aria-hidden="true"
-          className={`absolute inset-0 rounded-full bg-amber-500 transition-transform duration-500 [transition-timing-function:cubic-bezier(0.34,1,0.64,1)] motion-reduce:duration-0 ${
+          className={`nav-trigger-fill absolute inset-0 rounded-full bg-amber-500 motion-reduce:duration-0 ${
             open
               ? "translate-y-0"
               : "translate-y-[105%] group-hover:translate-y-0 group-focus-visible:translate-y-0"
@@ -121,22 +122,10 @@ export const Header = () => {
         />
         <span
           aria-hidden="true"
-          className="absolute left-1/2 top-1/2 h-[8%] w-[35%] -translate-x-1/2 -translate-y-1/2 min-[541px]:w-[30.5%]"
+          className="nav-trigger-bars absolute left-1/2 top-1/2 h-[8%] w-[35%] -translate-x-1/2 -translate-y-1/2 min-[541px]:w-[30.5%]"
         >
-          <span
-            className={`absolute left-0 h-px w-full transition-[top,transform,background-color] duration-300 [transition-timing-function:cubic-bezier(0.7,0,0.3,1)] motion-reduce:duration-0 ${
-              open
-                ? "top-1/2 -translate-y-1/2 -rotate-45 bg-neutral-950"
-                : "top-0 -translate-y-1/2 rotate-0 bg-white group-hover:bg-neutral-950 group-focus-visible:bg-neutral-950"
-            }`}
-          />
-          <span
-            className={`absolute left-0 h-px w-full transition-[top,transform,background-color] duration-300 [transition-timing-function:cubic-bezier(0.7,0,0.3,1)] motion-reduce:duration-0 ${
-              open
-                ? "top-1/2 -translate-y-1/2 rotate-45 bg-neutral-950"
-                : "top-full -translate-y-1/2 rotate-0 bg-white group-hover:bg-neutral-950 group-focus-visible:bg-neutral-950"
-            }`}
-          />
+          <span className="nav-trigger-line motion-reduce:duration-0" />
+          <span className="nav-trigger-line motion-reduce:duration-0" />
         </span>
       </button>
 
