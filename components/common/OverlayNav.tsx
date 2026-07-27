@@ -19,32 +19,46 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+const isElementVisible = (element: HTMLElement) => {
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    style.display !== "none" &&
+    style.visibility !== "hidden"
+  );
+};
+
 export const OverlayNav = ({
   open,
   onClose,
   navItems,
   socialItems,
-  restoreFocusRef,
+  triggerRef,
 }: {
   open: boolean;
   onClose: () => void;
   navItems: NavItem[];
   socialItems: NavSocial[];
-  restoreFocusRef?: React.RefObject<HTMLElement | null>;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
 }) => {
   const { scrollTo } = useSectionRegistry();
   const prefersReducedMotion = useReducedMotion();
   const dialogRef = useRef<HTMLElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
-    const restoreFocusElement = restoreFocusRef?.current;
+    const restoreFocusElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
 
     document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
+    triggerRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -58,9 +72,11 @@ export const OverlayNav = ({
       const dialog = dialogRef.current;
       if (!dialog) return;
 
-      const focusable = Array.from(
+      const dialogItems = Array.from(
         dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      ).filter((element) => element.offsetParent !== null);
+      ).filter(isElementVisible);
+      const trigger = triggerRef.current;
+      const focusable = trigger ? [trigger, ...dialogItems] : dialogItems;
 
       if (!focusable.length) {
         event.preventDefault();
@@ -89,9 +105,9 @@ export const OverlayNav = ({
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
-      restoreFocusElement?.focus();
+      if (restoreFocusElement?.isConnected) restoreFocusElement.focus();
     };
-  }, [open, onClose, restoreFocusRef]);
+  }, [open, onClose, triggerRef]);
 
   const handleClick = (id: string) => {
     onClose();
@@ -134,28 +150,13 @@ export const OverlayNav = ({
         </div>
 
         <div className="flex h-full flex-col px-6 pb-8 pt-6 sm:px-10 sm:pb-10 sm:pt-8 md:px-[clamp(3rem,6vw,6.5rem)] md:pb-[8vh] md:pt-[7vh]">
-          <div className="flex items-center justify-between border-b border-white/15 pb-7 sm:pb-9">
+          <div className="flex min-h-14 items-center border-b border-white/15 pb-7 pr-20 sm:min-h-16 sm:pb-9 sm:pr-24">
             <p
               id="site-nav-title"
               className="text-[0.68rem] uppercase tracking-[0.34em] text-white/45"
             >
               Navigation
             </p>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              className="group relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-amber-500 text-neutral-950 transition-transform duration-300 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-200 sm:size-16"
-              onClick={onClose}
-              aria-label="Close navigation"
-            >
-              <span
-                aria-hidden="true"
-                className="relative block size-5 transition-transform duration-300 group-hover:rotate-90"
-              >
-                <span className="absolute left-1/2 top-1/2 h-px w-full -translate-x-1/2 -translate-y-1/2 rotate-45 bg-current" />
-                <span className="absolute left-1/2 top-1/2 h-px w-full -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-current" />
-              </span>
-            </button>
           </div>
 
           <nav

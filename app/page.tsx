@@ -10,7 +10,7 @@ export default function Home() {
     <div className="bg-neutral-950 text-white">
       <SkipLink />
       <Header />
-      <main id="content" className="pt-13">
+      <main id="content">
         <Intro />
         <ProjectReveal />
         <SkillsHorizontal />
