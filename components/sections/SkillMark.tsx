@@ -40,9 +40,8 @@ const ConceptMark = ({ name }: SkillMarkProps) => {
   if (name === "Rendering") {
     return (
       <svg
-        className="skills-tool-logo"
+        className="skills-tool-logo skills-tool-logo--concept"
         viewBox="0 0 24 24"
-        fill="none"
         aria-hidden="true"
       >
         <rect x="3.5" y="4.5" width="13" height="11" />
@@ -53,9 +52,8 @@ const ConceptMark = ({ name }: SkillMarkProps) => {
 
   return (
     <svg
-      className="skills-tool-logo"
+      className="skills-tool-logo skills-tool-logo--concept"
       viewBox="0 0 24 24"
-      fill="none"
       aria-hidden="true"
     >
       <path d="M12 5v4M6 13V9h12v4" />
