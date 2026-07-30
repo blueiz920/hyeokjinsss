@@ -28,8 +28,8 @@ const assetMarks = {
   },
   Lenis: {
     height: 336,
-    src: "/skills/logos/lenis-wordmark.svg",
-    width: 1360,
+    src: "/skills/logos/lenis-mark.svg",
+    width: 314,
   },
 } satisfies Record<
   string,

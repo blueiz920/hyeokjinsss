@@ -935,7 +935,7 @@ html::-webkit-scrollbar {
   }
 
   .skills-tool-logo--lenis {
-    width: clamp(4.25rem, 16vw, 5.75rem);
+    width: clamp(2.5rem, 9vw, 3.25rem);
     height: auto;
     filter: grayscale(1) saturate(0);
   }
@@ -1511,7 +1511,7 @@ html::-webkit-scrollbar {
   }
 
   .skills-tool-logo--lenis {
-    width: clamp(4.75rem, 7vw, 6.75rem);
+    width: clamp(2.75rem, 3.5vw, 3.5rem);
     height: auto;
   }
 
