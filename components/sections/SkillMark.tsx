@@ -27,9 +27,9 @@ const assetMarks = {
     width: 434,
   },
   Lenis: {
-    height: 32,
-    src: "/skills/logos/lenis.svg",
-    width: 32,
+    height: 336,
+    src: "/skills/logos/lenis-wordmark.svg",
+    width: 1360,
   },
 } satisfies Record<
   string,
