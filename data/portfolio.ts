@@ -140,9 +140,6 @@ export const portfolio: PortfolioData = {
       evidence: "URL 상태 동기화 43개 테스트와 HTTPS 프록시로 배포 이슈를 안정화했습니다.",
     },
   ],
-
-  // skillsSummary:
-  //   "UX를 먼저 세우고, 성능·접근성·유지보수성 기준을 지키는 범위에서 인터랙션을 더합니다.",
   contactEmail: "rnjsgurwls123@naver.com",
   socials: [
     { label: "GitHub", href: "https://github.com/blueiz920" },

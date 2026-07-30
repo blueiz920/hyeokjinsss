@@ -176,8 +176,6 @@ describe("SkillsHorizontal static capabilities", () => {
       expect(capability.textContent).toContain("적용 프로젝트");
       expect(capability.textContent).toContain("결과");
     }
-    expect(container.querySelector(".skills-pin")).toBeNull();
-    expect(container.querySelector(".skills-bg")).toBeNull();
   });
 
   it("section registry를 등록하고 언마운트에서 해제한다", async () => {

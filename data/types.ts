@@ -36,7 +36,6 @@ export type PortfolioData = {
   introHighlights: string[];
   projects: Project[];
   skills: SkillCapability[];
-  // skillsSummary: string;
   contactEmail: string;
   socials: ProjectLink[];
   nav: NavItem[];
