@@ -99,15 +99,18 @@ export const ProjectDesktopList = ({
 
   return (
     <>
-      <ul className="project-desktop-list" aria-label="프로젝트 목록">
+      <ul
+        className="project-desktop-list"
+        aria-label="프로젝트 목록"
+        onPointerMove={movePreview}
+        onPointerLeave={stopPreview}
+      >
         {projects.map((project, index) => (
           <li
             key={project.slug}
             ref={(node) => setRowRef(index, node)}
             className="project-desktop-item"
             onPointerEnter={(event) => startPreview(index, event)}
-            onPointerMove={movePreview}
-            onPointerLeave={stopPreview}
           >
             <article
               className="project-desktop-row"
