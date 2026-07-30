@@ -8,7 +8,7 @@ import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SkillMark } from "./SkillMark";
 
-export const SkillsHorizontal = () => {
+export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();

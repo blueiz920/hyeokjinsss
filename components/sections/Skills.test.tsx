@@ -10,7 +10,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { SkillsHorizontal } from "./SkillsHorizontal";
+import { Skills } from "./Skills";
 
 const skillsMocks = vi.hoisted(() => ({
   initSkillsVisual: vi.fn(),
@@ -97,7 +97,7 @@ const mountSkills = async () => {
   mountedRoots.push(root);
 
   await act(async () => {
-    root.render(<SkillsHorizontal />);
+    root.render(<Skills />);
   });
 
   return { container, root };
@@ -128,7 +128,7 @@ afterEach(async () => {
   document.body.replaceChildren();
 });
 
-describe("SkillsHorizontal static capabilities", () => {
+describe("Skills static capabilities", () => {
   it("인트로, 포커스 가능한 기술 보드, 다섯 개 역량 서사를 순서대로 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");

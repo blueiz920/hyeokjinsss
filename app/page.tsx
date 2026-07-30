@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { Intro } from "@/components/sections/Intro";
 import { ProjectReveal } from "@/components/sections/ProjectReveal";
-import { SkillsHorizontal } from "@/components/sections/SkillsHorizontal";
+import { Skills } from "@/components/sections/Skills";
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
       <main id="content">
         <Intro />
         <ProjectReveal />
-        <SkillsHorizontal />
+        <Skills />
       </main>
       <Footer />
     </div>
