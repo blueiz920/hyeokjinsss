@@ -42,6 +42,7 @@ type TriggerOptions = {
   end: string;
   onEnter: () => void;
   onLeaveBack: () => void;
+  onRefresh: (self: { scroll: () => number; start: number }) => void;
   start: string;
 };
 
@@ -119,10 +120,41 @@ describe("initSkillsVisual", () => {
     expect(harness.timeline.play).toHaveBeenCalledOnce();
     options.onLeaveBack();
     expect(harness.timeline.reverse).toHaveBeenCalledOnce();
+    options.onRefresh({ scroll: () => 120, start: 100 });
+    expect(harness.timeline.progress).toHaveBeenCalledWith(1);
+    expect(harness.timeline.pause).toHaveBeenCalledOnce();
 
     cleanup();
     expect(harness.trigger.kill).toHaveBeenCalledOnce();
     expect(harness.timeline.kill).toHaveBeenCalledOnce();
+  });
+
+  it("예약된 refresh를 실행하고 필수 DOM이 없으면 정적 상태를 유지한다", async () => {
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        callback(0);
+        return 1;
+      }),
+    );
+
+    const media = createMedia();
+    const harness = createMotionHarness();
+    vi.stubGlobal("matchMedia", vi.fn(() => media.media));
+
+    const cleanup = await initSkillsVisual({
+      prefersReducedMotion: false,
+      root: createVisualDom(),
+    });
+
+    expect(harness.ScrollTrigger.refresh).toHaveBeenCalledOnce();
+    cleanup();
+
+    const staticCleanup = await initSkillsVisual({
+      prefersReducedMotion: false,
+      root: document.createElement("section"),
+    });
+    expect(() => staticCleanup()).not.toThrow();
   });
 
   it("모바일 전환 시 inline 상태를 정리하고 정적 보드로 복귀한다", async () => {

@@ -12,8 +12,8 @@ export default defineConfig({
     coverage: {
       include: [
         "hooks/useScrollRuntime.tsx",
-        "lib/animation/skillsBackground.ts",
         "lib/animation/scrollRuntime.ts",
+        "lib/animation/skillsVisual.ts",
       ],
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
