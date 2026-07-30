@@ -1,0 +1,93 @@
+@layer components {
+  .nav-trigger {
+    color: #181715;
+    box-shadow:
+      0 0.75rem 2rem rgba(0, 0, 0, 0.28),
+      inset 0 0 0 1px rgba(24, 23, 21, 0.14);
+  }
+
+  .nav-trigger-fill {
+    transition: translate 500ms cubic-bezier(0.34, 1, 0.64, 1);
+    will-change: translate;
+  }
+
+  .nav-trigger-line {
+    position: absolute;
+    left: 50%;
+    width: 100%;
+    height: 1px;
+    background: #181715;
+    transform: translate(-50%, -50%) rotate(0.001deg);
+    transition:
+      top 300ms cubic-bezier(0.7, 0, 0.3, 1),
+      transform 300ms cubic-bezier(0.7, 0, 0.3, 1);
+    will-change: top, transform;
+  }
+
+  .nav-trigger-line:first-child {
+    top: 0;
+  }
+
+  .nav-trigger-line:last-child {
+    top: 100%;
+  }
+
+  .nav-trigger[data-open="true"] .nav-trigger-line:first-child {
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+
+  .nav-trigger[data-open="true"] .nav-trigger-line:last-child {
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  .nav-menu-item {
+    transform: translate(15vw, 0) rotate(0.001deg);
+    transition: transform 800ms cubic-bezier(0.7, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  [data-open="true"] .nav-menu-item {
+    transform: translate(0, 0) rotate(0.001deg);
+  }
+
+  .nav-menu-item:nth-child(2) {
+    transition-delay: 30ms;
+  }
+
+  .nav-menu-item:nth-child(3) {
+    transition-delay: 60ms;
+  }
+
+  .nav-menu-item:nth-child(4) {
+    transition-delay: 90ms;
+  }
+
+  @media (max-width: 540px) {
+    [data-open="true"] .nav-menu-item:nth-child(1) {
+      transition-delay: 100ms;
+    }
+
+    [data-open="true"] .nav-menu-item:nth-child(2) {
+      transition-delay: 130ms;
+    }
+
+    [data-open="true"] .nav-menu-item:nth-child(3) {
+      transition-delay: 160ms;
+    }
+
+    [data-open="true"] .nav-menu-item:nth-child(4) {
+      transition-delay: 190ms;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-trigger-fill,
+    .nav-trigger-line,
+    .nav-menu-item {
+      transition-delay: 0ms;
+      transition-duration: 0ms;
+    }
+  }
+}

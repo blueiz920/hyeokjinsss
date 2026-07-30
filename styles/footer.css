@@ -1,0 +1,108 @@
+@layer components {
+  .site-footer {
+    @apply relative z-10 bg-[#f3ede3] text-neutral-950;
+    isolation: isolate;
+  }
+
+  .site-footer-curve {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 10vh;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateY(-1px);
+    will-change: height;
+  }
+
+  .site-footer-curve-shape {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 150%;
+    height: 750%;
+    border-radius: 50%;
+    background: rgb(10 10 10);
+    transform: translate(-50%, -86.666%);
+  }
+
+  @media (max-width: 720px) {
+    .site-footer-curve {
+      height: 7.5vh;
+    }
+  }
+
+  .site-footer-action {
+    @apply absolute right-0 top-0 flex size-36 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-neutral-950 text-sm font-semibold text-[#f3ede3] md:size-44 md:text-base;
+    isolation: isolate;
+    transition: color 300ms ease;
+  }
+
+  .site-footer-action::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: 0;
+    border-radius: inherit;
+    background: rgb(245 158 11);
+    transform: translateY(-105%);
+    transition: transform 500ms cubic-bezier(0.34, 1, 0.64, 1);
+  }
+
+  .site-footer-action:hover::before,
+  .site-footer-action:focus-visible::before {
+    transform: translateY(0);
+  }
+
+  .site-footer-action:hover,
+  .site-footer-action:focus-visible {
+    color: rgb(10 10 10);
+  }
+
+  .site-footer :focus-visible {
+    outline-color: rgb(10 10 10);
+  }
+
+  .site-footer-pill {
+    @apply inline-flex w-full items-center justify-center rounded-full border border-neutral-950/25 px-6 py-4 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-950 hover:text-[#f3ede3] sm:w-fit;
+  }
+}
+@media (min-width: 1024px) {
+  .site-footer,
+  .site-footer-content {
+    min-height: calc(100svh);
+  }
+
+  .site-footer-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer-meta {
+    margin-top: auto;
+  }
+
+  .site-footer-curve-shape {
+    background: linear-gradient(
+      90deg,
+      #56575b 0 50%,
+      rgb(10 10 10) 50% 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-footer-action::before {
+    transition: none;
+  }
+
+  .site-footer-action [aria-hidden="true"] {
+    transform: none !important;
+    transition: none;
+  }
+
+  .site-footer-curve {
+    will-change: auto;
+  }
+}
