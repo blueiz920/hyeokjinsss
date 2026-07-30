@@ -129,7 +129,7 @@ afterEach(async () => {
 });
 
 describe("SkillsHorizontal static capabilities", () => {
-  it("인트로, 장식 기술 보드, 다섯 개 역량 서사를 순서대로 렌더링한다", async () => {
+  it("인트로, 포커스 가능한 기술 보드, 다섯 개 역량 서사를 순서대로 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
     const grid = container.querySelector(".skills-expertise-grid");
@@ -150,7 +150,13 @@ describe("SkillsHorizontal static capabilities", () => {
     expect(grid?.children[2]).toBe(content);
     expect(photo?.getAttribute("alt")).toBe("");
     expect(photo?.getAttribute("src")).toContain("skills-editorial-v2.webp");
-    expect(board?.getAttribute("aria-hidden")).toBe("true");
+    expect(visual?.hasAttribute("aria-hidden")).toBe(false);
+    expect(board?.getAttribute("role")).toBe("group");
+    expect(board?.getAttribute("tabindex")).toBe("0");
+    expect(board?.getAttribute("aria-labelledby")).toBe("skills-stack-label");
+    expect(
+      container.querySelector("#skills-stack-label")?.textContent,
+    ).toBe("Selected stack");
     expect(capabilities).toHaveLength(5);
     expect(
       container.querySelectorAll(
@@ -158,7 +164,13 @@ describe("SkillsHorizontal static capabilities", () => {
       ),
     ).toHaveLength(5);
     expect(capabilities[0]?.textContent).toContain("Product UI");
-    expect(container.querySelectorAll("[data-skill-tools] span")).toHaveLength(10);
+    expect(container.querySelectorAll("[data-skill-tool]")).toHaveLength(10);
+    expect(
+      container.querySelectorAll("[data-skill-tool] .skills-tool-logo"),
+    ).toHaveLength(10);
+    expect(
+      container.querySelectorAll("[data-skill-tool] .sr-only"),
+    ).toHaveLength(10);
     for (const capability of capabilities) {
       expect(capability.querySelector(".skills-capability-tools")).not.toBeNull();
       expect(capability.textContent).toContain("적용 프로젝트");

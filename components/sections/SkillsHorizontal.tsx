@@ -6,6 +6,7 @@ import { portfolio } from "@/data/portfolio";
 import { initSkillsVisual } from "@/lib/animation/skillsVisual";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { SkillMark } from "./SkillMark";
 
 export const SkillsHorizontal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -71,7 +72,6 @@ export const SkillsHorizontal = () => {
         <div
           className="skills-expertise-visual"
           data-reduced-motion={prefersReducedMotion ? "true" : undefined}
-          aria-hidden="true"
         >
           <div className="skills-expertise-visual-inner">
             <div className="skills-expertise-photo" data-skill-photo>
@@ -86,16 +86,38 @@ export const SkillsHorizontal = () => {
             <div
               className="skills-expertise-board"
               data-skill-board
-              aria-hidden="true"
+              role="group"
+              aria-labelledby="skills-stack-label"
+              tabIndex={0}
             >
-              <p className="skills-expertise-label">Selected stack</p>
-              <div className="skills-expertise-tools" data-skill-tools>
+              <p
+                id="skills-stack-label"
+                className="skills-expertise-label"
+              >
+                Selected stack
+              </p>
+              <div
+                className="skills-expertise-tools"
+                data-skill-tools
+                role="list"
+              >
                 {portfolio.skills
                   .flatMap((skill) => skill.tools)
                   .map((tool) => (
-                    <span key={tool} className="skills-tool-wordmark">
-                      {tool}
-                    </span>
+                    <div
+                      key={tool}
+                      className="skills-tool"
+                      data-skill-tool
+                      role="listitem"
+                    >
+                      <span className="skills-tool-stage" aria-hidden="true">
+                        <span className="skills-tool-logo-layer">
+                          <SkillMark name={tool} />
+                        </span>
+                        <span className="skills-tool-name-layer">{tool}</span>
+                      </span>
+                      <span className="sr-only">{tool}</span>
+                    </div>
                   ))}
               </div>
             </div>
