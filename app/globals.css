@@ -41,6 +41,17 @@ html::-webkit-scrollbar {
     @apply py-24 md:py-36;
   }
 
+  @media (min-width: 541px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    [data-magnetic],
+    [data-magnetic-label] {
+      will-change: transform;
+    }
+
+    [data-magnetic-label] {
+      display: inline-flex;
+    }
+  }
+
   .nav-trigger {
     color: #181715;
     box-shadow:

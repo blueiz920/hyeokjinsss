@@ -71,9 +71,15 @@ export const Footer = () => {
         <div className="relative mt-16 border-t border-neutral-950/20 pt-24 md:mt-20 md:pt-28">
           <a
             href={`mailto:${portfolio.contactEmail}`}
+            data-magnetic
+            data-magnetic-strength="100"
+            data-magnetic-label-strength="50"
             className="site-footer-action group"
           >
-            <span className="relative z-10 flex items-center gap-2">
+            <span
+              data-magnetic-label
+              className="relative z-10 flex items-center gap-2"
+            >
               연락하기
               <span
                 aria-hidden="true"
@@ -94,8 +100,11 @@ export const Footer = () => {
           <a
             className="site-footer-pill"
             href={`mailto:${portfolio.contactEmail}`}
+            data-magnetic
+            data-magnetic-strength="25"
+            data-magnetic-label-strength="15"
           >
-            {portfolio.contactEmail}
+            <span data-magnetic-label>{portfolio.contactEmail}</span>
           </a>
 
           <nav aria-label="Footer links" className="space-y-3">
@@ -120,8 +129,11 @@ export const Footer = () => {
                           ? `${social.label} 새 탭에서 열기`
                           : undefined
                       }
+                      data-magnetic
+                      data-magnetic-strength="20"
+                      data-magnetic-label-strength="10"
                     >
-                      {social.label}
+                      <span data-magnetic-label>{social.label}</span>
                     </a>
                   );
                 })}

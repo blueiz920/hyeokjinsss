@@ -47,10 +47,13 @@ export const Header = () => {
           <button
             type="button"
             onClick={() => scrollTo("intro")}
+            data-magnetic
+            data-magnetic-strength="20"
+            data-magnetic-label-strength="10"
             className="text-sm font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300"
             aria-label="Scroll to intro"
           >
-            {portfolio.name}
+            <span data-magnetic-label>{portfolio.name}</span>
           </button>
 
           <nav
@@ -64,9 +67,12 @@ export const Header = () => {
                   key={item.id}
                   type="button"
                   onClick={() => scrollTo(item.id)}
+                  data-magnetic
+                  data-magnetic-strength="20"
+                  data-magnetic-label-strength="10"
                   className="relative py-2 text-sm font-medium text-white transition-opacity after:absolute after:-bottom-0.5 after:left-1/2 after:size-1 after:-translate-x-1/2 after:scale-0 after:rounded-full after:bg-amber-500 after:transition-transform hover:opacity-75 hover:after:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 focus-visible:after:scale-100"
                 >
-                  {item.label}
+                  <span data-magnetic-label>{item.label}</span>
                 </button>
               ))}
           </nav>
@@ -89,45 +95,55 @@ export const Header = () => {
         </div>
       </header>
 
-      <button
-        ref={circleRef}
-        type="button"
-        onClick={toggleMenu}
-        tabIndex={isTriggerVisible ? 0 : -1}
-        aria-hidden={!isTriggerVisible}
-        aria-label={open ? "Close navigation" : "Open navigation"}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls="site-navigation"
-        data-nav-trigger
-        data-open={open ? "true" : "false"}
-        data-visible={isTriggerVisible ? "true" : "false"}
-        className={`nav-trigger group fixed right-[clamp(1rem,2vw,1.8rem)] top-[clamp(1rem,2vw,1.8rem)] z-[60] size-[clamp(4rem,5.5vw,5rem)] overflow-hidden rounded-full rotate-[0.001deg] transition-transform duration-[400ms] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 motion-reduce:duration-0 ${
-          isTriggerVisible
-            ? "pointer-events-auto scale-100 [transition-timing-function:cubic-bezier(0.34,1.5,0.64,1)]"
-            : "pointer-events-none scale-0 [transition-timing-function:cubic-bezier(0.36,0,0.66,0)]"
+      <div
+        data-magnetic
+        data-magnetic-strength="50"
+        data-magnetic-label-strength="25"
+        className={`fixed right-[clamp(1rem,2vw,1.8rem)] top-[clamp(1rem,2vw,1.8rem)] z-[60] size-[clamp(4rem,5.5vw,5rem)] ${
+          isTriggerVisible ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-[#f3ede3]"
-        />
-        <span
-          aria-hidden="true"
-          className={`nav-trigger-fill absolute inset-0 rounded-full bg-amber-500 motion-reduce:duration-0 ${
-            open
-              ? "translate-y-0"
-              : "translate-y-[105%] group-hover:translate-y-0 group-focus-visible:translate-y-0"
+        <button
+          ref={circleRef}
+          type="button"
+          onClick={toggleMenu}
+          tabIndex={isTriggerVisible ? 0 : -1}
+          aria-hidden={!isTriggerVisible}
+          aria-label={open ? "Close navigation" : "Open navigation"}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls="site-navigation"
+          data-nav-trigger
+          data-open={open ? "true" : "false"}
+          data-visible={isTriggerVisible ? "true" : "false"}
+          className={`nav-trigger group size-full overflow-hidden rounded-full rotate-[0.001deg] transition-transform duration-[400ms] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 motion-reduce:duration-0 ${
+            isTriggerVisible
+              ? "pointer-events-auto scale-100 [transition-timing-function:cubic-bezier(0.34,1.5,0.64,1)]"
+              : "pointer-events-none scale-0 [transition-timing-function:cubic-bezier(0.36,0,0.66,0)]"
           }`}
-        />
-        <span
-          aria-hidden="true"
-          className="nav-trigger-bars absolute left-1/2 top-1/2 h-[8%] w-[35%] -translate-x-1/2 -translate-y-1/2 min-[541px]:w-[30.5%]"
         >
-          <span className="nav-trigger-line motion-reduce:duration-0" />
-          <span className="nav-trigger-line motion-reduce:duration-0" />
-        </span>
-      </button>
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 rounded-full bg-[#f3ede3]"
+          />
+          <span
+            aria-hidden="true"
+            className={`nav-trigger-fill absolute inset-0 rounded-full bg-amber-500 motion-reduce:duration-0 ${
+              open
+                ? "translate-y-0"
+                : "translate-y-[105%] group-hover:translate-y-0 group-focus-visible:translate-y-0"
+            }`}
+          />
+          <span
+            aria-hidden="true"
+            data-magnetic-label
+            className="nav-trigger-bars absolute left-1/2 top-1/2 h-[8%] w-[35%] -translate-x-1/2 -translate-y-1/2 min-[541px]:w-[30.5%]"
+          >
+            <span className="nav-trigger-line motion-reduce:duration-0" />
+            <span className="nav-trigger-line motion-reduce:duration-0" />
+          </span>
+        </button>
+      </div>
 
       <OverlayNav
         open={open}

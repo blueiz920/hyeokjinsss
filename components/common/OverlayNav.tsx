@@ -172,7 +172,14 @@ export const OverlayNav = ({
                     onClick={() => handleClick(item.id)}
                     className="group flex w-full items-center justify-between py-1 text-left text-[clamp(2.6rem,10vw,4.4rem)] font-medium leading-[1.17] tracking-[-0.045em] text-[#f3ede3] transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 md:text-[clamp(3.4rem,5vw,5.2rem)]"
                   >
-                    <span>{item.label}</span>
+                    <span
+                      data-magnetic
+                      data-magnetic-strength="24"
+                      data-magnetic-label-strength="12"
+                      className="inline-flex"
+                    >
+                      <span data-magnetic-label>{item.label}</span>
+                    </span>
                     <span
                       aria-hidden="true"
                       className="size-2.5 scale-0 rounded-full bg-amber-500 opacity-0 transition duration-300 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100"
@@ -200,9 +207,12 @@ export const OverlayNav = ({
                         rel={
                           isExternalLink ? "noopener noreferrer" : undefined
                         }
+                        data-magnetic
+                        data-magnetic-strength="20"
+                        data-magnetic-label-strength="10"
                         className="transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300"
                       >
-                        {social.label}
+                        <span data-magnetic-label>{social.label}</span>
                       </a>
                     </li>
                   );

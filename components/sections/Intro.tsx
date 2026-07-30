@@ -181,15 +181,21 @@ export const Intro = () => {
           <button
             type="button"
             onClick={() => scrollTo("projects")}
+            data-magnetic
+            data-magnetic-strength="25"
+            data-magnetic-label-strength="15"
             className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
           >
-            프로젝트 보기
+            <span data-magnetic-label>프로젝트 보기</span>
           </button>
           <a
             href={`mailto:${portfolio.contactEmail}`}
+            data-magnetic
+            data-magnetic-strength="25"
+            data-magnetic-label-strength="15"
             className="rounded-full border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/60"
           >
-            연락하기
+            <span data-magnetic-label>연락하기</span>
           </a>
         </div>
 
