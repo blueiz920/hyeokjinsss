@@ -1,3 +1,8 @@
+html[data-skills-locked="true"],
+html[data-skills-locked="true"] body {
+  overflow: hidden;
+}
+
 @layer components {
   .skills-static-section {
     background: rgb(10 10 10);
@@ -321,6 +326,14 @@
   .skills-static-section[data-skill-entry="staged"]
     .skills-title-line {
     max-width: none;
+  }
+
+  .skills-static-section[data-skill-entry-muted="true"]
+    .skills-expertise-intro,
+  .skills-static-section[data-skill-entry-muted="true"]
+    .skills-expertise-visual-inner {
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 
   .skills-expertise-title {

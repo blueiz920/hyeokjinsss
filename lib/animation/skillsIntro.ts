@@ -1,18 +1,27 @@
 import { loadGsap } from "@/lib/gsap/loadGsap";
+import {
+  SECTION_INTENT_EVENT,
+  type SectionIntentDetail,
+} from "@/lib/navigation/sectionIntent";
 
 type SkillsIntroOptions = {
+  lockScroll: () => void;
   prefersReducedMotion: boolean;
   root: HTMLElement;
+  unlockScroll: () => void;
 };
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
-const ENTRY_START = "top 5%";
+const ARM_START = "top 92%";
+const ENTRY_START = "top 1%";
 const ENTRY_EASE = "power3.inOut";
 
-// 섹션 진입을 시작 신호로 삼고 제목과 사진을 시간 기반 장면으로 펼친다.
+// 섹션을 목적지로 진입할 때만 3.1초 장면을 재생하고 다른 이동은 통과시킨다.
 export const initSkillsIntro = async ({
+  lockScroll: lockRuntime,
   prefersReducedMotion,
   root,
+  unlockScroll: unlockRuntime,
 }: SkillsIntroOptions) => {
   if (typeof window === "undefined" || prefersReducedMotion) return () => {};
 
@@ -50,10 +59,16 @@ export const initSkillsIntro = async ({
   gsap.registerPlugin(Flip);
   const media = window.matchMedia(DESKTOP_QUERY);
   let refreshFrame = 0;
+  let lockTimer = 0;
   let entryTimeline: ReturnType<typeof gsap.timeline> | null = null;
-  let entryTrigger: ReturnType<typeof ScrollTrigger.create> | null = null;
   let layoutTween: ReturnType<typeof Flip.from> | null = null;
-  let isComplete = false;
+  let armTrigger: ReturnType<typeof ScrollTrigger.create> | null = null;
+  let entryTrigger: ReturnType<typeof ScrollTrigger.create> | null = null;
+  let canEnter = false;
+  let hasPlayed = false;
+  let isArmed = false;
+  let ownsLock = false;
+  let isRunning = false;
 
   const clearProps = () => {
     gsap.set([title, ...titleLines, ...titleChars], {
@@ -62,7 +77,7 @@ export const initSkillsIntro = async ({
     });
     gsap.set(visual, {
       clearProps:
-        "position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
+        "opacity,visibility,position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
     });
     gsap.set([eyebrow, description, photo], {
       clearProps:
@@ -70,32 +85,69 @@ export const initSkillsIntro = async ({
     });
   };
 
-  const setFinal = () => {
-    isComplete = true;
-    root.dataset.skillEntry = "complete";
-    clearProps();
-  };
-
-  const clearMotion = () => {
-    if (refreshFrame) {
-      cancelAnimationFrame(refreshFrame);
-      refreshFrame = 0;
+  const unlockScroll = () => {
+    if (lockTimer) {
+      window.clearTimeout(lockTimer);
+      lockTimer = 0;
     }
-    entryTrigger?.kill();
-    entryTimeline?.kill();
-    layoutTween?.kill();
-    entryTrigger = null;
-    entryTimeline = null;
-    layoutTween = null;
-    isComplete = false;
+    if (!ownsLock) return;
+
+    ownsLock = false;
+    unlockRuntime();
+    delete document.documentElement.dataset.skillsLocked;
+  };
+
+  const lockScroll = () => {
+    if (ownsLock) return;
+
+    ownsLock = true;
+    lockRuntime();
+    document.documentElement.dataset.skillsLocked = "true";
+    lockTimer = window.setTimeout(unlockScroll, 3600);
+  };
+
+  const disarmMotion = () => {
+    if (isRunning) return;
+
+    isArmed = false;
     delete root.dataset.skillEntry;
+    delete root.dataset.skillEntryMuted;
     clearProps();
   };
 
-  const createMotion = () => {
-    clearMotion();
-    if (!media.matches) return;
+  const armMotion = () => {
+    if (hasPlayed || isRunning || isArmed) return isArmed;
 
+    const target = document.documentElement.dataset.sectionTarget;
+    if ((target && target !== "skills") || (!canEnter && target !== "skills")) {
+      return false;
+    }
+
+    isArmed = true;
+    root.dataset.skillEntry = "armed";
+    gsap.set(titleChars, {
+      yPercent: 120,
+      willChange: "transform",
+    });
+    gsap.set([eyebrow, description], {
+      autoAlpha: 0,
+      willChange: "transform,opacity",
+      y: 20,
+    });
+    gsap.set(visual, {
+      autoAlpha: 0,
+      clipPath: "inset(100% 0% 0% 0%)",
+      willChange: "clip-path,transform",
+    });
+    gsap.set(photo, {
+      scale: 0.82,
+      transformOrigin: "50% 50%",
+      willChange: "transform",
+    });
+    return true;
+  };
+
+  const stageMotion = () => {
     root.dataset.skillEntry = "staged";
     gsap.set(title, {
       autoAlpha: 1,
@@ -109,67 +161,62 @@ export const initSkillsIntro = async ({
       yPercent: -50,
       zIndex: 2,
     });
-    gsap.set(titleChars, {
-      yPercent: 120,
-      willChange: "transform",
-    });
-    gsap.set([eyebrow, description], {
-      autoAlpha: 0,
-      willChange: "transform,opacity",
-      y: 20,
-    });
     gsap.set(visual, {
-      clipPath: "inset(50% 50% 50% 50%)",
       height: () => Math.min(window.innerHeight * 0.54, 440),
       left: "50%",
       position: "fixed",
       top: "50%",
       transformOrigin: "50% 50%",
       width: () => Math.min(root.clientWidth * 0.2, 288),
-      willChange: "clip-path,transform",
       xPercent: -50,
       yPercent: -50,
       zIndex: 1,
     });
-    gsap.set(photo, {
-      scale: 0.82,
-      transformOrigin: "50% 50%",
-      willChange: "transform",
-    });
+  };
 
-    entryTimeline = gsap
+  const finishMotion = () => {
+    isArmed = false;
+    isRunning = false;
+    unlockScroll();
+    delete root.dataset.skillEntryMuted;
+    gsap.set(titleChars, { clearProps: "transform,willChange" });
+  };
+
+  const buildTimeline = () =>
+    gsap
       .timeline({ paused: true })
       .to(
         titleChars,
         {
-          duration: 1,
+          duration: 0.7,
           ease: ENTRY_EASE,
-          stagger: 0.05,
+          stagger: 0.03,
           yPercent: 0,
         },
-        0.3,
+        0.2,
       )
       .add("split")
       .to(
         titleLines[0],
-        { duration: 1, ease: ENTRY_EASE, x: "-16rem" },
+        { duration: 0.75, ease: ENTRY_EASE, x: "-16rem" },
         "split",
       )
       .to(
         titleLines[1],
-        { duration: 1, ease: ENTRY_EASE, x: "16rem" },
+        { duration: 0.75, ease: ENTRY_EASE, x: "16rem" },
         "split",
       )
+      .set(visual, { autoAlpha: 1 }, "split")
       .to(
         visual,
         {
           clipPath: "inset(0% 0% 0% 0%)",
-          duration: 1,
+          duration: 0.75,
           ease: ENTRY_EASE,
         },
         "split",
       )
-      .to(photo, { duration: 1, ease: ENTRY_EASE, scale: 0.9 }, "split")
+      .to(photo, { duration: 0.75, ease: ENTRY_EASE, scale: 0.9 }, "split")
       .add("layout")
       .call(
         () => {
@@ -177,7 +224,7 @@ export const initSkillsIntro = async ({
           root.dataset.skillEntry = "complete";
           gsap.set([title, ...titleLines, visual], {
             clearProps:
-              "position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
+              "opacity,visibility,position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
           });
           layoutTween = Flip.from(state, {
             absolute: true,
@@ -193,35 +240,105 @@ export const initSkillsIntro = async ({
       .to(photo, { duration: 1, ease: ENTRY_EASE, scale: 1 }, "layout")
       .to(
         eyebrow,
-        { autoAlpha: 1, duration: 0.45, ease: "power3.out", y: 0 },
-        "layout+=0.5",
+        { autoAlpha: 1, duration: 0.35, ease: "power3.out", y: 0 },
+        "layout+=0.48",
       )
       .to(
         description,
-        { autoAlpha: 1, duration: 0.45, ease: "power3.out", y: 0 },
-        "layout+=0.6",
+        { autoAlpha: 1, duration: 0.35, ease: "power3.out", y: 0 },
+        "layout+=0.58",
       )
-      .call(
-        () => {
-          isComplete = true;
-          gsap.set(titleChars, { clearProps: "transform,willChange" });
-        },
-        [],
-        "layout+=1",
-      );
+      .call(finishMotion, [], "layout+=1");
 
+  const startMotion = () => {
+    if (hasPlayed || isRunning) return;
+    if (!armMotion()) return;
+
+    hasPlayed = true;
+    isRunning = true;
+    stageMotion();
+    lockScroll();
+    entryTimeline = buildTimeline();
+    entryTimeline.play();
+    armTrigger?.kill();
+    entryTrigger?.kill();
+    armTrigger = null;
+    entryTrigger = null;
+  };
+
+  const handleIntent = (event: Event) => {
+    if (!media.matches) return;
+
+    const { id, phase } = (event as CustomEvent<SectionIntentDetail>).detail;
+    if (phase === "start" && id !== "skills") {
+      if (isRunning) {
+        root.dataset.skillEntryMuted = "true";
+        unlockScroll();
+      } else if (isArmed) {
+        disarmMotion();
+      }
+      return;
+    }
+
+    if (id !== "skills" || hasPlayed) return;
+
+    const sectionTop = root.getBoundingClientRect().top;
+    if (phase === "start" && Math.abs(sectionTop) <= window.innerHeight * 0.08) {
+      canEnter = true;
+      if (armMotion()) startMotion();
+      return;
+    }
+
+    if (phase === "end") {
+      canEnter = true;
+      if (armMotion()) startMotion();
+    }
+  };
+
+  const clearMotion = () => {
+    if (refreshFrame) {
+      cancelAnimationFrame(refreshFrame);
+      refreshFrame = 0;
+    }
+    armTrigger?.kill();
+    entryTrigger?.kill();
+    entryTimeline?.kill();
+    layoutTween?.kill();
+    armTrigger = null;
+    entryTrigger = null;
+    entryTimeline = null;
+    layoutTween = null;
+    canEnter = false;
+    hasPlayed = false;
+    isArmed = false;
+    isRunning = false;
+    unlockScroll();
+    delete root.dataset.skillEntry;
+    delete root.dataset.skillEntryMuted;
+    clearProps();
+  };
+
+  const createMotion = () => {
+    clearMotion();
+    if (!media.matches) return;
+
+    canEnter = root.getBoundingClientRect().top > 0;
+    armTrigger = ScrollTrigger.create({
+      onEnter: armMotion,
+      onLeaveBack: () => {
+        if (hasPlayed) return;
+        canEnter = true;
+        disarmMotion();
+      },
+      start: ARM_START,
+      trigger: root,
+    });
     entryTrigger = ScrollTrigger.create({
-      invalidateOnRefresh: true,
-      once: true,
-      onEnter: () => entryTimeline?.play(),
-      onRefresh: (self) => {
-        if (!isComplete && self.scroll() > self.start + 1) {
-          entryTimeline?.kill();
-          layoutTween?.kill();
-          entryTimeline = null;
-          layoutTween = null;
-          setFinal();
-        }
+      onEnter: startMotion,
+      onLeaveBack: () => {
+        if (hasPlayed) return;
+        canEnter = true;
+        disarmMotion();
       },
       start: ENTRY_START,
       trigger: root,
@@ -233,10 +350,12 @@ export const initSkillsIntro = async ({
     });
   };
 
+  document.addEventListener(SECTION_INTENT_EVENT, handleIntent);
   media.addEventListener("change", createMotion);
   createMotion();
 
   return () => {
+    document.removeEventListener(SECTION_INTENT_EVENT, handleIntent);
     media.removeEventListener("change", createMotion);
     clearMotion();
   };

@@ -32,6 +32,8 @@ const runtimeMocks = vi.hoisted(() => ({
   lenisRaf: vi.fn(),
   lenisResize: vi.fn(),
   lenisScrollTo: vi.fn(),
+  lenisStart: vi.fn(),
+  lenisStop: vi.fn(),
 }));
 
 vi.mock("./useReducedMotion", () => ({
@@ -69,6 +71,14 @@ vi.mock("lenis", () => ({
     // ScrollTrigger의 스크롤 쓰기가 Lenis로 위임되는지 기록한다.
     scrollTo(value: number, options: unknown) {
       runtimeMocks.lenisScrollTo(value, options);
+    }
+
+    start() {
+      runtimeMocks.lenisStart();
+    }
+
+    stop() {
+      runtimeMocks.lenisStop();
     }
 
     // Provider cleanup에서 Lenis 인스턴스를 정확히 한 번 파기하는지 기록한다.
@@ -292,6 +302,20 @@ describe("ScrollRuntimeProvider", () => {
 });
 
 describe("startScrollRuntime", () => {
+  it("lock과 unlock을 활성 Lenis 인스턴스에 전달한다", async () => {
+    const runtime = startScrollRuntime({ prefersReducedMotion: false });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    runtime.lockScroll();
+    runtime.unlockScroll();
+
+    expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
+    runtime.dispose();
+  });
+
   it("dispose를 여러 번 호출해도 runtime 자원을 한 번만 정리한다", async () => {
     const runtime = startScrollRuntime({ prefersReducedMotion: false });
     await act(async () => {

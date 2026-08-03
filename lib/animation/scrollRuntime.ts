@@ -7,6 +7,8 @@ type ScrollRuntimeOptions = {
 
 type ScrollRuntime = {
   dispose: () => void;
+  lockScroll: () => void;
+  unlockScroll: () => void;
 };
 
 type LenisInstance = InstanceType<typeof Lenis>;
@@ -20,6 +22,17 @@ export const startScrollRuntime = ({
   let lenis: LenisInstance | null = null;
   let rafId: number | null = null;
   let removeRefreshListener: (() => void) | null = null;
+  let isLocked = false;
+
+  const lockScroll = () => {
+    isLocked = true;
+    lenis?.stop();
+  };
+
+  const unlockScroll = () => {
+    isLocked = false;
+    lenis?.start();
+  };
 
   // Lenis를 사용할 수 없는 경로에서 문서 상태를 네이티브 스크롤로 명시한다.
   const enableNativeScroll = () => {
@@ -85,6 +98,7 @@ export const startScrollRuntime = ({
       wheelMultiplier: 0.6,
       smoothWheel: true,
     });
+    if (isLocked) lenis.stop();
 
     // Lenis의 스크롤 변화를 ScrollTrigger 계산에 즉시 반영한다.
     const syncScroll = () => {
@@ -142,5 +156,5 @@ export const startScrollRuntime = ({
 
   void setupSafely();
 
-  return { dispose: disposeRuntime };
+  return { dispose: disposeRuntime, lockScroll, unlockScroll };
 };

@@ -15,7 +15,9 @@ import { Skills } from "./Skills";
 const skillsMocks = vi.hoisted(() => ({
   initSkillsIntro: vi.fn(),
   initSkillsVisual: vi.fn(),
+  lockScroll: vi.fn(),
   register: vi.fn(),
+  unlockScroll: vi.fn(),
   unregister: vi.fn(),
 }));
 
@@ -70,7 +72,9 @@ vi.mock("@/hooks/useSectionRegistry", () => ({
 
 vi.mock("@/hooks/useScrollRuntime", () => ({
   useScrollRuntime: () => ({
+    lockScroll: skillsMocks.lockScroll,
     prefersReducedMotion: false,
+    unlockScroll: skillsMocks.unlockScroll,
   }),
 }));
 
@@ -207,8 +211,10 @@ describe("Skills static capabilities", () => {
     const section = container.querySelector("#skills");
 
     expect(skillsMocks.initSkillsIntro).toHaveBeenCalledWith({
+      lockScroll: skillsMocks.lockScroll,
       prefersReducedMotion: false,
       root: section,
+      unlockScroll: skillsMocks.unlockScroll,
     });
     expect(skillsMocks.initSkillsVisual).toHaveBeenCalledWith({
       prefersReducedMotion: false,

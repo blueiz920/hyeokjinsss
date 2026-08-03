@@ -13,7 +13,7 @@ const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as co
 
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const { prefersReducedMotion } = useScrollRuntime();
+  const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const Skills = () => {
     };
 
     void attachMotion(
-      initSkillsIntro({ prefersReducedMotion, root }),
+      initSkillsIntro({ lockScroll, prefersReducedMotion, root, unlockScroll }),
       "intro",
     );
     void attachMotion(
@@ -63,7 +63,7 @@ export const Skills = () => {
       cleanups.forEach((cleanup) => cleanup());
       cleanups.clear();
     };
-  }, [prefersReducedMotion]);
+  }, [lockScroll, prefersReducedMotion, unlockScroll]);
 
   return (
     <section

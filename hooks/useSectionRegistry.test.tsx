@@ -14,6 +14,10 @@ import {
   SectionRegistryProvider,
   useSectionRegistry,
 } from "./useSectionRegistry";
+import {
+  SECTION_INTENT_EVENT,
+  type SectionIntentDetail,
+} from "@/lib/navigation/sectionIntent";
 
 const registryMocks = vi.hoisted(() => ({
   prefersReducedMotion: false,
@@ -109,6 +113,28 @@ describe("SectionRegistryProvider", () => {
       block: "start",
     });
     expect(document.activeElement).toBe(section);
+  });
+
+  it("section 이동의 시작과 종료 목적지를 문서에 알린다", async () => {
+    const intents: SectionIntentDetail[] = [];
+    const handleIntent = (event: Event) => {
+      intents.push((event as CustomEvent<SectionIntentDetail>).detail);
+    };
+    document.addEventListener(SECTION_INTENT_EVENT, handleIntent);
+    const container = await mountRegistry(true);
+
+    await act(async () => container.querySelector("button")!.click());
+    expect(document.documentElement.dataset.sectionTarget).toBe("projects");
+    expect(intents).toEqual([{ id: "projects", phase: "start" }]);
+
+    await act(async () => document.dispatchEvent(new Event("scrollend")));
+    expect(document.documentElement.dataset.sectionTarget).toBeUndefined();
+    expect(intents).toEqual([
+      { id: "projects", phase: "start" },
+      { id: "projects", phase: "end" },
+    ]);
+
+    document.removeEventListener(SECTION_INTENT_EVENT, handleIntent);
   });
 
   it("reduced motion에서는 DOM fallback section으로 즉시 이동한다", async () => {

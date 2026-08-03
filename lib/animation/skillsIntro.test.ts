@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { initSkillsIntro } from "@/lib/animation/skillsIntro";
+import {
+  SECTION_INTENT_EVENT,
+  type SectionIntentDetail,
+} from "@/lib/navigation/sectionIntent";
 
 const introMocks = vi.hoisted(() => ({
   Flip: {
@@ -7,6 +11,8 @@ const introMocks = vi.hoisted(() => ({
     getState: vi.fn(),
   },
   loadGsap: vi.fn(),
+  lockScroll: vi.fn(),
+  unlockScroll: vi.fn(),
 }));
 
 vi.mock("@/lib/gsap/loadGsap", () => ({
@@ -39,6 +45,17 @@ function createMedia(initialMatches = true) {
 function createIntroDom() {
   const root = document.createElement("section");
   Object.defineProperty(root, "clientWidth", { value: 1440 });
+  vi.spyOn(root, "getBoundingClientRect").mockReturnValue({
+    bottom: 900,
+    height: 800,
+    left: 0,
+    right: 1440,
+    top: 100,
+    width: 1440,
+    x: 0,
+    y: 100,
+    toJSON: () => ({}),
+  });
   root.innerHTML = `
     <p class="skills-expertise-eyebrow"></p>
     <h2 class="skills-expertise-title">
@@ -61,10 +78,11 @@ function createHarness() {
     pause: vi.fn(),
     play: vi.fn(),
     progress: vi.fn(),
+    set: vi.fn(),
     to: vi.fn(),
   };
   Object.values(timeline).forEach((method) => method.mockReturnValue(timeline));
-  const trigger = { kill: vi.fn() };
+  const triggers = Array.from({ length: 2 }, () => ({ kill: vi.fn() }));
   const triggerOptions: Array<Record<string, unknown>> = [];
   const gsap = {
     registerPlugin: vi.fn(),
@@ -74,13 +92,13 @@ function createHarness() {
   const ScrollTrigger = {
     create: vi.fn((options: Record<string, unknown>) => {
       triggerOptions.push(options);
-      return trigger;
+      return triggers[triggerOptions.length - 1];
     }),
     refresh: vi.fn(),
   };
   introMocks.loadGsap.mockResolvedValue({ gsap, ScrollTrigger });
 
-  return { gsap, ScrollTrigger, timeline, trigger, triggerOptions };
+  return { gsap, ScrollTrigger, timeline, triggerOptions, triggers };
 }
 
 beforeEach(() => {
@@ -88,11 +106,15 @@ beforeEach(() => {
   introMocks.Flip.from.mockReturnValue({ kill: vi.fn() });
   introMocks.Flip.getState.mockReset();
   introMocks.Flip.getState.mockReturnValue({ state: true });
+  introMocks.lockScroll.mockReset();
+  introMocks.unlockScroll.mockReset();
   vi.stubGlobal("requestAnimationFrame", vi.fn(() => 1));
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
 
 afterEach(() => {
+  delete document.documentElement.dataset.sectionTarget;
+  delete document.documentElement.dataset.skillsLocked;
   vi.clearAllMocks();
   vi.unstubAllGlobals();
 });
@@ -105,21 +127,49 @@ describe("initSkillsIntro", () => {
     vi.stubGlobal("matchMedia", vi.fn(() => media.media));
 
     const cleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
       prefersReducedMotion: false,
       root,
+      unlockScroll: introMocks.unlockScroll,
     });
 
-    expect(root.dataset.skillEntry).toBe("staged");
+    expect(root.dataset.skillEntry).toBeUndefined();
     expect(harness.triggerOptions).toEqual([
-      expect.objectContaining({ once: true, start: "top 5%" }),
+      expect.objectContaining({ start: "top 92%" }),
+      expect.objectContaining({ start: "top 1%" }),
     ]);
-    expect(harness.timeline.to).toHaveBeenCalledTimes(8);
 
-    const triggerOptions = harness.triggerOptions[0] as {
+    const armOptions = harness.triggerOptions[0] as {
       onEnter: () => void;
     };
-    triggerOptions.onEnter();
+    armOptions.onEnter();
+    expect(root.dataset.skillEntry).toBe("armed");
+    expect(harness.gsap.set).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({
+        autoAlpha: 0,
+        clipPath: "inset(100% 0% 0% 0%)",
+      }),
+    );
+
+    const entryOptions = harness.triggerOptions[1] as {
+      onEnter: () => void;
+    };
+    entryOptions.onEnter();
+    expect(root.dataset.skillEntry).toBe("staged");
+    expect(document.documentElement.dataset.skillsLocked).toBe("true");
+    expect(introMocks.lockScroll).toHaveBeenCalledOnce();
     expect(harness.timeline.play).toHaveBeenCalledOnce();
+    expect(harness.timeline.to).toHaveBeenCalledTimes(8);
+    expect(harness.timeline.to.mock.calls[0]).toEqual([
+      expect.any(Array),
+      expect.objectContaining({ duration: 0.7, stagger: 0.03 }),
+      0.2,
+    ]);
+    expect(harness.timeline.to.mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({ duration: 0.75 }),
+    );
+    expect(harness.timeline.call.mock.calls[1]?.[2]).toBe("layout+=1");
 
     const layoutCall = harness.timeline.call.mock.calls[0]?.[0] as () => void;
     layoutCall();
@@ -130,21 +180,32 @@ describe("initSkillsIntro", () => {
       expect.objectContaining({ duration: 1, ease: "power3.inOut" }),
     );
 
+    const finishCall = harness.timeline.call.mock.calls[1]?.[0] as () => void;
+    finishCall();
+    expect(document.documentElement.dataset.skillsLocked).toBeUndefined();
+    expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
+
     media.setMatches(false);
     expect(root.dataset.skillEntry).toBeUndefined();
-    expect(harness.trigger.kill).toHaveBeenCalledOnce();
+    harness.triggers.forEach((trigger) => {
+      expect(trigger.kill).toHaveBeenCalledOnce();
+    });
 
     cleanup();
   });
 
   it("reduced motion과 필수 DOM 누락에서는 정적 상태를 유지한다", async () => {
     const reducedCleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
       prefersReducedMotion: true,
       root: createIntroDom(),
+      unlockScroll: introMocks.unlockScroll,
     });
     const staticCleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
       prefersReducedMotion: false,
       root: document.createElement("section"),
+      unlockScroll: introMocks.unlockScroll,
     });
 
     expect(introMocks.loadGsap).not.toHaveBeenCalled();
@@ -152,24 +213,64 @@ describe("initSkillsIntro", () => {
     expect(() => staticCleanup()).not.toThrow();
   });
 
-  it("복원된 스크롤이 진입점을 지난 경우 애니메이션 없이 최종 배치를 적용한다", async () => {
+  it("다른 section 목적지로 통과할 때 장면과 잠금을 시작하지 않는다", async () => {
+    const root = createIntroDom();
+    const media = createMedia();
+    const harness = createHarness();
+    vi.stubGlobal("matchMedia", vi.fn(() => media.media));
+    document.documentElement.dataset.sectionTarget = "contact";
+
+    const cleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
+      prefersReducedMotion: false,
+      root,
+      unlockScroll: introMocks.unlockScroll,
+    });
+
+    const armOptions = harness.triggerOptions[0] as {
+      onEnter: () => void;
+    };
+    const entryOptions = harness.triggerOptions[1] as {
+      onEnter: () => void;
+    };
+    armOptions.onEnter();
+    entryOptions.onEnter();
+
+    expect(root.dataset.skillEntry).toBeUndefined();
+    expect(document.documentElement.dataset.skillsLocked).toBeUndefined();
+    expect(harness.gsap.timeline).not.toHaveBeenCalled();
+    expect(harness.timeline.play).not.toHaveBeenCalled();
+
+    cleanup();
+  });
+
+  it("재생 중 다른 section 이동은 잠금과 장면만 숨기고 timeline은 유지한다", async () => {
     const root = createIntroDom();
     const media = createMedia();
     const harness = createHarness();
     vi.stubGlobal("matchMedia", vi.fn(() => media.media));
 
-    await initSkillsIntro({
+    const cleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
       prefersReducedMotion: false,
       root,
+      unlockScroll: introMocks.unlockScroll,
     });
+    (harness.triggerOptions[0] as { onEnter: () => void }).onEnter();
+    (harness.triggerOptions[1] as { onEnter: () => void }).onEnter();
 
-    const triggerOptions = harness.triggerOptions[0] as {
-      onRefresh: (self: { scroll: () => number; start: number }) => void;
-    };
-    triggerOptions.onRefresh({ scroll: () => 120, start: 100 });
+    const detail: SectionIntentDetail = { id: "contact", phase: "start" };
+    document.dispatchEvent(
+      new CustomEvent<SectionIntentDetail>(SECTION_INTENT_EVENT, { detail }),
+    );
 
-    expect(harness.timeline.kill).toHaveBeenCalledOnce();
-    expect(harness.timeline.play).not.toHaveBeenCalled();
-    expect(root.dataset.skillEntry).toBe("complete");
+    expect(document.documentElement.dataset.skillsLocked).toBeUndefined();
+    expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
+    expect(root.dataset.skillEntryMuted).toBe("true");
+    expect(harness.timeline.kill).not.toHaveBeenCalled();
+    expect(harness.timeline.progress).not.toHaveBeenCalled();
+
+    cleanup();
+    expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
   });
 });
