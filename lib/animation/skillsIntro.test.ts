@@ -138,7 +138,7 @@ describe("initSkillsIntro", () => {
     expect(root.dataset.skillEntry).toBeUndefined();
     expect(harness.triggerOptions).toEqual([
       expect.objectContaining({ start: "top 92%" }),
-      expect.objectContaining({ start: "top 1%" }),
+      expect.objectContaining({ start: "top top" }),
     ]);
 
     const armOptions = harness.triggerOptions[0] as {

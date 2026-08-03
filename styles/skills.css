@@ -296,6 +296,11 @@ html[data-skills-locked="true"] body {
 }
 
 @media (min-width: 1024px) {
+  html[data-skills-locked="true"]
+    .skills-expertise-visual-inner {
+    background: rgb(10 10 10);
+  }
+
   .skills-expertise-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

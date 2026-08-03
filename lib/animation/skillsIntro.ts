@@ -13,7 +13,7 @@ type SkillsIntroOptions = {
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 const ARM_START = "top 92%";
-const ENTRY_START = "top 1%";
+const ENTRY_START = "top top";
 const ENTRY_EASE = "power3.inOut";
 
 // 섹션을 목적지로 진입할 때만 3.1초 장면을 재생하고 다른 이동은 통과시킨다.
