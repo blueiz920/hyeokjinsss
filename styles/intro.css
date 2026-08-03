@@ -1,3 +1,8 @@
+html[data-intro-entering="true"],
+html[data-intro-entering="true"] body {
+  overflow: hidden;
+}
+
 @layer components {
   .intro-video-poster {
     background-image: url("/intro/intro-cinematic-poster.png");
@@ -16,6 +21,11 @@
 
   #intro [data-intro-item] {
     opacity: 0;
+  }
+
+  #intro[data-intro-entry-muted="true"] [data-intro-item] {
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 
   @media (min-width: 768px) {

@@ -7,17 +7,19 @@ import { splitTextToChars } from "@/lib/motion/splitTextPolicy";
 export const initIntroAnimation = async (
   root: HTMLElement,
   prefersReducedMotion: boolean,
+  onComplete: () => void = () => {},
 ) => {
   const { gsap } = await loadGsap();
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");
 
   if (!items.length) {
+    onComplete();
     return () => {};
   }
 
   const yDistance = prefersReducedMotion ? 12 : 28;
 
-  const timeline = gsap.timeline();
+  const timeline = gsap.timeline({ onComplete });
   timeline.fromTo(
     items,
     { opacity: 0, y: yDistance },

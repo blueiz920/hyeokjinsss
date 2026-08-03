@@ -6,11 +6,16 @@ import { Container } from "@/components/layout/Container";
 import { IntroTextureOverlay } from "@/components/sections/IntroTextureOverlay";
 import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
 import { waitIntroReady } from "@/lib/animation/introLoader";
+import {
+  SECTION_INTENT_EVENT,
+  type SectionIntentDetail,
+} from "@/lib/navigation/sectionIntent";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
 const INTRO_MASK_PHRASE = "몰입감 있는";
 const INTRO_PHRASE_TEXTURE_SRC = "/intro/intro-phrase-texture.mp4";
+const INTRO_ENTRY_FALLBACK_MS = 1800;
 const INTRO_TEXTURE_READY_FALLBACK_MS = 450;
 
 export const Intro = () => {
@@ -22,7 +27,7 @@ export const Intro = () => {
     ? portfolio.introHeadline.slice(INTRO_MASK_PHRASE.length)
     : "";
 
-  const { prefersReducedMotion } = useScrollRuntime();
+  const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister, scrollTo } = useSectionRegistry();
   const shouldGateTitleTexture = hasIntroMaskPhrase && !prefersReducedMotion;
   const [isTitleTextureReady, setIsTitleTextureReady] = useState(!shouldGateTitleTexture);
@@ -49,60 +54,130 @@ export const Intro = () => {
     setIsTitleTextureReady(true);
   }, []);
 
-  // 진입 애니메이션
+  // 로더 이후 진입 장면을 마친 뒤 스크롤 소멸을 연결해 같은 속성의 경합을 막는다.
   useEffect(() => {
     if (!sectionRef.current) return;
 
     const root = sectionRef.current;
     let alive = true;
-    let destroy: (() => void) | null = null;
+    let introDestroy: (() => void) | null = null;
+    let scrollDestroy: (() => void) | null = null;
+    let entryTimer = 0;
+    let isEntering = false;
+    let isLeaving = false;
+    let ownsLock = false;
+    let scrollStarted = false;
 
-    const startAnimation = () => {
-      (async () => {
-        const dispose = await initIntroAnimation(root, prefersReducedMotion);
-        if (!alive) {
-          dispose();
-          return;
+    const unlockIntro = () => {
+      if (entryTimer) {
+        window.clearTimeout(entryTimer);
+        entryTimer = 0;
+      }
+      if (!ownsLock) return;
+
+      ownsLock = false;
+      unlockScroll();
+      delete document.documentElement.dataset.introEntering;
+    };
+
+    const startScroll = () => {
+      if (!alive || scrollStarted) return;
+
+      scrollStarted = true;
+      void (async () => {
+        try {
+          const dispose = await initIntroScroll({
+            root,
+            heading: headingRef.current,
+            prefersReducedMotion,
+          });
+          if (!alive) {
+            dispose();
+            return;
+          }
+          scrollDestroy = dispose;
+        } catch (error) {
+          if (alive) console.error("Intro scroll motion failed.", error);
         }
-        destroy = dispose;
       })();
     };
 
-    const stopWaiting = waitIntroReady(startAnimation);
-
-    return () => {
-      alive = false;
-      stopWaiting();
-      destroy?.();
+    const finishIntro = () => {
+      isEntering = false;
+      if (!isLeaving) delete root.dataset.introEntryMuted;
+      unlockIntro();
+      startScroll();
     };
-  }, [prefersReducedMotion]);
 
-  // 스크롤 기반 흩어짐/소멸
-  useEffect(() => {
-    if (!sectionRef.current) return;
+    const lockIntro = () => {
+      if (prefersReducedMotion || ownsLock) return;
 
-    let alive = true;
-    let destroy: (() => void) | null = null;
+      ownsLock = true;
+      lockScroll();
+      document.documentElement.dataset.introEntering = "true";
+      entryTimer = window.setTimeout(finishIntro, INTRO_ENTRY_FALLBACK_MS);
+    };
 
-    (async () => {
-      const d = await initIntroScroll({
-        root: sectionRef.current!,
-        heading: headingRef.current,
-        prefersReducedMotion,
-      });
+    const startIntro = () => {
+      isEntering = true;
+      lockIntro();
+      void (async () => {
+        try {
+          const dispose = await initIntroAnimation(
+            root,
+            prefersReducedMotion,
+            finishIntro,
+          );
+          if (!alive) {
+            dispose();
+            return;
+          }
+          introDestroy = dispose;
+        } catch (error) {
+          if (!alive) return;
+          console.error("Intro entry motion failed.", error);
+          finishIntro();
+        }
+      })();
+    };
 
-      if (!alive) {
-        d();
+    const handleIntent = (event: Event) => {
+      const { id, phase } = (event as CustomEvent<SectionIntentDetail>).detail;
+
+      if (phase === "end" && id !== "intro" && isLeaving) {
+        isLeaving = false;
+        delete root.dataset.introEntryMuted;
         return;
       }
-      destroy = d;
-    })();
+
+      if (phase === "start" && id === "intro") {
+        isLeaving = false;
+        delete root.dataset.introEntryMuted;
+        return;
+      }
+
+      if (id === "intro" || !isEntering) return;
+
+      if (phase === "start") {
+        isLeaving = true;
+        root.dataset.introEntryMuted = "true";
+        unlockIntro();
+      }
+    };
+
+    document.addEventListener(SECTION_INTENT_EVENT, handleIntent);
+    const stopWaiting = waitIntroReady(startIntro);
 
     return () => {
       alive = false;
-      destroy?.();
+      document.removeEventListener(SECTION_INTENT_EVENT, handleIntent);
+      stopWaiting();
+      introDestroy?.();
+      scrollDestroy?.();
+      unlockIntro();
+      delete root.dataset.introEntryMuted;
     };
-  }, [prefersReducedMotion]);
+  }, [lockScroll, prefersReducedMotion, unlockScroll]);
 
   return (
     <section
