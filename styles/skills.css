@@ -296,9 +296,14 @@ html[data-skills-locked="true"] body {
 }
 
 @media (min-width: 1024px) {
-  html[data-skills-locked="true"]
+  .skills-expertise-visual:not([data-reduced-motion="true"])
     .skills-expertise-visual-inner {
     background: rgb(10 10 10);
+  }
+
+  .skills-static-section[data-skill-panel-ready="true"]
+    .skills-expertise-visual-inner {
+    background: #56575b;
   }
 
   .skills-expertise-grid {

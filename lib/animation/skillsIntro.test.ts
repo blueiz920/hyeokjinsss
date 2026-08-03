@@ -213,11 +213,13 @@ describe("initSkillsIntro", () => {
 
     const finishCall = harness.timeline.call.mock.calls[1]?.[0] as () => void;
     finishCall();
+    expect(root.dataset.skillPanelReady).toBe("true");
     expect(document.documentElement.dataset.skillsLocked).toBeUndefined();
     expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
 
     media.setMatches(false);
     expect(root.dataset.skillEntry).toBeUndefined();
+    expect(root.dataset.skillPanelReady).toBeUndefined();
     harness.triggers.forEach((trigger) => {
       expect(trigger.kill).toHaveBeenCalledOnce();
     });

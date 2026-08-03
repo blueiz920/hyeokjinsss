@@ -190,6 +190,7 @@ export const initSkillsIntro = async ({
     isArmed = false;
     isRunning = false;
     resetVisual();
+    root.dataset.skillPanelReady = "true";
     unlockScroll();
     delete root.dataset.skillEntryMuted;
     gsap.set(titleChars, { clearProps: "transform,willChange" });
@@ -342,6 +343,7 @@ export const initSkillsIntro = async ({
     unlockScroll();
     delete root.dataset.skillEntry;
     delete root.dataset.skillEntryMuted;
+    delete root.dataset.skillPanelReady;
     clearProps();
   };
 
@@ -350,6 +352,7 @@ export const initSkillsIntro = async ({
     if (!media.matches) return;
 
     canEnter = root.getBoundingClientRect().top > 0;
+    if (!canEnter) root.dataset.skillPanelReady = "true";
     armTrigger = ScrollTrigger.create({
       onEnter: armMotion,
       onLeaveBack: () => {
