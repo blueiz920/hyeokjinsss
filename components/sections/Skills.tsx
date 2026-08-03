@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
+import { initSkillsIntro } from "@/lib/animation/skillsIntro";
 import { initSkillsVisual } from "@/lib/animation/skillsVisual";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
@@ -24,27 +25,41 @@ export const Skills = () => {
     if (!root) return;
 
     let isActive = true;
-    let cleanupMotion: (() => void) | null = null;
+    const cleanups = new Set<() => void>();
 
-    void initSkillsVisual({ prefersReducedMotion, root })
-      .then((cleanup) => {
+    const attachMotion = async (
+      motion: Promise<() => void>,
+      label: string,
+    ) => {
+      try {
+        const cleanup = await motion;
         if (!isActive) {
           cleanup();
           return;
         }
-        cleanupMotion = cleanup;
-      })
-      .catch((error) => {
+        cleanups.add(cleanup);
+      } catch (error) {
         if (!isActive) return;
         console.error(
-          "Skills visual motion failed; using the static visual.",
+          `Skills ${label} motion failed; using the static layout.`,
           error,
         );
-      });
+      }
+    };
+
+    void attachMotion(
+      initSkillsIntro({ prefersReducedMotion, root }),
+      "intro",
+    );
+    void attachMotion(
+      initSkillsVisual({ prefersReducedMotion, root }),
+      "visual",
+    );
 
     return () => {
       isActive = false;
-      cleanupMotion?.();
+      cleanups.forEach((cleanup) => cleanup());
+      cleanups.clear();
     };
   }, [prefersReducedMotion]);
 

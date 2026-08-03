@@ -13,6 +13,7 @@ import {
 import { Skills } from "./Skills";
 
 const skillsMocks = vi.hoisted(() => ({
+  initSkillsIntro: vi.fn(),
   initSkillsVisual: vi.fn(),
   register: vi.fn(),
   unregister: vi.fn(),
@@ -77,6 +78,10 @@ vi.mock("@/lib/animation/skillsVisual", () => ({
   initSkillsVisual: skillsMocks.initSkillsVisual,
 }));
 
+vi.mock("@/lib/animation/skillsIntro", () => ({
+  initSkillsIntro: skillsMocks.initSkillsIntro,
+}));
+
 let mountedRoots: Root[] = [];
 
 beforeAll(() => {
@@ -112,6 +117,8 @@ const unmountSkills = async (root: Root) => {
 };
 
 beforeEach(() => {
+  skillsMocks.initSkillsIntro.mockReset();
+  skillsMocks.initSkillsIntro.mockResolvedValue(vi.fn());
   skillsMocks.initSkillsVisual.mockReset();
   skillsMocks.initSkillsVisual.mockResolvedValue(vi.fn());
   skillsMocks.register.mockReset();
@@ -189,10 +196,14 @@ describe("Skills static capabilities", () => {
     expect(skillsMocks.unregister).toHaveBeenCalledWith("skills");
   });
 
-  it("visual motion을 현재 section에 연결한다", async () => {
+  it("intro와 visual motion을 현재 section에 연결한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
 
+    expect(skillsMocks.initSkillsIntro).toHaveBeenCalledWith({
+      prefersReducedMotion: false,
+      root: section,
+    });
     expect(skillsMocks.initSkillsVisual).toHaveBeenCalledWith({
       prefersReducedMotion: false,
       root: section,

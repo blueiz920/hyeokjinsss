@@ -55,6 +55,7 @@
 
   .skills-expertise-visual-inner {
     position: relative;
+    background: #56575b;
     aspect-ratio: 358 / 422;
   }
 
@@ -281,6 +282,25 @@
     grid-row: 1;
     min-height: 100svh;
     padding: clamp(7rem, 10vw, 12.5rem) clamp(3rem, 6vw, 7.5rem);
+  }
+
+  .skills-static-section[data-skill-entry="active"]
+    .skills-expertise-grid {
+    grid-template-rows: 170svh auto;
+  }
+
+  .skills-static-section[data-skill-entry="active"]
+    .skills-expertise-intro {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    height: 100svh;
+    align-self: start;
+  }
+
+  .skills-static-section[data-skill-entry="active"]
+    .skills-expertise-visual {
+    background: rgb(10 10 10);
   }
 
   .skills-expertise-title {
