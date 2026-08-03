@@ -77,6 +77,12 @@ html[data-skills-locked="true"] body {
     position: relative;
     background: #56575b;
     aspect-ratio: 358 / 422;
+    overflow: hidden;
+  }
+
+  .skills-expertise-stage {
+    position: absolute;
+    inset: 0;
   }
 
   .skills-expertise-photo {
@@ -352,6 +358,11 @@ html[data-skills-locked="true"] body {
     height: 100svh;
     aspect-ratio: auto;
     overflow: hidden;
+  }
+
+  .skills-expertise-stage {
+    height: 100%;
+    width: 100%;
   }
 
   .skills-expertise-photo {

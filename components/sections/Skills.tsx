@@ -112,51 +112,53 @@ export const Skills = () => {
           data-reduced-motion={prefersReducedMotion ? "true" : undefined}
         >
           <div className="skills-expertise-visual-inner">
-            <div className="skills-expertise-photo" data-skill-photo>
-              <Image
-                src="/skills/skills-editorial-v2.webp"
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 50vw, 0px"
-              />
-            </div>
+            <div className="skills-expertise-stage">
+              <div className="skills-expertise-photo" data-skill-photo>
+                <Image
+                  src="/skills/skills-editorial-v2.webp"
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 0px"
+                />
+              </div>
 
-            <div
-              className="skills-expertise-board"
-              data-skill-board
-              role="group"
-              aria-labelledby="skills-stack-label"
-              tabIndex={0}
-            >
-              <p
-                id="skills-stack-label"
-                className="skills-expertise-label"
-              >
-                Selected stack
-              </p>
               <div
-                className="skills-expertise-tools"
-                data-skill-tools
-                role="list"
+                className="skills-expertise-board"
+                data-skill-board
+                role="group"
+                aria-labelledby="skills-stack-label"
+                tabIndex={0}
               >
-                {portfolio.skills
-                  .flatMap((skill) => skill.tools)
-                  .map((tool) => (
-                    <div
-                      key={tool}
-                      className="skills-tool"
-                      data-skill-tool
-                      role="listitem"
-                    >
-                      <span className="skills-tool-stage" aria-hidden="true">
-                        <span className="skills-tool-logo-layer">
-                          <SkillMark name={tool} />
+                <p
+                  id="skills-stack-label"
+                  className="skills-expertise-label"
+                >
+                  Selected stack
+                </p>
+                <div
+                  className="skills-expertise-tools"
+                  data-skill-tools
+                  role="list"
+                >
+                  {portfolio.skills
+                    .flatMap((skill) => skill.tools)
+                    .map((tool) => (
+                      <div
+                        key={tool}
+                        className="skills-tool"
+                        data-skill-tool
+                        role="listitem"
+                      >
+                        <span className="skills-tool-stage" aria-hidden="true">
+                          <span className="skills-tool-logo-layer">
+                            <SkillMark name={tool} />
+                          </span>
+                          <span className="skills-tool-name-layer">{tool}</span>
                         </span>
-                        <span className="skills-tool-name-layer">{tool}</span>
-                      </span>
-                      <span className="sr-only">{tool}</span>
-                    </div>
-                  ))}
+                        <span className="sr-only">{tool}</span>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
           </div>

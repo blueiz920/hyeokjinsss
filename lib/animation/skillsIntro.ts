@@ -37,7 +37,7 @@ export const initSkillsIntro = async ({
     ".skills-expertise-description",
   );
   const visual = root.querySelector<HTMLElement>(
-    ".skills-expertise-visual-inner",
+    ".skills-expertise-stage",
   );
   const photo = root.querySelector<HTMLElement>(
     ".skills-expertise-photo img",
@@ -70,15 +70,19 @@ export const initSkillsIntro = async ({
   let ownsLock = false;
   let isRunning = false;
 
+  const resetVisual = () => {
+    gsap.set(visual, {
+      clearProps:
+        "opacity,visibility,position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
+    });
+  };
+
   const clearProps = () => {
     gsap.set([title, ...titleLines, ...titleChars], {
       clearProps:
         "opacity,visibility,position,top,left,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,willChange",
     });
-    gsap.set(visual, {
-      clearProps:
-        "opacity,visibility,position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
-    });
+    resetVisual();
     gsap.set([eyebrow, description, photo], {
       clearProps:
         "opacity,visibility,x,y,scale,transform,transformOrigin,willChange",
@@ -148,6 +152,14 @@ export const initSkillsIntro = async ({
   };
 
   const stageMotion = () => {
+    const finalWidth = root.clientWidth / 2;
+    const finalHeight = window.innerHeight;
+    const visualScale = Math.min(
+      0.4,
+      288 / finalWidth,
+      440 / finalHeight,
+    );
+
     root.dataset.skillEntry = "staged";
     gsap.set(title, {
       autoAlpha: 1,
@@ -162,12 +174,12 @@ export const initSkillsIntro = async ({
       zIndex: 2,
     });
     gsap.set(visual, {
-      height: () => Math.min(window.innerHeight * 0.54, 440),
+      height: finalHeight * visualScale,
       left: "50%",
       position: "fixed",
       top: "50%",
       transformOrigin: "50% 50%",
-      width: () => Math.min(root.clientWidth * 0.2, 288),
+      width: finalWidth * visualScale,
       xPercent: -50,
       yPercent: -50,
       zIndex: 1,
@@ -177,6 +189,7 @@ export const initSkillsIntro = async ({
   const finishMotion = () => {
     isArmed = false;
     isRunning = false;
+    resetVisual();
     unlockScroll();
     delete root.dataset.skillEntryMuted;
     gsap.set(titleChars, { clearProps: "transform,willChange" });
@@ -220,14 +233,14 @@ export const initSkillsIntro = async ({
       .add("layout")
       .call(
         () => {
-          const state = Flip.getState([title, ...titleLines, visual]);
+          const state = Flip.getState([title, ...titleLines]);
           root.dataset.skillEntry = "complete";
-          gsap.set([title, ...titleLines, visual], {
+          gsap.set([title, ...titleLines], {
             clearProps:
-              "opacity,visibility,position,top,left,width,height,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,clipPath,willChange",
+              "opacity,visibility,position,top,left,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,willChange",
           });
           layoutTween = Flip.from(state, {
-            absolute: true,
+            absolute: false,
             duration: 1,
             ease: ENTRY_EASE,
             nested: true,
@@ -235,6 +248,20 @@ export const initSkillsIntro = async ({
           });
         },
         [],
+        "layout",
+      )
+      .to(
+        visual,
+        {
+          duration: 1,
+          ease: ENTRY_EASE,
+          height: () => window.innerHeight,
+          left: 0,
+          top: 0,
+          width: () => root.clientWidth / 2,
+          xPercent: 0,
+          yPercent: 0,
+        },
         "layout",
       )
       .to(photo, { duration: 1, ease: ENTRY_EASE, scale: 1 }, "layout")

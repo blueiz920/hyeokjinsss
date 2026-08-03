@@ -64,7 +64,9 @@ function createIntroDom() {
     </h2>
     <p class="skills-expertise-description"></p>
     <div class="skills-expertise-visual-inner">
-      <div class="skills-expertise-photo"><img alt="" /></div>
+      <div class="skills-expertise-stage">
+        <div class="skills-expertise-photo"><img alt="" /></div>
+      </div>
     </div>
   `;
   return root;
@@ -160,7 +162,15 @@ describe("initSkillsIntro", () => {
     expect(document.documentElement.dataset.skillsLocked).toBe("true");
     expect(introMocks.lockScroll).toHaveBeenCalledOnce();
     expect(harness.timeline.play).toHaveBeenCalledOnce();
-    expect(harness.timeline.to).toHaveBeenCalledTimes(8);
+    const visual = root.querySelector(".skills-expertise-stage");
+    const visualStage = harness.gsap.set.mock.calls.find(
+      ([target, options]) =>
+        target === visual && options.position === "fixed",
+    )?.[1] as { height: number; width: number };
+    expect(visualStage.width / visualStage.height).toBeCloseTo(
+      (root.clientWidth / 2) / window.innerHeight,
+    );
+    expect(harness.timeline.to).toHaveBeenCalledTimes(9);
     expect(harness.timeline.to.mock.calls[0]).toEqual([
       expect.any(Array),
       expect.objectContaining({ duration: 0.7, stagger: 0.03 }),
@@ -169,15 +179,36 @@ describe("initSkillsIntro", () => {
     expect(harness.timeline.to.mock.calls[1]?.[1]).toEqual(
       expect.objectContaining({ duration: 0.75 }),
     );
+    const visualTween = harness.timeline.to.mock.calls.find(
+      ([target, options, position]) =>
+        target === visual && options.left === 0 && position === "layout",
+    )?.[1] as {
+      height: () => number;
+      width: () => number;
+      xPercent: number;
+      yPercent: number;
+    };
+    expect(visualTween.height()).toBe(window.innerHeight);
+    expect(visualTween.width()).toBe(root.clientWidth / 2);
+    expect(visualTween).toEqual(
+      expect.objectContaining({ xPercent: 0, yPercent: 0 }),
+    );
     expect(harness.timeline.call.mock.calls[1]?.[2]).toBe("layout+=1");
 
     const layoutCall = harness.timeline.call.mock.calls[0]?.[0] as () => void;
     layoutCall();
     expect(root.dataset.skillEntry).toBe("complete");
-    expect(introMocks.Flip.getState).toHaveBeenCalledOnce();
+    expect(introMocks.Flip.getState).toHaveBeenCalledWith([
+      root.querySelector(".skills-expertise-title"),
+      ...root.querySelectorAll("[data-skill-title-line]"),
+    ]);
     expect(introMocks.Flip.from).toHaveBeenCalledWith(
       { state: true },
-      expect.objectContaining({ duration: 1, ease: "power3.inOut" }),
+      expect.objectContaining({
+        absolute: false,
+        duration: 1,
+        ease: "power3.inOut",
+      }),
     );
 
     const finishCall = harness.timeline.call.mock.calls[1]?.[0] as () => void;
