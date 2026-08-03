@@ -2,6 +2,7 @@ import Lenis from "lenis";
 import { loadGsap } from "@/lib/gsap/loadGsap";
 
 type ScrollRuntimeOptions = {
+  initiallyLocked?: boolean;
   prefersReducedMotion: boolean;
 };
 
@@ -16,13 +17,14 @@ type LenisInstance = InstanceType<typeof Lenis>;
 // Lenis와 ScrollTrigger의 생성·연결·정리를 한 생명주기로 묶어 시작한다.
 // React 밖에서도 즉시 dispose할 수 있어 비동기 로딩 경합을 안전하게 처리한다.
 export const startScrollRuntime = ({
+  initiallyLocked = false,
   prefersReducedMotion,
 }: ScrollRuntimeOptions): ScrollRuntime => {
   let disposed = false;
   let lenis: LenisInstance | null = null;
   let rafId: number | null = null;
   let removeRefreshListener: (() => void) | null = null;
-  let isLocked = false;
+  let isLocked = initiallyLocked;
 
   const lockScroll = () => {
     isLocked = true;

@@ -1,7 +1,11 @@
 @layer components {
+  html[data-intro-locked="true"],
+  html[data-intro-locked="true"] body {
+    overflow: hidden;
+  }
+
   html[data-intro-loading="true"],
   html[data-intro-loading="true"] body {
-    overflow: hidden;
     cursor: wait;
   }
 

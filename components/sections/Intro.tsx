@@ -27,7 +27,7 @@ export const Intro = () => {
     ? portfolio.introHeadline.slice(INTRO_MASK_PHRASE.length)
     : "";
 
-  const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
+  const { prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister, scrollTo } = useSectionRegistry();
   const shouldGateTitleTexture = hasIntroMaskPhrase && !prefersReducedMotion;
   const [isTitleTextureReady, setIsTitleTextureReady] = useState(!shouldGateTitleTexture);
@@ -68,16 +68,17 @@ export const Intro = () => {
     let ownsLock = false;
     let scrollStarted = false;
 
-    const unlockIntro = () => {
+    const releaseIntro = () => {
       if (entryTimer) {
         window.clearTimeout(entryTimer);
         entryTimer = 0;
       }
+      delete document.documentElement.dataset.introEntering;
       if (!ownsLock) return;
 
       ownsLock = false;
+      delete document.documentElement.dataset.introLocked;
       unlockScroll();
-      delete document.documentElement.dataset.introEntering;
     };
 
     const startScroll = () => {
@@ -105,22 +106,18 @@ export const Intro = () => {
     const finishIntro = () => {
       isEntering = false;
       if (!isLeaving) delete root.dataset.introEntryMuted;
-      unlockIntro();
+      releaseIntro();
       startScroll();
-    };
-
-    const lockIntro = () => {
-      if (prefersReducedMotion || ownsLock) return;
-
-      ownsLock = true;
-      lockScroll();
-      document.documentElement.dataset.introEntering = "true";
-      entryTimer = window.setTimeout(finishIntro, INTRO_ENTRY_FALLBACK_MS);
     };
 
     const startIntro = () => {
       isEntering = true;
-      lockIntro();
+      if (!prefersReducedMotion) {
+        ownsLock =
+          document.documentElement.dataset.introLocked === "true";
+        document.documentElement.dataset.introEntering = "true";
+        entryTimer = window.setTimeout(finishIntro, INTRO_ENTRY_FALLBACK_MS);
+      }
       void (async () => {
         try {
           const dispose = await initIntroAnimation(
@@ -161,7 +158,7 @@ export const Intro = () => {
       if (phase === "start") {
         isLeaving = true;
         root.dataset.introEntryMuted = "true";
-        unlockIntro();
+        releaseIntro();
       }
     };
 
@@ -174,10 +171,10 @@ export const Intro = () => {
       stopWaiting();
       introDestroy?.();
       scrollDestroy?.();
-      unlockIntro();
+      releaseIntro();
       delete root.dataset.introEntryMuted;
     };
-  }, [lockScroll, prefersReducedMotion, unlockScroll]);
+  }, [prefersReducedMotion, unlockScroll]);
 
   return (
     <section

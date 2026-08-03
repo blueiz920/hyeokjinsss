@@ -20,7 +20,6 @@ import { Intro } from "./Intro";
 const introMocks = vi.hoisted(() => ({
   initIntroAnimation: vi.fn(),
   initIntroScroll: vi.fn(),
-  lockScroll: vi.fn(),
   register: vi.fn(),
   scrollTo: vi.fn(),
   unlockScroll: vi.fn(),
@@ -41,7 +40,6 @@ vi.mock("@/components/sections/IntroTextureOverlay", () => ({
 
 vi.mock("@/hooks/useScrollRuntime", () => ({
   useScrollRuntime: () => ({
-    lockScroll: introMocks.lockScroll,
     prefersReducedMotion: introState.prefersReducedMotion,
     unlockScroll: introMocks.unlockScroll,
   }),
@@ -85,6 +83,7 @@ const mountIntro = async () => {
 };
 
 beforeEach(() => {
+  document.documentElement.dataset.introLocked = "true";
   delete document.documentElement.dataset.introReady;
   introState.prefersReducedMotion = false;
   Object.values(introMocks).forEach((mock) => mock.mockReset());
@@ -99,6 +98,7 @@ afterEach(async () => {
   mountedRoots = [];
   document.body.replaceChildren();
   delete document.documentElement.dataset.introEntering;
+  delete document.documentElement.dataset.introLocked;
   delete document.documentElement.dataset.introReady;
 });
 
@@ -118,7 +118,6 @@ describe("Intro readiness", () => {
       false,
       expect.any(Function),
     );
-    expect(introMocks.lockScroll).toHaveBeenCalledOnce();
     expect(document.documentElement.dataset.introEntering).toBe("true");
     expect(introMocks.initIntroScroll).not.toHaveBeenCalled();
 
@@ -135,6 +134,7 @@ describe("Intro readiness", () => {
     });
     expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
     expect(document.documentElement.dataset.introEntering).toBeUndefined();
+    expect(document.documentElement.dataset.introLocked).toBeUndefined();
   });
 
   it("로더가 먼저 완료된 경우에는 마운트 직후 진입 애니메이션을 시작한다", async () => {
@@ -146,7 +146,6 @@ describe("Intro readiness", () => {
       false,
       expect.any(Function),
     );
-    expect(introMocks.lockScroll).toHaveBeenCalledOnce();
     expect(introMocks.initIntroScroll).not.toHaveBeenCalled();
   });
 
@@ -168,6 +167,7 @@ describe("Intro readiness", () => {
 
     expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
     expect(document.documentElement.dataset.introEntering).toBeUndefined();
+    expect(document.documentElement.dataset.introLocked).toBeUndefined();
     expect(section.dataset.introEntryMuted).toBe("true");
     expect(introMocks.initIntroScroll).not.toHaveBeenCalled();
 
@@ -184,6 +184,7 @@ describe("Intro readiness", () => {
 
   it("reduced motion에서는 진입 중 스크롤을 잠그지 않는다", async () => {
     introState.prefersReducedMotion = true;
+    delete document.documentElement.dataset.introLocked;
     markIntroReady();
     const section = await mountIntro();
 
@@ -192,7 +193,6 @@ describe("Intro readiness", () => {
       true,
       expect.any(Function),
     );
-    expect(introMocks.lockScroll).not.toHaveBeenCalled();
     expect(document.documentElement.dataset.introEntering).toBeUndefined();
 
     const finishIntro = introMocks.initIntroAnimation.mock.calls[0][2];

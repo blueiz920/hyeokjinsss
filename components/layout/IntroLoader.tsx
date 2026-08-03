@@ -30,6 +30,8 @@ export const IntroLoader = () => {
     ).matches;
 
     if (prefersReducedMotion) {
+      delete document.documentElement.dataset.introLocked;
+      delete document.documentElement.dataset.introLoading;
       markIntroReady();
       const frameId = window.requestAnimationFrame(() => setIsVisible(false));
       return () => window.cancelAnimationFrame(frameId);

@@ -105,6 +105,17 @@ const RuntimeProbe = () => {
   return <span>{String(prefersReducedMotion)}</span>;
 };
 
+const RuntimeControlProbe = () => {
+  const { lockScroll, unlockScroll } = useScrollRuntime();
+
+  return (
+    <>
+      <button type="button" onClick={lockScroll}>lock</button>
+      <button type="button" onClick={unlockScroll}>unlock</button>
+    </>
+  );
+};
+
 beforeAll(() => {
   // React 19가 테스트 환경의 act 호출을 공식 지원하도록 전역 플래그를 활성화한다.
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -294,6 +305,31 @@ describe("ScrollRuntimeProvider", () => {
     expect(html).toContain("true");
   });
 
+  it("Provider 제어 함수를 활성 runtime에 전달한다", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    mountedRoots.push(root);
+
+    await act(async () => {
+      root.render(
+        <ScrollRuntimeProvider>
+          <RuntimeControlProbe />
+        </ScrollRuntimeProvider>,
+      );
+      await Promise.resolve();
+    });
+
+    const [lockButton, unlockButton] = container.querySelectorAll("button");
+    await act(async () => {
+      lockButton.click();
+      unlockButton.click();
+    });
+
+    expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
+  });
+
   it("Provider 밖에서 사용하면 명확한 오류를 던진다", () => {
     expect(() => renderToString(<RuntimeProbe />)).toThrow(
       "useScrollRuntime must be used within ScrollRuntimeProvider",
@@ -312,6 +348,24 @@ describe("startScrollRuntime", () => {
     runtime.unlockScroll();
 
     expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
+    runtime.dispose();
+  });
+
+  it("초기 잠금 상태로 생성하면 Lenis를 멈춘 채 시작한다", async () => {
+    const runtime = startScrollRuntime({
+      initiallyLocked: true,
+      prefersReducedMotion: false,
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
+    expect(runtimeMocks.lenisStart).not.toHaveBeenCalled();
+
+    runtime.unlockScroll();
+
     expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
     runtime.dispose();
   });

@@ -37,7 +37,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={pretendard.variable}>
+    <html
+      lang="ko"
+      className={pretendard.variable}
+      data-intro-locked="true"
+      data-intro-loading="true"
+    >
       <body className="bg-neutral-950 font-sans text-white antialiased">
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
