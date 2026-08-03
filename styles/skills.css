@@ -39,6 +39,21 @@
     text-wrap: balance;
   }
 
+  .skills-title-lines,
+  .skills-title-line {
+    display: block;
+  }
+
+  .skills-title-line {
+    width: max-content;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .skills-title-char {
+    display: inline-block;
+  }
+
   .skills-expertise-description {
     max-width: 31rem;
     margin-top: clamp(2.5rem, 8vw, 4.5rem);
@@ -284,23 +299,28 @@
     padding: clamp(7rem, 10vw, 12.5rem) clamp(3rem, 6vw, 7.5rem);
   }
 
-  .skills-static-section[data-skill-entry="active"]
-    .skills-expertise-grid {
-    grid-template-rows: 170svh auto;
-  }
-
-  .skills-static-section[data-skill-entry="active"]
-    .skills-expertise-intro {
-    position: sticky;
-    z-index: 1;
-    top: 0;
-    height: 100svh;
-    align-self: start;
-  }
-
-  .skills-static-section[data-skill-entry="active"]
+  .skills-static-section[data-skill-entry]
     .skills-expertise-visual {
     background: rgb(10 10 10);
+  }
+
+  .skills-static-section[data-skill-entry="staged"]
+    .skills-expertise-title {
+    z-index: 2;
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  .skills-static-section[data-skill-entry="staged"]
+    .skills-title-lines {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 3rem);
+  }
+
+  .skills-static-section[data-skill-entry="staged"]
+    .skills-title-line {
+    max-width: none;
   }
 
   .skills-expertise-title {

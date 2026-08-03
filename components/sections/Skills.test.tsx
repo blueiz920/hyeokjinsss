@@ -149,9 +149,15 @@ describe("Skills static capabilities", () => {
 
     expect(section?.getAttribute("tabindex")).toBe("-1");
     expect(section?.getAttribute("aria-labelledby")).toBe("skills-title");
-    expect(container.querySelector("#skills-title")?.textContent).toBe(
-      "문제를 해결하는 다섯 가지 방식",
-    );
+    expect(
+      container.querySelector("#skills-title")?.getAttribute("aria-label"),
+    ).toBe("문제를 해결하는 다섯 가지 방식");
+    expect(
+      container.querySelectorAll("[data-skill-title-line]"),
+    ).toHaveLength(2);
+    expect(
+      container.querySelectorAll("[data-skill-title-char]"),
+    ).toHaveLength(16);
     expect(grid?.children[0]).toBe(intro);
     expect(grid?.children[1]).toBe(visual);
     expect(grid?.children[2]).toBe(content);

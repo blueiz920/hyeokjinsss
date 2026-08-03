@@ -9,6 +9,8 @@ import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SkillMark } from "./SkillMark";
 
+const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as const;
+
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const { prefersReducedMotion } = useScrollRuntime();
@@ -74,9 +76,30 @@ export const Skills = () => {
       <div className="skills-expertise-grid">
         <header className="skills-expertise-intro" data-skill-intro>
           <p className="skills-expertise-eyebrow">Skills</p>
-          <h2 id="skills-title" className="skills-expertise-title">
-            문제를 해결하는{" "}
-            <span className="block">다섯 가지 방식</span>
+          <h2
+            id="skills-title"
+            className="skills-expertise-title"
+            aria-label="문제를 해결하는 다섯 가지 방식"
+          >
+            <span className="skills-title-lines" aria-hidden="true">
+              {skillTitleLines.map((line, lineIndex) => (
+                <span
+                  key={line}
+                  className="skills-title-line"
+                  data-skill-title-line
+                >
+                  {Array.from(line).map((character, characterIndex) => (
+                    <span
+                      key={`${lineIndex}-${characterIndex}`}
+                      className="skills-title-char"
+                      data-skill-title-char
+                    >
+                      {character === " " ? "\u00a0" : character}
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </span>
           </h2>
           <p className="skills-expertise-description">
             기술을 나열하기보다, 실제 사용자 흐름과 엔지니어링 결과를 만든
