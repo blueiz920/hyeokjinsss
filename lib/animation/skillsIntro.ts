@@ -196,6 +196,7 @@ export const initSkillsIntro = async ({
     root.dataset.skillPanelReady = "true";
     unlockScroll();
     delete root.dataset.skillEntryMuted;
+    gsap.set(title, { clearProps: "zIndex" });
     gsap.set(titleChars, { clearProps: "transform,willChange" });
   };
 
@@ -241,7 +242,7 @@ export const initSkillsIntro = async ({
           root.dataset.skillEntry = "complete";
           gsap.set([title, ...titleLines], {
             clearProps:
-              "opacity,visibility,position,top,left,xPercent,yPercent,x,y,scale,transform,transformOrigin,zIndex,willChange",
+              "opacity,visibility,position,top,left,xPercent,yPercent,x,y,scale,transform,transformOrigin,willChange",
           });
           layoutTween = Flip.from(state, {
             absolute: false,

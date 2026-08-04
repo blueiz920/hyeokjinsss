@@ -198,6 +198,15 @@ describe("initSkillsIntro", () => {
     const layoutCall = harness.timeline.call.mock.calls[0]?.[0] as () => void;
     layoutCall();
     expect(root.dataset.skillEntry).toBe("complete");
+    expect(harness.gsap.set).toHaveBeenCalledWith(
+      [
+        root.querySelector(".skills-expertise-title"),
+        ...root.querySelectorAll("[data-skill-title-line]"),
+      ],
+      expect.objectContaining({
+        clearProps: expect.not.stringContaining("zIndex"),
+      }),
+    );
     expect(introMocks.Flip.getState).toHaveBeenCalledWith([
       root.querySelector(".skills-expertise-title"),
       ...root.querySelectorAll("[data-skill-title-line]"),
@@ -216,6 +225,10 @@ describe("initSkillsIntro", () => {
     expect(root.dataset.skillPanelReady).toBe("true");
     expect(document.documentElement.dataset.skillsLocked).toBeUndefined();
     expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
+    expect(harness.gsap.set).toHaveBeenCalledWith(
+      root.querySelector(".skills-expertise-title"),
+      { clearProps: "zIndex" },
+    );
 
     media.setMatches(false);
     expect(root.dataset.skillEntry).toBeUndefined();
