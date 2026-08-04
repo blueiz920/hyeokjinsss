@@ -16,6 +16,7 @@ const skillsMocks = vi.hoisted(() => ({
   initSkillsIntro: vi.fn(),
   initSkillsVisual: vi.fn(),
   lockScroll: vi.fn(),
+  prefersReducedMotion: false,
   register: vi.fn(),
   unlockScroll: vi.fn(),
   unregister: vi.fn(),
@@ -73,7 +74,7 @@ vi.mock("@/hooks/useSectionRegistry", () => ({
 vi.mock("@/hooks/useScrollRuntime", () => ({
   useScrollRuntime: () => ({
     lockScroll: skillsMocks.lockScroll,
-    prefersReducedMotion: false,
+    prefersReducedMotion: skillsMocks.prefersReducedMotion,
     unlockScroll: skillsMocks.unlockScroll,
   }),
 }));
@@ -127,6 +128,7 @@ beforeEach(() => {
   skillsMocks.initSkillsVisual.mockResolvedValue(vi.fn());
   skillsMocks.register.mockReset();
   skillsMocks.unregister.mockReset();
+  skillsMocks.prefersReducedMotion = false;
 });
 
 afterEach(async () => {
@@ -202,8 +204,9 @@ describe("Skills static capabilities", () => {
     }
   });
 
-  it("모바일 기술 덱의 버튼 상태와 현재 페이지를 함께 갱신한다", async () => {
+  it("모바일 기술 덱의 버튼 상태와 현재 역량을 함께 갱신한다", async () => {
     const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
     const previous = container.querySelector<HTMLButtonElement>(
       '[aria-label="이전 기술 그룹 보기"]',
     );
@@ -211,6 +214,13 @@ describe("Skills static capabilities", () => {
       '[aria-label="다음 기술 그룹 보기"]',
     );
     const status = container.querySelector("[data-skill-deck-status]");
+    const triggers = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-capability-trigger",
+    );
+    const scrollTo = vi.fn();
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo });
 
     expect(previous?.disabled).toBe(true);
     expect(next?.disabled).toBe(false);
@@ -222,6 +232,82 @@ describe("Skills static capabilities", () => {
     expect(status?.textContent).toBe("02 / 05");
     expect(previous?.disabled).toBe(false);
     expect(next?.disabled).toBe(false);
+    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("true");
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
+    expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 320 });
+
+    await act(async () => {
+      previous?.click();
+    });
+
+    expect(status?.textContent).toBe("01 / 05");
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("true");
+    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 0 });
+  });
+
+  it("덱 스와이프와 역량 선택을 양방향으로 동기화한다", async () => {
+    const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const status = container.querySelector("[data-skill-deck-status]");
+    const triggers = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-capability-trigger",
+    );
+    const scrollTo = vi.fn();
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo, scrollLeft: 640 });
+
+    await act(async () => {
+      deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(status?.textContent).toBe("03 / 05");
+    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
+
+    await act(async () => {
+      triggers[4]?.click();
+    });
+
+    expect(status?.textContent).toBe("05 / 05");
+    expect(triggers[4]?.getAttribute("aria-expanded")).toBe("true");
+    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 1280 });
+
+    Object.assign(deck ?? {}, { scrollLeft: 960 });
+    await act(async () => {
+      deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(status?.textContent).toBe("05 / 05");
+    expect(triggers[4]?.getAttribute("aria-expanded")).toBe("true");
+
+    await act(async () => {
+      deck?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(status?.textContent).toBe("04 / 05");
+    expect(triggers[3]?.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("reduced motion에서는 역량 선택 시 덱을 즉시 이동한다", async () => {
+    skillsMocks.prefersReducedMotion = true;
+    const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const triggers = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-capability-trigger",
+    );
+    const scrollTo = vi.fn();
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo });
+
+    await act(async () => {
+      triggers[3]?.click();
+    });
+
+    expect(triggers[3]?.getAttribute("aria-expanded")).toBe("true");
+    expect(scrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 960 });
   });
 
   it("모바일 역량 아코디언은 하나만 열고 모든 서사 콘텐츠를 유지한다", async () => {

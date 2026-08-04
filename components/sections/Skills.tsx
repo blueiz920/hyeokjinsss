@@ -14,6 +14,7 @@ const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as co
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
+  const targetPageRef = useRef<number | null>(null);
   const [activePage, setActivePage] = useState(0);
   const [activeCapability, setActiveCapability] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -21,26 +22,49 @@ export const Skills = () => {
   const { register, unregister } = useSectionRegistry();
   const pageTotal = portfolio.skills.length;
 
+  const selectPage = (page: number, shouldScroll = false) => {
+    const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
+    const deck = deckRef.current;
+
+    setActivePage(nextPage);
+    if (!isDesktop) setActiveCapability(nextPage);
+
+    if (shouldScroll) {
+      targetPageRef.current = prefersReducedMotion ? null : nextPage;
+      deck?.scrollTo?.({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        left: nextPage * deck.clientWidth,
+      });
+    }
+  };
+
   const updatePage = () => {
     const deck = deckRef.current;
     if (!deck || deck.clientWidth === 0) return;
 
     const nextPage = Math.round(deck.scrollLeft / deck.clientWidth);
-    setActivePage(Math.min(Math.max(nextPage, 0), pageTotal - 1));
+    if (
+      targetPageRef.current !== null &&
+      targetPageRef.current !== nextPage
+    ) {
+      return;
+    }
+
+    targetPageRef.current = null;
+    selectPage(nextPage);
+  };
+
+  const clearTarget = () => {
+    targetPageRef.current = null;
   };
 
   const movePage = (offset: number) => {
-    const deck = deckRef.current;
     const nextPage = Math.min(
       Math.max(activePage + offset, 0),
       pageTotal - 1,
     );
 
-    setActivePage(nextPage);
-    deck?.scrollTo?.({
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-      left: nextPage * deck.clientWidth,
-    });
+    selectPage(nextPage, true);
   };
 
   useEffect(() => {
@@ -53,7 +77,10 @@ export const Skills = () => {
     const query = window.matchMedia?.("(min-width: 1024px)");
     if (!query) return;
 
-    const updateDesktop = () => setIsDesktop(query.matches);
+    const updateDesktop = () => {
+      if (query.matches) clearTarget();
+      setIsDesktop(query.matches);
+    };
     updateDesktop();
     query.addEventListener("change", updateDesktop);
 
@@ -198,6 +225,8 @@ export const Skills = () => {
                   role="region"
                   aria-label="역량별 기술 스택"
                   onScroll={updatePage}
+                  onPointerDown={clearTarget}
+                  onWheel={clearTarget}
                 >
                   <div
                     className="skills-board-pages"
@@ -299,9 +328,7 @@ export const Skills = () => {
                     aria-controls={panelId}
                     aria-expanded={isExpanded}
                     disabled={isDesktop}
-                    onClick={() => {
-                      if (!isDesktop) setActiveCapability(index);
-                    }}
+                    onClick={() => selectPage(index, true)}
                   >
                     <span className="skills-capability-name">{skill.title}</span>
                     <span
