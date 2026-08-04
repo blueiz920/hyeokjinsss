@@ -255,6 +255,7 @@ export const initSkillsIntro = async ({
         [],
         "layout",
       )
+      .set(visual, { zIndex: 3 }, "layout")
       .to(
         visual,
         {

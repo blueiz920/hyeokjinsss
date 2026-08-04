@@ -370,6 +370,13 @@ html[data-skills-locked="true"] body {
     overflow: hidden;
   }
 
+  .skills-static-section[data-skill-entry]:not(
+      [data-skill-panel-ready="true"]
+    )
+    .skills-expertise-visual-inner {
+    position: static;
+  }
+
   .skills-expertise-stage {
     height: 100%;
     width: 100%;

@@ -193,6 +193,11 @@ describe("initSkillsIntro", () => {
     expect(visualTween).toEqual(
       expect.objectContaining({ xPercent: 0, yPercent: 0 }),
     );
+    expect(harness.timeline.set).toHaveBeenCalledWith(
+      visual,
+      { zIndex: 3 },
+      "layout",
+    );
     expect(harness.timeline.call.mock.calls[1]?.[2]).toBe("layout+=1");
 
     const layoutCall = harness.timeline.call.mock.calls[0]?.[0] as () => void;
