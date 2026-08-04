@@ -224,6 +224,47 @@ describe("Skills static capabilities", () => {
     expect(next?.disabled).toBe(false);
   });
 
+  it("모바일 역량 아코디언은 하나만 열고 모든 서사 콘텐츠를 유지한다", async () => {
+    const { container } = await mountSkills();
+    const triggers = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-capability-trigger",
+    );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+
+    expect(triggers).toHaveLength(5);
+    expect(panels).toHaveLength(5);
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("true");
+    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("false");
+    expect(triggers[0]?.getAttribute("aria-controls")).toBe("skill-panel-0");
+    expect(panels[0]?.getAttribute("role")).toBe("region");
+    expect(panels[0]?.getAttribute("aria-labelledby")).toBe("skill-trigger-0");
+    expect(panels[0]?.getAttribute("aria-hidden")).toBe("false");
+
+    await act(async () => {
+      triggers[1]?.click();
+    });
+
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
+    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("true");
+    expect(panels[0]?.getAttribute("aria-hidden")).toBe("true");
+    expect(panels[1]?.getAttribute("aria-hidden")).toBe("false");
+
+    await act(async () => {
+      triggers[2]?.click();
+    });
+
+    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
+    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
+
+    await act(async () => {
+      triggers[2]?.click();
+    });
+
+    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
+    expect(panels[0]?.textContent).toContain("사용자 흐름을 화면 구조로 만듭니다.");
+    expect(panels[2]?.textContent).toContain("LCP를 개선했습니다.");
+  });
+
   it("section registry를 등록하고 언마운트에서 해제한다", async () => {
     const { root } = await mountSkills();
 

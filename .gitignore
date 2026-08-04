@@ -59,6 +59,8 @@ subagent-*
 /docs/design-references/www.buildinamsterdam.com/
 /docs/research/koto.com/
 /docs/design-references/koto.com/
+/docs/research/www.awwwards.com/
+/docs/design-references/www.awwwards.com/
 
 # Local guardrail notes
 lib/perf/guardrails.md

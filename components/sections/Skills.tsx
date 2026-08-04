@@ -15,6 +15,8 @@ export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
   const [activePage, setActivePage] = useState(0);
+  const [activeCapability, setActiveCapability] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
   const pageTotal = portfolio.skills.length;
@@ -46,6 +48,17 @@ export const Skills = () => {
     register("skills", sectionRef);
     return () => unregister("skills");
   }, [register, unregister]);
+
+  useEffect(() => {
+    const query = window.matchMedia?.("(min-width: 1024px)");
+    if (!query) return;
+
+    const updateDesktop = () => setIsDesktop(query.matches);
+    updateDesktop();
+    query.addEventListener("change", updateDesktop);
+
+    return () => query.removeEventListener("change", updateDesktop);
+  }, []);
 
   useEffect(() => {
     const root = sectionRef.current;
@@ -257,41 +270,75 @@ export const Skills = () => {
         </div>
 
         <div className="skills-expertise-content" role="list">
-          {portfolio.skills.map((skill, index) => (
-            <article
-              key={skill.title}
-              className="skills-capability"
-              data-skill-capability
-              role="listitem"
-              aria-labelledby={`skill-title-${index}`}
-            >
-              <p className="skills-capability-label">
-                {String(index + 1).padStart(2, "0")} /{" "}
-                {String(portfolio.skills.length).padStart(2, "0")}
-              </p>
-              <h3
-                id={`skill-title-${index}`}
-                className="skills-capability-title"
+          {portfolio.skills.map((skill, index) => {
+            const isExpanded = isDesktop || activeCapability === index;
+            const panelId = `skill-panel-${index}`;
+            const triggerId = `skill-trigger-${index}`;
+
+            return (
+              <article
+                key={skill.title}
+                className="skills-capability"
+                data-skill-capability
+                data-open={isExpanded ? "true" : "false"}
+                role="listitem"
+                aria-labelledby={`skill-title-${index}`}
               >
-                {skill.title}
-              </h3>
-              <p className="skills-capability-tools">
-                <span>Tools</span>
-                {skill.tools.join(" · ")}
-              </p>
-              <p className="skills-capability-summary">{skill.summary}</p>
-              <dl className="skills-capability-details">
-                <div>
-                  <dt>적용 프로젝트</dt>
-                  <dd>{skill.project}</dd>
+                <p className="skills-capability-label">
+                  {String(index + 1).padStart(2, "0")} /{" "}
+                  {String(portfolio.skills.length).padStart(2, "0")}
+                </p>
+                <h3
+                  id={`skill-title-${index}`}
+                  className="skills-capability-title"
+                >
+                  <button
+                    id={triggerId}
+                    className="skills-capability-trigger"
+                    type="button"
+                    aria-controls={panelId}
+                    aria-expanded={isExpanded}
+                    disabled={isDesktop}
+                    onClick={() => {
+                      if (!isDesktop) setActiveCapability(index);
+                    }}
+                  >
+                    <span className="skills-capability-name">{skill.title}</span>
+                    <span
+                      className="skills-capability-indicator"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </h3>
+                <p className="skills-capability-tools">
+                  <span>Tools</span>
+                  {skill.tools.join(" · ")}
+                </p>
+                <div
+                  id={panelId}
+                  className="skills-capability-panel"
+                  data-skill-panel
+                  role="region"
+                  aria-labelledby={triggerId}
+                  aria-hidden={!isExpanded}
+                >
+                  <div className="skills-capability-panel-inner">
+                    <p className="skills-capability-summary">{skill.summary}</p>
+                    <dl className="skills-capability-details">
+                      <div>
+                        <dt>적용 프로젝트</dt>
+                        <dd>{skill.project}</dd>
+                      </div>
+                      <div>
+                        <dt>결과</dt>
+                        <dd>{skill.evidence}</dd>
+                      </div>
+                    </dl>
+                  </div>
                 </div>
-                <div>
-                  <dt>결과</dt>
-                  <dd>{skill.evidence}</dd>
-                </div>
-              </dl>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
