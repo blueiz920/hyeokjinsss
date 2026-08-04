@@ -221,4 +221,22 @@ describe("Skills static capabilities", () => {
       root: section,
     });
   });
+
+  it("intro motion 실패 시 정적 패널을 표시한다", async () => {
+    const motionError = new Error("motion failed");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    skillsMocks.initSkillsIntro.mockRejectedValue(motionError);
+
+    const { container } = await mountSkills();
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const section = container.querySelector<HTMLElement>("#skills");
+    expect(section?.dataset.skillPanelReady).toBe("true");
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("Skills intro motion failed"),
+      motionError,
+    );
+  });
 });

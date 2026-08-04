@@ -42,6 +42,7 @@ export const Skills = () => {
         cleanups.add(cleanup);
       } catch (error) {
         if (!isActive) return;
+        if (label === "intro") root.dataset.skillPanelReady = "true";
         console.error(
           `Skills ${label} motion failed; using the static layout.`,
           error,
@@ -62,6 +63,7 @@ export const Skills = () => {
       isActive = false;
       cleanups.forEach((cleanup) => cleanup());
       cleanups.clear();
+      delete root.dataset.skillPanelReady;
     };
   }, [lockScroll, prefersReducedMotion, unlockScroll]);
 

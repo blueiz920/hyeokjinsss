@@ -437,3 +437,13 @@ html[data-skills-locked="true"] body {
     margin-top: 3rem;
   }
 }
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .skills-static-section:not([data-skill-entry]):not(
+      [data-skill-panel-ready="true"]
+    )
+    .skills-expertise-stage {
+    visibility: hidden;
+    opacity: 0;
+  }
+}

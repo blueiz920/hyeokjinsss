@@ -51,7 +51,10 @@ export const initSkillsIntro = async ({
     !visual ||
     !photo
   ) {
-    return () => {};
+    root.dataset.skillPanelReady = "true";
+    return () => {
+      delete root.dataset.skillPanelReady;
+    };
   }
 
   const { gsap, ScrollTrigger } = await loadGsap();

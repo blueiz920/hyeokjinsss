@@ -234,16 +234,19 @@ describe("initSkillsIntro", () => {
       root: createIntroDom(),
       unlockScroll: introMocks.unlockScroll,
     });
+    const staticRoot = document.createElement("section");
     const staticCleanup = await initSkillsIntro({
       lockScroll: introMocks.lockScroll,
       prefersReducedMotion: false,
-      root: document.createElement("section"),
+      root: staticRoot,
       unlockScroll: introMocks.unlockScroll,
     });
 
     expect(introMocks.loadGsap).not.toHaveBeenCalled();
+    expect(staticRoot.dataset.skillPanelReady).toBe("true");
     expect(() => reducedCleanup()).not.toThrow();
     expect(() => staticCleanup()).not.toThrow();
+    expect(staticRoot.dataset.skillPanelReady).toBeUndefined();
   });
 
   it("다른 section 목적지로 통과할 때 장면과 잠금을 시작하지 않는다", async () => {
