@@ -75,8 +75,8 @@ html[data-skills-locked="true"] body {
 
   .skills-expertise-visual-inner {
     position: relative;
+    min-height: clamp(30rem, 128vw, 36rem);
     background: #56575b;
-    aspect-ratio: 358 / 422;
     overflow: hidden;
   }
 
@@ -98,8 +98,8 @@ html[data-skills-locked="true"] body {
   .skills-expertise-board {
     display: grid;
     height: 100%;
-    grid-template-rows: auto 1fr;
-    gap: 2rem;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 1.5rem;
     padding: 1.5rem;
   }
 
@@ -112,12 +112,67 @@ html[data-skills-locked="true"] body {
     color: rgba(244, 244, 241, 0.64);
   }
 
-  .skills-expertise-tools {
+  .skills-board-header,
+  .skills-board-page-meta,
+  .skills-board-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .skills-board-status,
+  .skills-board-page-meta {
+    color: rgba(244, 244, 241, 0.64);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .skills-board-header,
+  .skills-board-page-meta {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .skills-board-viewport {
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .skills-board-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skills-board-pages {
+    display: flex;
+    height: 100%;
+  }
+
+  .skills-board-page {
+    display: grid;
+    min-width: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 1.5rem;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .skills-board-page-meta span:last-child {
+    color: #f4f4f1;
+    letter-spacing: 0.04em;
+  }
+
+  .skills-board-tools {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(5, minmax(0, 1fr));
     align-items: stretch;
-    gap: 1rem 0.75rem;
+    gap: 0.75rem;
   }
 
   .skills-tool {
@@ -133,7 +188,7 @@ html[data-skills-locked="true"] body {
     display: grid;
     width: 100%;
     height: 100%;
-    min-height: 4.5rem;
+    min-height: clamp(10rem, 40vw, 13rem);
     grid-template-rows: auto auto;
     place-content: center;
     place-items: center;
@@ -187,6 +242,53 @@ html[data-skills-locked="true"] body {
     letter-spacing: -0.025em;
     text-align: center;
     text-wrap: balance;
+  }
+
+  .skills-board-controls {
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .skills-board-controls button {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 1px solid rgba(244, 244, 241, 0.38);
+    background: transparent;
+    color: #f4f4f1;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .skills-board-controls button:focus-visible {
+    outline: 1px solid #f4f4f1;
+    outline-offset: 3px;
+  }
+
+  .skills-board-controls button:disabled {
+    cursor: default;
+    opacity: 0.28;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .skills-board-controls button:not(:disabled):hover {
+      border-color: #f4f4f1;
+      background: #f4f4f1;
+      color: #56575b;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skills-board-controls button {
+      transition: none;
+    }
   }
 
   .skills-expertise-content {
@@ -366,6 +468,7 @@ html[data-skills-locked="true"] body {
     top: 0;
     width: 100%;
     height: 100svh;
+    min-height: 0;
     aspect-ratio: auto;
     overflow: hidden;
   }
@@ -392,9 +495,44 @@ html[data-skills-locked="true"] body {
     position: absolute;
     inset: 0;
     height: auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 2rem;
     padding: clamp(2rem, 4vw, 4rem);
     opacity: 0;
     visibility: hidden;
+  }
+
+  .skills-board-header {
+    display: block;
+  }
+
+  .skills-board-status,
+  .skills-board-page-meta,
+  .skills-board-controls {
+    display: none;
+  }
+
+  .skills-board-viewport {
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .skills-board-pages {
+    display: grid;
+    height: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 1rem 0.75rem;
+  }
+
+  .skills-board-page,
+  .skills-board-tools {
+    display: contents;
+  }
+
+  .skills-tool-stage {
+    min-height: 4.5rem;
   }
 
   .skills-expertise-visual[data-reduced-motion="true"]

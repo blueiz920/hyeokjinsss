@@ -148,6 +148,9 @@ describe("Skills static capabilities", () => {
     const visual = container.querySelector(".skills-expertise-visual");
     const photo = container.querySelector("[data-skill-photo] img");
     const board = container.querySelector("[data-skill-board]");
+    const deck = container.querySelector("[data-skill-deck]");
+    const deckPages = container.querySelectorAll("[data-skill-deck-page]");
+    const deckStatus = container.querySelector("[data-skill-deck-status]");
     const content = container.querySelector(".skills-expertise-content");
     const capabilities = container.querySelectorAll("[data-skill-capability]");
 
@@ -171,6 +174,10 @@ describe("Skills static capabilities", () => {
     expect(board?.getAttribute("role")).toBe("group");
     expect(board?.getAttribute("tabindex")).toBe("0");
     expect(board?.getAttribute("aria-labelledby")).toBe("skills-stack-label");
+    expect(deck?.getAttribute("role")).toBe("region");
+    expect(deck?.getAttribute("aria-label")).toBe("역량별 기술 스택");
+    expect(deckPages).toHaveLength(5);
+    expect(deckStatus?.textContent).toBe("01 / 05");
     expect(
       container.querySelector("#skills-stack-label")?.textContent,
     ).toBe("Selected stack");
@@ -193,6 +200,28 @@ describe("Skills static capabilities", () => {
       expect(capability.textContent).toContain("적용 프로젝트");
       expect(capability.textContent).toContain("결과");
     }
+  });
+
+  it("모바일 기술 덱의 버튼 상태와 현재 페이지를 함께 갱신한다", async () => {
+    const { container } = await mountSkills();
+    const previous = container.querySelector<HTMLButtonElement>(
+      '[aria-label="이전 기술 그룹 보기"]',
+    );
+    const next = container.querySelector<HTMLButtonElement>(
+      '[aria-label="다음 기술 그룹 보기"]',
+    );
+    const status = container.querySelector("[data-skill-deck-status]");
+
+    expect(previous?.disabled).toBe(true);
+    expect(next?.disabled).toBe(false);
+
+    await act(async () => {
+      next?.click();
+    });
+
+    expect(status?.textContent).toBe("02 / 05");
+    expect(previous?.disabled).toBe(false);
+    expect(next?.disabled).toBe(false);
   });
 
   it("section registry를 등록하고 언마운트에서 해제한다", async () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
 import { initSkillsIntro } from "@/lib/animation/skillsIntro";
 import { initSkillsVisual } from "@/lib/animation/skillsVisual";
@@ -13,8 +13,33 @@ const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as co
 
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const deckRef = useRef<HTMLDivElement | null>(null);
+  const [activePage, setActivePage] = useState(0);
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
+  const pageTotal = portfolio.skills.length;
+
+  const updatePage = () => {
+    const deck = deckRef.current;
+    if (!deck || deck.clientWidth === 0) return;
+
+    const nextPage = Math.round(deck.scrollLeft / deck.clientWidth);
+    setActivePage(Math.min(Math.max(nextPage, 0), pageTotal - 1));
+  };
+
+  const movePage = (offset: number) => {
+    const deck = deckRef.current;
+    const nextPage = Math.min(
+      Math.max(activePage + offset, 0),
+      pageTotal - 1,
+    );
+
+    setActivePage(nextPage);
+    deck?.scrollTo?.({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      left: nextPage * deck.clientWidth,
+    });
+  };
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -131,35 +156,100 @@ export const Skills = () => {
                 aria-labelledby="skills-stack-label"
                 tabIndex={0}
               >
-                <p
-                  id="skills-stack-label"
-                  className="skills-expertise-label"
-                >
-                  Selected stack
-                </p>
                 <div
-                  className="skills-expertise-tools"
-                  data-skill-tools
-                  role="list"
+                  className="skills-board-header"
+                  data-skill-deck-header
                 >
-                  {portfolio.skills
-                    .flatMap((skill) => skill.tools)
-                    .map((tool) => (
+                  <p
+                    id="skills-stack-label"
+                    className="skills-expertise-label"
+                  >
+                    Selected stack
+                  </p>
+                  <p
+                    className="skills-board-status"
+                    data-skill-deck-status
+                    aria-live="polite"
+                  >
+                    <span>{String(activePage + 1).padStart(2, "0")}</span>
+                    <span aria-hidden="true"> / </span>
+                    <span>{String(pageTotal).padStart(2, "0")}</span>
+                  </p>
+                </div>
+
+                <div
+                  id="skills-stack-pages"
+                  ref={deckRef}
+                  className="skills-board-viewport"
+                  data-skill-deck
+                  role="region"
+                  aria-label="역량별 기술 스택"
+                  onScroll={updatePage}
+                >
+                  <div
+                    className="skills-board-pages"
+                    data-skill-tools
+                    role="list"
+                  >
+                    {portfolio.skills.map((skill, index) => (
                       <div
-                        key={tool}
-                        className="skills-tool"
-                        data-skill-tool
+                        key={skill.title}
+                        className="skills-board-page"
+                        data-skill-deck-page
                         role="listitem"
+                        aria-label={`${String(index + 1).padStart(2, "0")} / ${String(pageTotal).padStart(2, "0")} ${skill.title}`}
                       >
-                        <span className="skills-tool-stage" aria-hidden="true">
-                          <span className="skills-tool-logo-layer">
-                            <SkillMark name={tool} />
-                          </span>
-                          <span className="skills-tool-name-layer">{tool}</span>
-                        </span>
-                        <span className="sr-only">{tool}</span>
+                        <div className="skills-board-page-meta" aria-hidden="true">
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          <span>{skill.title}</span>
+                        </div>
+                        <div className="skills-board-tools" role="list">
+                          {skill.tools.map((tool) => (
+                            <div
+                              key={tool}
+                              className="skills-tool"
+                              data-skill-tool
+                              role="listitem"
+                            >
+                              <span
+                                className="skills-tool-stage"
+                                aria-hidden="true"
+                              >
+                                <span className="skills-tool-logo-layer">
+                                  <SkillMark name={tool} />
+                                </span>
+                                <span className="skills-tool-name-layer">
+                                  {tool}
+                                </span>
+                              </span>
+                              <span className="sr-only">{tool}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="skills-board-controls" data-skill-deck-controls>
+                  <button
+                    type="button"
+                    aria-controls="skills-stack-pages"
+                    aria-label="이전 기술 그룹 보기"
+                    disabled={activePage === 0}
+                    onClick={() => movePage(-1)}
+                  >
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-controls="skills-stack-pages"
+                    aria-label="다음 기술 그룹 보기"
+                    disabled={activePage === pageTotal - 1}
+                    onClick={() => movePage(1)}
+                  >
+                    <span aria-hidden="true">→</span>
+                  </button>
                 </div>
               </div>
             </div>
