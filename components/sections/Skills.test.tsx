@@ -197,14 +197,14 @@ describe("Skills Snap Tabs", () => {
     ).toHaveLength(16);
     expect(grid?.children[0]).toBe(intro);
     expect(grid?.children[1]).toBe(visual);
-    expect(grid?.children[2]).toBe(tablist);
-    expect(grid?.children[3]).toBe(content);
+    expect(grid?.children[2]).toBe(content);
     expect(photo?.getAttribute("alt")).toBe("");
     expect(photo?.getAttribute("src")).toContain("skills-editorial-v2.webp");
     expect(visual?.hasAttribute("aria-hidden")).toBe(false);
     expect(board?.getAttribute("role")).toBe("group");
     expect(board?.getAttribute("tabindex")).toBe("0");
     expect(board?.getAttribute("aria-labelledby")).toBe("skills-stack-label");
+    expect(board?.contains(tablist)).toBe(true);
     expect(deck?.getAttribute("role")).toBe("region");
     expect(deck?.getAttribute("aria-label")).toBe("역량별 기술 스택");
     expect(deckPages).toHaveLength(5);
@@ -335,6 +335,14 @@ describe("Skills Snap Tabs", () => {
       left: 720,
     });
 
+    Object.assign(panelViewport ?? {}, { scrollLeft: 720 });
+    await act(async () => {
+      panelViewport?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(deckScrollTo).not.toHaveBeenCalled();
+    expect(panelScrollTo).toHaveBeenCalledOnce();
+
     Object.assign(panelViewport ?? {}, { scrollLeft: 360 });
     await act(async () => {
       panelViewport?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
@@ -348,6 +356,14 @@ describe("Skills Snap Tabs", () => {
       behavior: "smooth",
       left: 320,
     });
+
+    Object.assign(deck ?? {}, { scrollLeft: 320 });
+    await act(async () => {
+      deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(deckScrollTo).toHaveBeenCalledOnce();
+    expect(panelScrollTo).toHaveBeenCalledOnce();
   });
 
   it("프로그램 대상 페이지 전의 중간 스크롤로 활성 상태가 깜빡이지 않는다", async () => {

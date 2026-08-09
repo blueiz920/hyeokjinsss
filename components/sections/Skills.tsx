@@ -18,6 +18,7 @@ export const Skills = () => {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const deckTargetRef = useRef<number | null>(null);
   const panelTargetRef = useRef<number | null>(null);
+  const activePageRef = useRef(0);
   const [activePage, setActivePage] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
@@ -41,6 +42,7 @@ export const Skills = () => {
   const selectPage = (page: number, source?: "deck" | "panel") => {
     const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
 
+    activePageRef.current = nextPage;
     setActivePage(nextPage);
 
     if (source !== "deck") {
@@ -57,11 +59,14 @@ export const Skills = () => {
     if (!surface || surface.clientWidth === 0) return;
 
     const nextPage = Math.round(surface.scrollLeft / surface.clientWidth);
-    if (targetRef.current !== null && targetRef.current !== nextPage) {
+    if (targetRef.current !== null) {
+      if (targetRef.current !== nextPage) return;
+
+      targetRef.current = null;
       return;
     }
+    if (activePageRef.current === nextPage) return;
 
-    targetRef.current = null;
     selectPage(nextPage, source);
   };
 
@@ -306,42 +311,46 @@ export const Skills = () => {
                   </div>
                 </div>
 
+                <div
+                  className="skills-mobile-tabs"
+                  role={isDesktop ? undefined : "tablist"}
+                  aria-label={isDesktop ? undefined : "역량 선택"}
+                  aria-hidden={isDesktop ? true : undefined}
+                >
+                  {portfolio.skills.map((skill, index) => {
+                    const isActive = activePage === index;
+
+                    return (
+                      <button
+                        key={skill.title}
+                        id={`skill-tab-${index}`}
+                        ref={(tab) => {
+                          tabRefs.current[index] = tab;
+                        }}
+                        className="skills-mobile-tab"
+                        type="button"
+                        role={isDesktop ? undefined : "tab"}
+                        aria-controls={
+                          isDesktop ? undefined : `skill-panel-${index}`
+                        }
+                        aria-label={isDesktop ? undefined : skill.title}
+                        aria-selected={isDesktop ? undefined : isActive}
+                        disabled={isDesktop}
+                        tabIndex={isDesktop ? -1 : isActive ? 0 : -1}
+                        onClick={() => selectTab(index)}
+                        onKeyDown={handleTabKey}
+                      >
+                        <span
+                          className="skills-mobile-dot"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div
-          className="skills-mobile-tabs"
-          role={isDesktop ? undefined : "tablist"}
-          aria-label={isDesktop ? undefined : "역량 선택"}
-          aria-hidden={isDesktop ? true : undefined}
-        >
-          {portfolio.skills.map((skill, index) => {
-            const isActive = activePage === index;
-
-            return (
-              <button
-                key={skill.title}
-                id={`skill-tab-${index}`}
-                ref={(tab) => {
-                  tabRefs.current[index] = tab;
-                }}
-                className="skills-mobile-tab"
-                type="button"
-                role={isDesktop ? undefined : "tab"}
-                aria-controls={isDesktop ? undefined : `skill-panel-${index}`}
-                aria-label={isDesktop ? undefined : skill.title}
-                aria-selected={isDesktop ? undefined : isActive}
-                disabled={isDesktop}
-                tabIndex={isDesktop ? -1 : isActive ? 0 : -1}
-                onClick={() => selectTab(index)}
-                onKeyDown={handleTabKey}
-              >
-                <span className="skills-mobile-dot" aria-hidden="true" />
-              </button>
-            );
-          })}
         </div>
 
         <div
