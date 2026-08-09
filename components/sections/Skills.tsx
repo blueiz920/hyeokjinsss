@@ -14,56 +14,55 @@ const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as co
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
+  const panelsRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const targetPageRef = useRef<number | null>(null);
+  const deckTargetRef = useRef<number | null>(null);
+  const panelTargetRef = useRef<number | null>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
   const pageTotal = portfolio.skills.length;
 
-  const selectPage = (page: number, shouldScroll = false) => {
+  const scrollSurface = (
+    surface: HTMLDivElement | null,
+    targetRef: { current: number | null },
+    page: number,
+  ) => {
+    if (!surface || isDesktop) return;
+
+    targetRef.current = prefersReducedMotion ? null : page;
+    surface.scrollTo?.({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      left: page * surface.clientWidth,
+    });
+  };
+
+  const selectPage = (page: number, source?: "deck" | "panel") => {
     const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
-    const deck = deckRef.current;
 
     setActivePage(nextPage);
 
-    if (shouldScroll) {
-      targetPageRef.current = prefersReducedMotion ? null : nextPage;
-      deck?.scrollTo?.({
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-        left: nextPage * deck.clientWidth,
-      });
+    if (source !== "deck") {
+      scrollSurface(deckRef.current, deckTargetRef, nextPage);
+    }
+    if (source !== "panel") {
+      scrollSurface(panelsRef.current, panelTargetRef, nextPage);
     }
   };
 
-  const updatePage = () => {
-    const deck = deckRef.current;
-    if (!deck || deck.clientWidth === 0) return;
+  const syncSurface = (source: "deck" | "panel") => {
+    const surface = source === "deck" ? deckRef.current : panelsRef.current;
+    const targetRef = source === "deck" ? deckTargetRef : panelTargetRef;
+    if (!surface || surface.clientWidth === 0) return;
 
-    const nextPage = Math.round(deck.scrollLeft / deck.clientWidth);
-    if (
-      targetPageRef.current !== null &&
-      targetPageRef.current !== nextPage
-    ) {
+    const nextPage = Math.round(surface.scrollLeft / surface.clientWidth);
+    if (targetRef.current !== null && targetRef.current !== nextPage) {
       return;
     }
 
-    targetPageRef.current = null;
-    selectPage(nextPage);
-  };
-
-  const clearTarget = () => {
-    targetPageRef.current = null;
-  };
-
-  const movePage = (offset: number) => {
-    const nextPage = Math.min(
-      Math.max(activePage + offset, 0),
-      pageTotal - 1,
-    );
-
-    selectPage(nextPage, true);
+    targetRef.current = null;
+    selectPage(nextPage, source);
   };
 
   const selectTab = (page: number, shouldFocus = false) => {
@@ -71,7 +70,7 @@ export const Skills = () => {
 
     const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
 
-    selectPage(nextPage, true);
+    selectPage(nextPage);
 
     if (shouldFocus) {
       tabRefs.current[nextPage]?.focus({ preventScroll: true });
@@ -105,7 +104,10 @@ export const Skills = () => {
     if (!query) return;
 
     const updateDesktop = () => {
-      if (query.matches) clearTarget();
+      if (query.matches) {
+        deckTargetRef.current = null;
+        panelTargetRef.current = null;
+      }
       setIsDesktop(query.matches);
     };
     updateDesktop();
@@ -251,9 +253,13 @@ export const Skills = () => {
                   data-skill-deck
                   role="region"
                   aria-label="역량별 기술 스택"
-                  onScroll={updatePage}
-                  onPointerDown={clearTarget}
-                  onWheel={clearTarget}
+                  onScroll={() => syncSurface("deck")}
+                  onPointerDown={() => {
+                    deckTargetRef.current = null;
+                  }}
+                  onWheel={() => {
+                    deckTargetRef.current = null;
+                  }}
                 >
                   <div
                     className="skills-board-pages"
@@ -300,26 +306,6 @@ export const Skills = () => {
                   </div>
                 </div>
 
-                <div className="skills-board-controls" data-skill-deck-controls>
-                  <button
-                    type="button"
-                    aria-controls="skills-stack-pages"
-                    aria-label="이전 기술 그룹 보기"
-                    disabled={activePage === 0}
-                    onClick={() => movePage(-1)}
-                  >
-                    <span aria-hidden="true">←</span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-controls="skills-stack-pages"
-                    aria-label="다음 기술 그룹 보기"
-                    disabled={activePage === pageTotal - 1}
-                    onClick={() => movePage(1)}
-                  >
-                    <span aria-hidden="true">→</span>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -352,22 +338,24 @@ export const Skills = () => {
                 onClick={() => selectTab(index)}
                 onKeyDown={handleTabKey}
               >
-                <span aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                <span className="skills-mobile-dot" aria-hidden="true" />
               </button>
             );
           })}
-          <span
-            className="skills-mobile-indicator"
-            aria-hidden="true"
-            style={{ transform: `translateX(${activePage * 100}%)` }}
-          />
         </div>
 
         <div
+          ref={panelsRef}
           className="skills-expertise-content"
+          data-skill-panels
           role={isDesktop ? "list" : undefined}
+          onScroll={() => syncSurface("panel")}
+          onPointerDown={() => {
+            panelTargetRef.current = null;
+          }}
+          onWheel={() => {
+            panelTargetRef.current = null;
+          }}
         >
           {portfolio.skills.map((skill, index) => {
             const isExpanded = isDesktop || activePage === index;

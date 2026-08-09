@@ -182,7 +182,7 @@ describe("Skills Snap Tabs", () => {
       ".skills-mobile-tab",
     );
     const tablist = container.querySelector(".skills-mobile-tabs");
-    const indicator = container.querySelector(".skills-mobile-indicator");
+    const dots = container.querySelectorAll(".skills-mobile-dot");
 
     expect(section?.getAttribute("tabindex")).toBe("-1");
     expect(section?.getAttribute("aria-labelledby")).toBe("skills-title");
@@ -223,7 +223,10 @@ describe("Skills Snap Tabs", () => {
     expect(tabs[1]?.getAttribute("aria-selected")).toBe("false");
     expect(tabs[1]?.getAttribute("aria-controls")).toBe("skill-panel-1");
     expect(tabs[1]?.tabIndex).toBe(-1);
-    expect(indicator?.getAttribute("aria-hidden")).toBe("true");
+    expect(dots).toHaveLength(5);
+    for (const dot of dots) {
+      expect(dot.getAttribute("aria-hidden")).toBe("true");
+    }
     expect(panels).toHaveLength(5);
     expect(panels[0]?.getAttribute("role")).toBe("tabpanel");
     expect(panels[0]?.getAttribute("aria-labelledby")).toBe("skill-tab-0");
@@ -254,18 +257,27 @@ describe("Skills Snap Tabs", () => {
   it("탭 클릭은 문서를 스크롤하지 않고 기술 보드와 활성 서사를 함께 선택한다", async () => {
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const panelViewport = container.querySelector<HTMLDivElement>(
+      "[data-skill-panels]",
+    );
     const tabs = container.querySelectorAll<HTMLButtonElement>(
       ".skills-mobile-tab",
     );
     const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
     const status = container.querySelector("[data-skill-deck-status]");
-    const scrollTo = vi.fn();
+    const deckScrollTo = vi.fn();
+    const panelScrollTo = vi.fn();
     const documentScrollTo = vi
       .spyOn(window, "scrollTo")
       .mockImplementation(() => undefined);
 
     Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
-    Object.assign(deck ?? {}, { scrollTo });
+    Object.defineProperty(panelViewport, "clientWidth", {
+      configurable: true,
+      value: 360,
+    });
+    Object.assign(deck ?? {}, { scrollTo: deckScrollTo });
+    Object.assign(panelViewport ?? {}, { scrollTo: panelScrollTo });
 
     await act(async () => {
       tabs[3]?.click();
@@ -278,28 +290,38 @@ describe("Skills Snap Tabs", () => {
     expect(tabs[0]?.tabIndex).toBe(-1);
     expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
     expect(panels[0]?.getAttribute("aria-hidden")).toBe("true");
-    expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 960 });
+    expect(deckScrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 960 });
+    expect(panelScrollTo).toHaveBeenCalledWith({
+      behavior: "smooth",
+      left: 1080,
+    });
     expect(documentScrollTo).not.toHaveBeenCalled();
   });
 
-  it("보드 스와이프와 이전·다음 버튼은 선택된 탭과 서사를 동기화한다", async () => {
+  it("보드와 서사 스와이프를 반대쪽 표면 및 선택 상태와 동기화한다", async () => {
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
-    const previous = container.querySelector<HTMLButtonElement>(
-      '[aria-label="이전 기술 그룹 보기"]',
-    );
-    const next = container.querySelector<HTMLButtonElement>(
-      '[aria-label="다음 기술 그룹 보기"]',
+    const panelViewport = container.querySelector<HTMLDivElement>(
+      "[data-skill-panels]",
     );
     const status = container.querySelector("[data-skill-deck-status]");
     const tabs = container.querySelectorAll<HTMLButtonElement>(
       ".skills-mobile-tab",
     );
     const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
-    const scrollTo = vi.fn();
+    const deckScrollTo = vi.fn();
+    const panelScrollTo = vi.fn();
 
     Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
-    Object.assign(deck ?? {}, { scrollLeft: 640, scrollTo });
+    Object.defineProperty(panelViewport, "clientWidth", {
+      configurable: true,
+      value: 360,
+    });
+    Object.assign(deck ?? {}, { scrollLeft: 640, scrollTo: deckScrollTo });
+    Object.assign(panelViewport ?? {}, {
+      scrollLeft: 0,
+      scrollTo: panelScrollTo,
+    });
 
     await act(async () => {
       deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
@@ -308,26 +330,24 @@ describe("Skills Snap Tabs", () => {
     expect(status?.textContent).toBe("03 / 05");
     expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
     expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
+    expect(panelScrollTo).toHaveBeenLastCalledWith({
+      behavior: "smooth",
+      left: 720,
+    });
 
+    Object.assign(panelViewport ?? {}, { scrollLeft: 360 });
     await act(async () => {
-      previous?.click();
+      panelViewport?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      panelViewport?.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
 
     expect(status?.textContent).toBe("02 / 05");
-    expect(previous?.disabled).toBe(false);
-    expect(next?.disabled).toBe(false);
     expect(tabs[1]?.getAttribute("aria-selected")).toBe("true");
     expect(panels[1]?.getAttribute("aria-hidden")).toBe("false");
-    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 320 });
-
-    await act(async () => {
-      next?.click();
+    expect(deckScrollTo).toHaveBeenLastCalledWith({
+      behavior: "smooth",
+      left: 320,
     });
-
-    expect(status?.textContent).toBe("03 / 05");
-    expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
-    expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
-    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 640 });
   });
 
   it("프로그램 대상 페이지 전의 중간 스크롤로 활성 상태가 깜빡이지 않는다", async () => {
@@ -375,20 +395,30 @@ describe("Skills Snap Tabs", () => {
     skillsMocks.prefersReducedMotion = true;
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const panelViewport = container.querySelector<HTMLDivElement>(
+      "[data-skill-panels]",
+    );
     const tabs = container.querySelectorAll<HTMLButtonElement>(
       ".skills-mobile-tab",
     );
-    const scrollTo = vi.fn();
+    const deckScrollTo = vi.fn();
+    const panelScrollTo = vi.fn();
 
     Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
-    Object.assign(deck ?? {}, { scrollTo });
+    Object.defineProperty(panelViewport, "clientWidth", {
+      configurable: true,
+      value: 360,
+    });
+    Object.assign(deck ?? {}, { scrollTo: deckScrollTo });
+    Object.assign(panelViewport ?? {}, { scrollTo: panelScrollTo });
 
     await act(async () => {
       tabs[3]?.click();
     });
 
     expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
-    expect(scrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 960 });
+    expect(deckScrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 960 });
+    expect(panelScrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 1080 });
   });
 
   it("키보드로 탭을 선택하고 roving focus를 이동한다", async () => {
