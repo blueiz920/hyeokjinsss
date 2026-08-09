@@ -14,9 +14,9 @@ const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as co
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const targetPageRef = useRef<number | null>(null);
   const [activePage, setActivePage] = useState(0);
-  const [activeCapability, setActiveCapability] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -27,7 +27,6 @@ export const Skills = () => {
     const deck = deckRef.current;
 
     setActivePage(nextPage);
-    if (!isDesktop) setActiveCapability(nextPage);
 
     if (shouldScroll) {
       targetPageRef.current = prefersReducedMotion ? null : nextPage;
@@ -65,6 +64,34 @@ export const Skills = () => {
     );
 
     selectPage(nextPage, true);
+  };
+
+  const selectTab = (page: number, shouldFocus = false) => {
+    if (isDesktop) return;
+
+    const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
+
+    selectPage(nextPage, true);
+
+    if (shouldFocus) {
+      tabRefs.current[nextPage]?.focus({ preventScroll: true });
+    }
+  };
+
+  const handleTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (isDesktop) return;
+
+    let nextPage: number | null = null;
+
+    if (event.key === "ArrowLeft") nextPage = activePage - 1;
+    if (event.key === "ArrowRight") nextPage = activePage + 1;
+    if (event.key === "Home") nextPage = 0;
+    if (event.key === "End") nextPage = pageTotal - 1;
+
+    if (nextPage === null) return;
+
+    event.preventDefault();
+    selectTab(nextPage, true);
   };
 
   useEffect(() => {
@@ -298,20 +325,67 @@ export const Skills = () => {
           </div>
         </div>
 
-        <div className="skills-expertise-content" role="list">
+        <div
+          className="skills-mobile-tabs"
+          role={isDesktop ? undefined : "tablist"}
+          aria-label={isDesktop ? undefined : "역량 선택"}
+          aria-hidden={isDesktop ? true : undefined}
+        >
           {portfolio.skills.map((skill, index) => {
-            const isExpanded = isDesktop || activeCapability === index;
+            const isActive = activePage === index;
+
+            return (
+              <button
+                key={skill.title}
+                id={`skill-tab-${index}`}
+                ref={(tab) => {
+                  tabRefs.current[index] = tab;
+                }}
+                className="skills-mobile-tab"
+                type="button"
+                role={isDesktop ? undefined : "tab"}
+                aria-controls={isDesktop ? undefined : `skill-panel-${index}`}
+                aria-label={isDesktop ? undefined : skill.title}
+                aria-selected={isDesktop ? undefined : isActive}
+                disabled={isDesktop}
+                tabIndex={isDesktop ? -1 : isActive ? 0 : -1}
+                onClick={() => selectTab(index)}
+                onKeyDown={handleTabKey}
+              >
+                <span aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </button>
+            );
+          })}
+          <span
+            className="skills-mobile-indicator"
+            aria-hidden="true"
+            style={{ transform: `translateX(${activePage * 100}%)` }}
+          />
+        </div>
+
+        <div
+          className="skills-expertise-content"
+          role={isDesktop ? "list" : undefined}
+        >
+          {portfolio.skills.map((skill, index) => {
+            const isExpanded = isDesktop || activePage === index;
             const panelId = `skill-panel-${index}`;
-            const triggerId = `skill-trigger-${index}`;
 
             return (
               <article
                 key={skill.title}
                 className="skills-capability"
                 data-skill-capability
+                data-skill-panel
                 data-open={isExpanded ? "true" : "false"}
-                role="listitem"
-                aria-labelledby={`skill-title-${index}`}
+                id={panelId}
+                role={isDesktop ? "listitem" : "tabpanel"}
+                aria-labelledby={
+                  isDesktop ? `skill-title-${index}` : `skill-tab-${index}`
+                }
+                aria-hidden={!isExpanded}
               >
                 <p className="skills-capability-label">
                   {String(index + 1).padStart(2, "0")} /{" "}
@@ -321,33 +395,14 @@ export const Skills = () => {
                   id={`skill-title-${index}`}
                   className="skills-capability-title"
                 >
-                  <button
-                    id={triggerId}
-                    className="skills-capability-trigger"
-                    type="button"
-                    aria-controls={panelId}
-                    aria-expanded={isExpanded}
-                    disabled={isDesktop}
-                    onClick={() => selectPage(index, true)}
-                  >
-                    <span className="skills-capability-name">{skill.title}</span>
-                    <span
-                      className="skills-capability-indicator"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <span className="skills-capability-name">{skill.title}</span>
                 </h3>
                 <p className="skills-capability-tools">
                   <span>Tools</span>
                   {skill.tools.join(" · ")}
                 </p>
                 <div
-                  id={panelId}
                   className="skills-capability-panel"
-                  data-skill-panel
-                  role="region"
-                  aria-labelledby={triggerId}
-                  aria-hidden={!isExpanded}
                 >
                   <div className="skills-capability-panel-inner">
                     <p className="skills-capability-summary">{skill.summary}</p>

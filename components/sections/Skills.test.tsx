@@ -88,6 +88,8 @@ vi.mock("@/lib/animation/skillsIntro", () => ({
 }));
 
 let mountedRoots: Root[] = [];
+let mediaMatches = false;
+let mediaListener: (() => void) | null = null;
 
 beforeAll(() => {
   // React 19가 테스트 환경의 act 호출을 공식 지원하도록 전역 플래그를 활성화한다.
@@ -129,6 +131,25 @@ beforeEach(() => {
   skillsMocks.register.mockReset();
   skillsMocks.unregister.mockReset();
   skillsMocks.prefersReducedMotion = false;
+  mediaMatches = false;
+  mediaListener = null;
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({
+      get matches() {
+        return mediaMatches;
+      },
+      media: "(min-width: 1024px)",
+      onchange: null,
+      addEventListener: vi.fn((_type: string, listener: () => void) => {
+        mediaListener = listener;
+      }),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  );
 });
 
 afterEach(async () => {
@@ -139,10 +160,12 @@ afterEach(async () => {
   }
   mountedRoots = [];
   document.body.replaceChildren();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
-describe("Skills static capabilities", () => {
-  it("인트로, 포커스 가능한 기술 보드, 다섯 개 역량 서사를 순서대로 렌더링한다", async () => {
+describe("Skills Snap Tabs", () => {
+  it("인트로, 기술 보드, 다섯 개 Snap Tabs와 하나의 활성 서사를 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
     const grid = container.querySelector(".skills-expertise-grid");
@@ -154,7 +177,12 @@ describe("Skills static capabilities", () => {
     const deckPages = container.querySelectorAll("[data-skill-deck-page]");
     const deckStatus = container.querySelector("[data-skill-deck-status]");
     const content = container.querySelector(".skills-expertise-content");
-    const capabilities = container.querySelectorAll("[data-skill-capability]");
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const tablist = container.querySelector(".skills-mobile-tabs");
+    const indicator = container.querySelector(".skills-mobile-indicator");
 
     expect(section?.getAttribute("tabindex")).toBe("-1");
     expect(section?.getAttribute("aria-labelledby")).toBe("skills-title");
@@ -169,7 +197,8 @@ describe("Skills static capabilities", () => {
     ).toHaveLength(16);
     expect(grid?.children[0]).toBe(intro);
     expect(grid?.children[1]).toBe(visual);
-    expect(grid?.children[2]).toBe(content);
+    expect(grid?.children[2]).toBe(tablist);
+    expect(grid?.children[3]).toBe(content);
     expect(photo?.getAttribute("alt")).toBe("");
     expect(photo?.getAttribute("src")).toContain("skills-editorial-v2.webp");
     expect(visual?.hasAttribute("aria-hidden")).toBe(false);
@@ -183,13 +212,28 @@ describe("Skills static capabilities", () => {
     expect(
       container.querySelector("#skills-stack-label")?.textContent,
     ).toBe("Selected stack");
-    expect(capabilities).toHaveLength(5);
+    expect(tablist?.getAttribute("role")).toBe("tablist");
+    expect(tablist?.getAttribute("aria-label")).toBe("역량 선택");
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]?.id).toBe("skill-tab-0");
+    expect(tabs[0]?.getAttribute("aria-selected")).toBe("true");
+    expect(tabs[0]?.getAttribute("aria-controls")).toBe("skill-panel-0");
+    expect(tabs[0]?.tabIndex).toBe(0);
+    expect(tabs[1]?.id).toBe("skill-tab-1");
+    expect(tabs[1]?.getAttribute("aria-selected")).toBe("false");
+    expect(tabs[1]?.getAttribute("aria-controls")).toBe("skill-panel-1");
+    expect(tabs[1]?.tabIndex).toBe(-1);
+    expect(indicator?.getAttribute("aria-hidden")).toBe("true");
+    expect(panels).toHaveLength(5);
+    expect(panels[0]?.getAttribute("role")).toBe("tabpanel");
+    expect(panels[0]?.getAttribute("aria-labelledby")).toBe("skill-tab-0");
+    expect(panels[0]?.getAttribute("aria-hidden")).toBe("false");
     expect(
-      container.querySelectorAll(
-        ".skills-expertise-content [data-skill-capability]",
+      Array.from(panels).filter(
+        (panel) => panel.getAttribute("data-open") === "true",
       ),
-    ).toHaveLength(5);
-    expect(capabilities[0]?.textContent).toContain("Product UI");
+    ).toHaveLength(1);
+    expect(panels[0]?.textContent).toContain("Product UI");
     expect(container.querySelectorAll("[data-skill-tool]")).toHaveLength(10);
     expect(
       container.querySelectorAll("[data-skill-tool] .skills-tool-logo"),
@@ -197,14 +241,48 @@ describe("Skills static capabilities", () => {
     expect(
       container.querySelectorAll("[data-skill-tool] .sr-only"),
     ).toHaveLength(10);
-    for (const capability of capabilities) {
+    for (const capability of panels) {
       expect(capability.querySelector(".skills-capability-tools")).not.toBeNull();
       expect(capability.textContent).toContain("적용 프로젝트");
       expect(capability.textContent).toContain("결과");
     }
+    expect(panels[0]?.textContent).toContain("사용자 흐름을 화면 구조로 만듭니다.");
+    expect(panels[2]?.textContent).toContain("LCP를 개선했습니다.");
+    expect(panels[4]?.textContent).toContain("배포 이슈를 안정화했습니다.");
   });
 
-  it("모바일 기술 덱의 버튼 상태와 현재 역량을 함께 갱신한다", async () => {
+  it("탭 클릭은 문서를 스크롤하지 않고 기술 보드와 활성 서사를 함께 선택한다", async () => {
+    const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+    const status = container.querySelector("[data-skill-deck-status]");
+    const scrollTo = vi.fn();
+    const documentScrollTo = vi
+      .spyOn(window, "scrollTo")
+      .mockImplementation(() => undefined);
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo });
+
+    await act(async () => {
+      tabs[3]?.click();
+    });
+
+    expect(status?.textContent).toBe("04 / 05");
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
+    expect(tabs[3]?.tabIndex).toBe(0);
+    expect(tabs[0]?.getAttribute("aria-selected")).toBe("false");
+    expect(tabs[0]?.tabIndex).toBe(-1);
+    expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
+    expect(panels[0]?.getAttribute("aria-hidden")).toBe("true");
+    expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 960 });
+    expect(documentScrollTo).not.toHaveBeenCalled();
+  });
+
+  it("보드 스와이프와 이전·다음 버튼은 선택된 탭과 서사를 동기화한다", async () => {
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
     const previous = container.querySelector<HTMLButtonElement>(
@@ -214,63 +292,64 @@ describe("Skills static capabilities", () => {
       '[aria-label="다음 기술 그룹 보기"]',
     );
     const status = container.querySelector("[data-skill-deck-status]");
-    const triggers = container.querySelectorAll<HTMLButtonElement>(
-      ".skills-capability-trigger",
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
     );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
     const scrollTo = vi.fn();
 
     Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
-    Object.assign(deck ?? {}, { scrollTo });
-
-    expect(previous?.disabled).toBe(true);
-    expect(next?.disabled).toBe(false);
-
-    await act(async () => {
-      next?.click();
-    });
-
-    expect(status?.textContent).toBe("02 / 05");
-    expect(previous?.disabled).toBe(false);
-    expect(next?.disabled).toBe(false);
-    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("true");
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
-    expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 320 });
-
-    await act(async () => {
-      previous?.click();
-    });
-
-    expect(status?.textContent).toBe("01 / 05");
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("true");
-    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 0 });
-  });
-
-  it("덱 스와이프와 역량 선택을 양방향으로 동기화한다", async () => {
-    const { container } = await mountSkills();
-    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
-    const status = container.querySelector("[data-skill-deck-status]");
-    const triggers = container.querySelectorAll<HTMLButtonElement>(
-      ".skills-capability-trigger",
-    );
-    const scrollTo = vi.fn();
-
-    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
-    Object.assign(deck ?? {}, { scrollTo, scrollLeft: 640 });
+    Object.assign(deck ?? {}, { scrollLeft: 640, scrollTo });
 
     await act(async () => {
       deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
 
     expect(status?.textContent).toBe("03 / 05");
-    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
+    expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
 
     await act(async () => {
-      triggers[4]?.click();
+      previous?.click();
+    });
+
+    expect(status?.textContent).toBe("02 / 05");
+    expect(previous?.disabled).toBe(false);
+    expect(next?.disabled).toBe(false);
+    expect(tabs[1]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[1]?.getAttribute("aria-hidden")).toBe("false");
+    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 320 });
+
+    await act(async () => {
+      next?.click();
+    });
+
+    expect(status?.textContent).toBe("03 / 05");
+    expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
+    expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 640 });
+  });
+
+  it("프로그램 대상 페이지 전의 중간 스크롤로 활성 상태가 깜빡이지 않는다", async () => {
+    const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const status = container.querySelector("[data-skill-deck-status]");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+    const scrollTo = vi.fn();
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo });
+
+    await act(async () => {
+      tabs[4]?.click();
     });
 
     expect(status?.textContent).toBe("05 / 05");
-    expect(triggers[4]?.getAttribute("aria-expanded")).toBe("true");
+    expect(tabs[4]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[4]?.getAttribute("aria-hidden")).toBe("false");
     expect(scrollTo).toHaveBeenLastCalledWith({ behavior: "smooth", left: 1280 });
 
     Object.assign(deck ?? {}, { scrollLeft: 960 });
@@ -279,7 +358,8 @@ describe("Skills static capabilities", () => {
     });
 
     expect(status?.textContent).toBe("05 / 05");
-    expect(triggers[4]?.getAttribute("aria-expanded")).toBe("true");
+    expect(tabs[4]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[4]?.getAttribute("aria-hidden")).toBe("false");
 
     await act(async () => {
       deck?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
@@ -287,15 +367,16 @@ describe("Skills static capabilities", () => {
     });
 
     expect(status?.textContent).toBe("04 / 05");
-    expect(triggers[3]?.getAttribute("aria-expanded")).toBe("true");
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
   });
 
-  it("reduced motion에서는 역량 선택 시 덱을 즉시 이동한다", async () => {
+  it("reduced motion에서는 탭 선택 시 보드를 즉시 이동한다", async () => {
     skillsMocks.prefersReducedMotion = true;
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
-    const triggers = container.querySelectorAll<HTMLButtonElement>(
-      ".skills-capability-trigger",
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
     );
     const scrollTo = vi.fn();
 
@@ -303,52 +384,139 @@ describe("Skills static capabilities", () => {
     Object.assign(deck ?? {}, { scrollTo });
 
     await act(async () => {
-      triggers[3]?.click();
+      tabs[3]?.click();
     });
 
-    expect(triggers[3]?.getAttribute("aria-expanded")).toBe("true");
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
     expect(scrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 960 });
   });
 
-  it("모바일 역량 아코디언은 하나만 열고 모든 서사 콘텐츠를 유지한다", async () => {
+  it("키보드로 탭을 선택하고 roving focus를 이동한다", async () => {
     const { container } = await mountSkills();
-    const triggers = container.querySelectorAll<HTMLButtonElement>(
-      ".skills-capability-trigger",
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
     );
     const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
 
-    expect(triggers).toHaveLength(5);
-    expect(panels).toHaveLength(5);
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("true");
-    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("false");
-    expect(triggers[0]?.getAttribute("aria-controls")).toBe("skill-panel-0");
-    expect(panels[0]?.getAttribute("role")).toBe("region");
-    expect(panels[0]?.getAttribute("aria-labelledby")).toBe("skill-trigger-0");
-    expect(panels[0]?.getAttribute("aria-hidden")).toBe("false");
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo: vi.fn() });
+    tabs[0]?.focus();
 
     await act(async () => {
-      triggers[1]?.click();
+      tabs[0]?.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }),
+      );
     });
 
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
-    expect(triggers[1]?.getAttribute("aria-expanded")).toBe("true");
-    expect(panels[0]?.getAttribute("aria-hidden")).toBe("true");
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(tabs[1]?.getAttribute("aria-selected")).toBe("true");
     expect(panels[1]?.getAttribute("aria-hidden")).toBe("false");
 
     await act(async () => {
-      triggers[2]?.click();
+      tabs[1]?.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      );
     });
 
-    expect(triggers[0]?.getAttribute("aria-expanded")).toBe("false");
-    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
+    expect(document.activeElement).toBe(tabs[4]);
+    expect(tabs[4]?.getAttribute("aria-selected")).toBe("true");
 
     await act(async () => {
-      triggers[2]?.click();
+      tabs[4]?.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "ArrowLeft" }),
+      );
     });
 
-    expect(triggers[2]?.getAttribute("aria-expanded")).toBe("true");
-    expect(panels[0]?.textContent).toContain("사용자 흐름을 화면 구조로 만듭니다.");
-    expect(panels[2]?.textContent).toContain("LCP를 개선했습니다.");
+    expect(document.activeElement).toBe(tabs[3]);
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
+
+    await act(async () => {
+      tabs[3]?.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "Home" }),
+      );
+    });
+
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(tabs[0]?.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("desktop 전환은 모든 서사를 목록으로 복원하고 모바일 탭 의미를 비활성화한다", async () => {
+    const { container } = await mountSkills();
+    const tablist = container.querySelector(".skills-mobile-tabs");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const content = container.querySelector(".skills-expertise-content");
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+
+    expect(content?.getAttribute("role")).toBeNull();
+    expect(panels[0]?.getAttribute("role")).toBe("tabpanel");
+    expect(panels[1]?.getAttribute("aria-hidden")).toBe("true");
+
+    mediaMatches = true;
+    await act(async () => {
+      mediaListener?.();
+    });
+
+    expect(content?.getAttribute("role")).toBe("list");
+    expect(tablist?.getAttribute("aria-hidden")).toBe("true");
+    for (const tab of tabs) {
+      expect(tab.disabled).toBe(true);
+      expect(tab.tabIndex).toBe(-1);
+      expect(tab.getAttribute("role")).toBeNull();
+      expect(tab.getAttribute("aria-controls")).toBeNull();
+      expect(tab.getAttribute("aria-selected")).toBeNull();
+    }
+    for (const panel of panels) {
+      expect(panel.getAttribute("role")).toBe("listitem");
+      expect(panel.getAttribute("aria-hidden")).toBe("false");
+    }
+  });
+
+  it("브레이크포인트 왕복 후 탭과 단일 활성 서사는 보드 페이지를 공유한다", async () => {
+    const { container } = await mountSkills();
+    const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
+    const status = container.querySelector("[data-skill-deck-status]");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+
+    Object.defineProperty(deck, "clientWidth", { configurable: true, value: 320 });
+    Object.assign(deck ?? {}, { scrollTo: vi.fn() });
+
+    await act(async () => {
+      tabs[3]?.click();
+    });
+
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
+
+    mediaMatches = true;
+    await act(async () => {
+      mediaListener?.();
+    });
+
+    Object.assign(deck ?? {}, { scrollLeft: 640 });
+    await act(async () => {
+      deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+
+    expect(status?.textContent).toBe("03 / 05");
+
+    mediaMatches = false;
+    await act(async () => {
+      mediaListener?.();
+    });
+
+    expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
+    expect(
+      Array.from(panels).filter(
+        (panel) => panel.getAttribute("data-open") === "true",
+      ),
+    ).toEqual([panels[2]]);
   });
 
   it("section registry를 등록하고 언마운트에서 해제한다", async () => {
