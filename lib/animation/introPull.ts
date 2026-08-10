@@ -13,7 +13,6 @@ type PullPoint = {
 
 type PullState = "drop" | "pull";
 
-const DRAG_SLOP = 6;
 const HOVER_DISTANCE = 38;
 const HOVER_PULL = 0.38;
 const HOVER_LIMIT = 15;
@@ -41,12 +40,8 @@ export const initIntroPull = async ({
   const point: PullPoint = { x: initialWidth / 2, y: 0 };
   let active = false;
   let hovering = false;
-  let moved = false;
   let pointerId = -1;
-  let startX = 0;
-  let startY = 0;
   let state: PullState = "pull";
-  let clickTimer = 0;
 
   const readPointer = (event: PointerEvent) => {
     const bounds = root.getBoundingClientRect();
@@ -153,25 +148,13 @@ export const initIntroPull = async ({
     movePoint(target, pointer ? 0.38 : 0.8, "elastic.out(1, 0.35)");
   };
 
-  const suppressClick = () => {
-    root.dataset.pullSuppressClick = "true";
-    if (clickTimer) window.clearTimeout(clickTimer);
-    clickTimer = window.setTimeout(() => {
-      delete root.dataset.pullSuppressClick;
-      clickTimer = 0;
-    });
-  };
-
   const onPointerDown = (event: PointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     if (!hovering && event.target !== hit) return;
 
     const pointer = readPointer(event);
     active = true;
-    moved = false;
     pointerId = event.pointerId;
-    startX = event.clientX;
-    startY = event.clientY;
     gsap?.killTweensOf(point);
     point.x = pointer.x;
     point.y = pointer.y;
@@ -210,9 +193,6 @@ export const initIntroPull = async ({
     if (event.pointerId !== pointerId) return;
 
     const threshold = readThreshold();
-    const xDistance = event.clientX - startX;
-    const yDistance = event.clientY - startY;
-    moved = moved || Math.hypot(xDistance, yDistance) > DRAG_SLOP;
     point.x = pointer.x;
     point.y = clamp(pointer.y, -threshold * 0.4, threshold * 1.65);
     setState(point.y >= threshold ? "drop" : "pull");
@@ -231,7 +211,6 @@ export const initIntroPull = async ({
       root.releasePointerCapture(pointerId);
     }
 
-    if (moved) suppressClick();
     if (shouldDrop) {
       setHover(false);
       resetPull();
@@ -266,11 +245,9 @@ export const initIntroPull = async ({
     root.removeEventListener("pointercancel", onPointerCancel);
     root.removeEventListener("pointerleave", onPointerLeave);
     gsap?.killTweensOf(point);
-    if (clickTimer) window.clearTimeout(clickTimer);
     delete root.dataset.pullActive;
     delete root.dataset.pullHover;
     delete root.dataset.pullLabelSide;
-    delete root.dataset.pullSuppressClick;
     root.style.removeProperty("--intro-pull-x");
     root.style.removeProperty("--intro-pull-y");
   };

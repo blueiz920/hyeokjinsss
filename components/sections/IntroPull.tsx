@@ -48,11 +48,9 @@ export const IntroPull = ({
   }, [onActivate, prefersReducedMotion]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (event.currentTarget.dataset.pullSuppressClick === "true") {
-      event.preventDefault();
-      delete event.currentTarget.dataset.pullSuppressClick;
-      return;
-    }
+    // Pointer users complete this CTA by pulling the line. Assistive
+    // technology and keyboards emit a click with detail 0.
+    if (event.detail !== 0) return;
 
     onActivate();
   };
@@ -69,7 +67,8 @@ export const IntroPull = ({
         onClick={handleClick}
       >
         <span id="intro-pull-instructions" className="sr-only">
-          선을 아래로 당겼다가 놓거나 버튼을 선택하면 프로젝트로 이동합니다.
+          선을 아래로 당겼다가 놓으세요. 키보드에서는 Enter 또는 Space를
+          누르면 프로젝트로 이동합니다.
         </span>
         <svg
           className="intro-pull-line"

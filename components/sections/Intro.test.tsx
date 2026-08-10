@@ -137,7 +137,7 @@ describe("Intro readiness", () => {
     });
   });
 
-  it("설명·성과·연락 CTA 대신 당김 CTA 하나로 Projects 이동을 제공한다", async () => {
+  it("당김 CTA는 pointer click을 무시하고 drag·키보드로만 Projects 이동한다", async () => {
     const section = await mountIntro();
     const pull = section.querySelector<HTMLButtonElement>(".intro-pull")!;
 
@@ -153,7 +153,19 @@ describe("Intro readiness", () => {
       prefersReducedMotion: false,
     });
 
-    await act(async () => pull.click());
+    await act(async () => {
+      pull.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, detail: 1 }),
+      );
+    });
+
+    expect(introMocks.scrollTo).not.toHaveBeenCalled();
+
+    await act(async () => {
+      pull.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, detail: 0 }),
+      );
+    });
 
     expect(introMocks.scrollTo).toHaveBeenCalledOnce();
     expect(introMocks.scrollTo).toHaveBeenCalledWith("projects");

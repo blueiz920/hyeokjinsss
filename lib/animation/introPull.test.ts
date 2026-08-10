@@ -162,7 +162,6 @@ describe("initIntroPull", () => {
 
     expect(onDrop).toHaveBeenCalledOnce();
     expect(root.dataset.pullState).toBe("pull");
-    expect(root.dataset.pullSuppressClick).toBe("true");
     expect(pullMocks.to).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
