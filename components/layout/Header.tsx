@@ -42,7 +42,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="absolute inset-x-0 top-0 z-40 w-full bg-gradient-to-b from-black/55 via-black/25 to-transparent">
+      <header className="absolute inset-x-0 top-0 z-40 w-full text-[#181715]">
         <div className="flex min-h-[5.75rem] items-center justify-between px-6 py-6 min-[541px]:min-h-0 min-[541px]:px-[clamp(1.5rem,3vw,2.7rem)] min-[541px]:py-[clamp(1.35rem,2vw,1.8rem)]">
           <button
             type="button"
@@ -50,7 +50,7 @@ export const Header = () => {
             data-magnetic
             data-magnetic-strength="20"
             data-magnetic-label-strength="10"
-            className="text-sm font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300"
+            className="text-sm font-semibold uppercase tracking-[0.2em] transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600"
             aria-label="Scroll to intro"
           >
             <span data-magnetic-label>{portfolio.name}</span>
@@ -70,7 +70,7 @@ export const Header = () => {
                   data-magnetic
                   data-magnetic-strength="20"
                   data-magnetic-label-strength="10"
-                  className="relative py-2 text-sm font-medium text-white transition-opacity after:absolute after:-bottom-0.5 after:left-1/2 after:size-1 after:-translate-x-1/2 after:scale-0 after:rounded-full after:bg-amber-500 after:transition-transform hover:opacity-75 hover:after:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 focus-visible:after:scale-100"
+                  className="relative py-2 text-sm font-medium transition-opacity after:absolute after:-bottom-0.5 after:left-1/2 after:size-1 after:-translate-x-1/2 after:scale-0 after:rounded-full after:bg-amber-500 after:transition-transform hover:opacity-75 hover:after:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 focus-visible:after:scale-100"
                 >
                   <span data-magnetic-label>{item.label}</span>
                 </button>
@@ -80,7 +80,7 @@ export const Header = () => {
           <button
             type="button"
             onClick={openMenu}
-            className="group inline-flex min-h-11 items-center gap-3 px-1 text-xs font-semibold uppercase tracking-[0.22em] text-white transition-opacity hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 min-[541px]:hidden"
+            className="group inline-flex min-h-11 items-center gap-3 px-1 text-xs font-semibold uppercase tracking-[0.22em] transition-opacity hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 min-[541px]:hidden"
             aria-label="Open navigation"
             aria-haspopup="dialog"
             aria-expanded={open}

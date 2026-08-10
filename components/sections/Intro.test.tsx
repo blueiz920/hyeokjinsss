@@ -30,14 +30,6 @@ const introState = vi.hoisted(() => ({
   prefersReducedMotion: false,
 }));
 
-vi.mock("@/components/layout/Container", () => ({
-  Container: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
-vi.mock("@/components/sections/IntroTextureOverlay", () => ({
-  IntroTextureOverlay: () => null,
-}));
-
 vi.mock("@/hooks/useScrollRuntime", () => ({
   useScrollRuntime: () => ({
     prefersReducedMotion: introState.prefersReducedMotion,
@@ -129,7 +121,6 @@ describe("Intro readiness", () => {
 
     expect(introMocks.initIntroScroll).toHaveBeenCalledWith({
       root: section,
-      heading: section.querySelector("#intro-title"),
       prefersReducedMotion: false,
     });
     expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
@@ -203,7 +194,6 @@ describe("Intro readiness", () => {
 
     expect(introMocks.initIntroScroll).toHaveBeenCalledWith({
       root: section,
-      heading: section.querySelector("#intro-title"),
       prefersReducedMotion: true,
     });
     expect(introMocks.unlockScroll).not.toHaveBeenCalled();

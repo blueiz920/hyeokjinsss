@@ -3,17 +3,17 @@ import type { PortfolioData } from "./types";
 export const portfolio: PortfolioData = {
   name: "Hyeokjin",
   title: "프론트엔드 개발자",
-  introEyebrow: "Frontend Engineer",
+  introEyebrow: "Hyeokjin Kwon",
   introHeadline: {
-    accent: "문제를 파고들어",
-    rest: "더 빠르고 안정적인 흐름을 만듭니다.",
+    accent: "Frontend",
+    rest: "Developer",
   },
   introSubhead:
-    "Next.js와 TypeScript로 검색 상태, 렌더링 성능, 배포 과정에서 드러난 문제를 측정하고 개선해 왔습니다. 기획부터 구현·테스트·배포까지 연결해 사용자 경험과 팀의 검증 과정을 함께 다듬습니다.",
+    "검색·상태·배포에서 드러난 문제를 측정하고 개선합니다.",
   introHighlights: [
-    "검색 페이지 LCP 1.5s → 0.8s 개선",
-    "URL 상태 동기화 43개 테스트 구축",
-    "GitHub Actions·Vercel 배포 흐름 구성",
+    "LCP 1.5s → 0.8s",
+    "URL State · 43 Tests",
+    "GitHub Actions · Vercel",
   ],
   nav: [
     { id: "intro", label: "Intro" },
