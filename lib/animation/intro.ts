@@ -14,7 +14,7 @@ export const showIntro = (root: HTMLElement) => {
     char.style.willChange = "auto";
   });
   root
-    .querySelectorAll<HTMLElement>(".intro-context, .intro-proof-list")
+    .querySelectorAll<HTMLElement>(".intro-pull-stage")
     .forEach((item) => {
       item.style.clipPath = "none";
       item.style.transform = "none";
@@ -45,8 +45,7 @@ export const initIntroAnimation = async (
   const nameChars = root.querySelectorAll<HTMLElement>(
     ".intro-name [data-intro-char]",
   );
-  const context = root.querySelector<HTMLElement>(".intro-context");
-  const proof = root.querySelector<HTMLElement>(".intro-proof-list");
+  const pull = root.querySelector<HTMLElement>(".intro-pull-stage");
   const entryEase = CustomEase.create(
     "intro-entry",
     "0.62, 0.05, 0.01, 0.99",
@@ -87,11 +86,9 @@ export const initIntroAnimation = async (
     );
   }
 
-  [context, proof].forEach((item, index) => {
-    if (!item) return;
-
+  if (pull) {
     timeline.to(
-      item,
+      pull,
       {
         clipPath: "inset(0% 0% 0% 0%)",
         opacity: 1,
@@ -99,9 +96,9 @@ export const initIntroAnimation = async (
         duration: 0.65,
         ease: entryEase,
       },
-      supportStart + index * 0.07,
+      supportStart,
     );
-  });
+  }
 
   return () => {
     timeline.revert();

@@ -37,8 +37,6 @@ export type PortfolioData = {
   title: string;
   introEyebrow: string;
   introHeadline: IntroHeadline;
-  introSubhead: string;
-  introHighlights: string[];
   projects: Project[];
   skills: SkillCapability[];
   contactEmail: string;

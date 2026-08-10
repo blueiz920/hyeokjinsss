@@ -20,6 +20,7 @@ import { Intro } from "./Intro";
 
 const introMocks = vi.hoisted(() => ({
   initIntroAnimation: vi.fn(),
+  initIntroPull: vi.fn(),
   initIntroScroll: vi.fn(),
   register: vi.fn(),
   scrollTo: vi.fn(),
@@ -53,6 +54,10 @@ vi.mock("@/lib/animation/intro", () => ({
   showIntro: introMocks.showIntro,
 }));
 
+vi.mock("@/lib/animation/introPull", () => ({
+  initIntroPull: introMocks.initIntroPull,
+}));
+
 let mountedRoots: Root[] = [];
 
 beforeAll(() => {
@@ -83,6 +88,7 @@ beforeEach(() => {
   introState.prefersReducedMotion = false;
   Object.values(introMocks).forEach((mock) => mock.mockReset());
   introMocks.initIntroAnimation.mockResolvedValue(vi.fn());
+  introMocks.initIntroPull.mockResolvedValue(vi.fn());
   introMocks.initIntroScroll.mockResolvedValue(vi.fn());
 });
 
@@ -129,6 +135,27 @@ describe("Intro readiness", () => {
       );
       expect(character.closest(".intro-line-mask")).not.toBeNull();
     });
+  });
+
+  it("설명·성과·연락 CTA 대신 당김 CTA 하나로 Projects 이동을 제공한다", async () => {
+    const section = await mountIntro();
+    const pull = section.querySelector<HTMLButtonElement>(".intro-pull")!;
+
+    expect(section.querySelector(".intro-statement")).toBeNull();
+    expect(section.querySelector(".intro-proof-list")).toBeNull();
+    expect(section.querySelector('a[href^="mailto:"]')).toBeNull();
+    expect(pull.getAttribute("aria-label")).toBe("프로젝트 보기");
+    expect(pull.querySelector("[data-pull-label]")?.textContent).toBe("PULL!");
+    expect(introMocks.initIntroPull).toHaveBeenCalledWith({
+      root: pull,
+      onDrop: expect.any(Function),
+      prefersReducedMotion: false,
+    });
+
+    await act(async () => pull.click());
+
+    expect(introMocks.scrollTo).toHaveBeenCalledOnce();
+    expect(introMocks.scrollTo).toHaveBeenCalledWith("projects");
   });
 
   it("로더 완료 전에는 진입 애니메이션을 시작하지 않고 완료 신호 뒤 시작한다", async () => {

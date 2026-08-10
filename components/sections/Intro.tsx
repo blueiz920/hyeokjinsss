@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
 import {
   initIntroAnimation,
@@ -14,6 +14,7 @@ import {
 } from "@/lib/navigation/sectionIntent";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { IntroPull } from "./IntroPull";
 
 // 정상 sequence(약 2.6초)는 유지하고 cold import 실패 경계만 여유 있게 둔다.
 const INTRO_ENTRY_FALLBACK_MS = 4000;
@@ -35,6 +36,7 @@ export const Intro = () => {
 
   const { prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister, scrollTo } = useSectionRegistry();
+  const showProjects = useCallback(() => scrollTo("projects"), [scrollTo]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -206,41 +208,10 @@ export const Intro = () => {
           </span>
         </h1>
 
-        <div className="intro-context" data-intro-item>
-          <p className="intro-statement">{portfolio.introSubhead}</p>
-
-          <div className="intro-actions" aria-label="첫 화면 바로가기">
-            <button
-              type="button"
-              onClick={() => scrollTo("projects")}
-              data-magnetic
-              data-magnetic-strength="25"
-              data-magnetic-label-strength="15"
-              className="intro-action"
-            >
-              <span data-magnetic-label>
-                프로젝트 보기 <span aria-hidden="true">↘</span>
-              </span>
-            </button>
-            <a
-              href={`mailto:${portfolio.contactEmail}`}
-              data-magnetic
-              data-magnetic-strength="25"
-              data-magnetic-label-strength="15"
-              className="intro-action"
-            >
-              <span data-magnetic-label>
-                연락하기 <span aria-hidden="true">↗</span>
-              </span>
-            </a>
-          </div>
-        </div>
-
-        <ul className="intro-proof-list" aria-label="주요 성과" data-intro-item>
-          {portfolio.introHighlights.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+        <IntroPull
+          onActivate={showProjects}
+          prefersReducedMotion={prefersReducedMotion}
+        />
 
         <p className="intro-name" data-intro-item>
           <span className="sr-only">{portfolio.introEyebrow}</span>

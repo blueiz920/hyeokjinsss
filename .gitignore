@@ -65,6 +65,12 @@ subagent-*
 /docs/design-references/gui-challenges.web.app/
 /docs/research/www.richardekwonye.com/
 /docs/design-references/www.richardekwonye.com/
+/docs/research/codepen.io/
+/docs/design-references/codepen.io/
+/docs/research/tympanus.net/
+/docs/design-references/tympanus.net/
+/docs/research/www.marcohope.com/
+/docs/design-references/www.marcohope.com/
 
 # Local guardrail notes
 lib/perf/guardrails.md

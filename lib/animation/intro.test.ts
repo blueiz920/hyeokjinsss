@@ -16,8 +16,7 @@ const createEntryDom = () => {
       <span data-intro-role-line><span data-intro-char>F</span></span>
       <span data-intro-role-line><span data-intro-char>D</span></span>
     </h1>
-    <div class="intro-context" data-intro-item></div>
-    <ul class="intro-proof-list" data-intro-item></ul>
+    <div class="intro-pull-stage" data-intro-item></div>
     <p class="intro-name" data-intro-item><span data-intro-char>H</span></p>
   `;
   return root;
@@ -48,7 +47,7 @@ afterEach(() => {
 });
 
 describe("initIntroAnimation", () => {
-  it("두 역할 줄을 함께 시작하고 name과 supporting blocks를 뒤이어 reveal한다", async () => {
+  it("두 역할 줄을 함께 시작하고 name과 pull CTA를 뒤이어 reveal한다", async () => {
     const root = createEntryDom();
     const { CustomEase, entryEase, gsap, timeline } = createHarness();
     const onComplete = vi.fn();
@@ -82,9 +81,9 @@ describe("initIntroAnimation", () => {
       expect.objectContaining({ y: 0, yPercent: 0 }),
       0.18,
     ]);
-    expect(timeline.to).toHaveBeenCalledTimes(2);
+    expect(timeline.to).toHaveBeenCalledOnce();
     expect(timeline.to.mock.calls[0]).toEqual([
-      root.querySelector(".intro-context"),
+      root.querySelector(".intro-pull-stage"),
       expect.objectContaining({
         clipPath: "inset(0% 0% 0% 0%)",
         duration: 0.65,
@@ -92,7 +91,6 @@ describe("initIntroAnimation", () => {
       }),
       1.5,
     ]);
-    expect(timeline.to.mock.calls[1]?.[2]).toBe(1.57);
 
     cleanup();
     expect(timeline.revert).toHaveBeenCalledOnce();
@@ -119,13 +117,12 @@ describe("initIntroAnimation", () => {
   it("showIntro는 실패 뒤 모든 Intro 요소를 최종 가시 상태로 복원한다", () => {
     const root = createEntryDom();
     const char = root.querySelector<HTMLElement>("[data-intro-char]")!;
-    const context = root.querySelector<HTMLElement>(".intro-context")!;
-    const proof = root.querySelector<HTMLElement>(".intro-proof-list")!;
+    const pull = root.querySelector<HTMLElement>(".intro-pull-stage")!;
     char.style.transform = "translate(0%, 80%)";
     char.style.willChange = "transform";
-    context.style.clipPath = "inset(100% 0% 0% 0%)";
-    context.style.transform = "translateY(1.25rem)";
-    proof.style.willChange = "clip-path";
+    pull.style.clipPath = "inset(0% 50% 0% 50%)";
+    pull.style.transform = "translateY(0.75rem)";
+    pull.style.willChange = "clip-path";
 
     showIntro(root);
 
@@ -134,11 +131,9 @@ describe("initIntroAnimation", () => {
     });
     expect(char.style.transform).toBe("none");
     expect(char.style.willChange).toBe("auto");
-    [context, proof].forEach((item) => {
-      expect(item.style.clipPath).toBe("none");
-      expect(item.style.transform).toBe("none");
-      expect(item.style.willChange).toBe("auto");
-    });
+    expect(pull.style.clipPath).toBe("none");
+    expect(pull.style.transform).toBe("none");
+    expect(pull.style.willChange).toBe("auto");
   });
 
   it("reduced motion에서는 GSAP을 시작하지 않고 즉시 완료한다", async () => {

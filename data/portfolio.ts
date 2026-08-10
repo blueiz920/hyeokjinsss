@@ -8,13 +8,6 @@ export const portfolio: PortfolioData = {
     accent: "Frontend",
     rest: "Developer",
   },
-  introSubhead:
-    "검색·상태·배포에서 드러난 문제를 측정하고 개선합니다.",
-  introHighlights: [
-    "LCP 1.5s → 0.8s",
-    "URL State · 43 Tests",
-    "GitHub Actions · Vercel",
-  ],
   nav: [
     { id: "intro", label: "Intro" },
     { id: "projects", label: "Projects" },
