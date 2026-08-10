@@ -80,17 +80,16 @@ export const IntroPull = ({
         >
           <path
             data-pull-line
-            d="M0 100 Q500 100 1000 100"
+            d="M0 100 C225 100 390 100 500 100 C610 100 775 100 1000 100"
             vectorEffect="non-scaling-stroke"
           />
           <path
             data-pull-hit
-            d="M0 100 Q500 100 1000 100"
+            d="M0 100 C225 100 390 100 500 100 C610 100 775 100 1000 100"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
-        <span className="intro-pull-point" data-pull-point aria-hidden="true">
-          <span className="intro-pull-dot" />
+        <span className="intro-pull-hint" aria-hidden="true">
           <span className="intro-pull-label" data-pull-label>
             PULL!
           </span>

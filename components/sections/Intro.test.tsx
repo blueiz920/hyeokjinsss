@@ -146,6 +146,7 @@ describe("Intro readiness", () => {
     expect(section.querySelector('a[href^="mailto:"]')).toBeNull();
     expect(pull.getAttribute("aria-label")).toBe("프로젝트 보기");
     expect(pull.querySelector("[data-pull-label]")?.textContent).toBe("PULL!");
+    expect(pull.querySelector(".intro-pull-dot")).toBeNull();
     expect(introMocks.initIntroPull).toHaveBeenCalledWith({
       root: pull,
       onDrop: expect.any(Function),
