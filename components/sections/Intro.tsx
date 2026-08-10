@@ -13,7 +13,6 @@ import {
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
-const INTRO_MASK_PHRASE = "몰입감 있는";
 const INTRO_PHRASE_TEXTURE_SRC = "/intro/intro-phrase-texture.mp4";
 const INTRO_ENTRY_FALLBACK_MS = 1800;
 const INTRO_TEXTURE_READY_FALLBACK_MS = 450;
@@ -22,14 +21,10 @@ export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const titleShellRef = useRef<HTMLDivElement | null>(null);
-  const hasIntroMaskPhrase = portfolio.introHeadline.startsWith(INTRO_MASK_PHRASE);
-  const introHeadlineRest = hasIntroMaskPhrase
-    ? portfolio.introHeadline.slice(INTRO_MASK_PHRASE.length)
-    : "";
 
   const { prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister, scrollTo } = useSectionRegistry();
-  const shouldGateTitleTexture = hasIntroMaskPhrase && !prefersReducedMotion;
+  const shouldGateTitleTexture = !prefersReducedMotion;
   const [isTitleTextureReady, setIsTitleTextureReady] = useState(!shouldGateTitleTexture);
 
   useEffect(() => {
@@ -221,26 +216,20 @@ export const Intro = () => {
             ref={headingRef}
             className="intro-title text-4xl font-semibold leading-tight md:text-6xl"
           >
-            {hasIntroMaskPhrase ? (
-              <>
-                <span
-                  className="intro-title-mask-phrase intro-title-mask-char"
-                  data-intro-mask-phrase-anchor
-                >
-                  {INTRO_MASK_PHRASE}
-                </span>
-                {introHeadlineRest}
-              </>
-            ) : (
-              portfolio.introHeadline
-            )}
+            <span
+              className="intro-title-mask-phrase intro-title-mask-char"
+              data-intro-mask-phrase-anchor
+            >
+              {portfolio.introHeadline.accent}
+            </span>{" "}
+            {portfolio.introHeadline.rest}
           </h1>
           <IntroTextureOverlay
-            disabled={!hasIntroMaskPhrase || prefersReducedMotion}
+            disabled={prefersReducedMotion}
             headingRef={headingRef}
             hostRef={titleShellRef}
             onReady={handlePhraseTextureReady}
-            phrase={INTRO_MASK_PHRASE}
+            phrase={portfolio.introHeadline.accent}
             src={INTRO_PHRASE_TEXTURE_SRC}
           />
         </div>

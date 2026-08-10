@@ -27,11 +27,16 @@ export type NavItem = {
   label: string;
 };
 
+export type IntroHeadline = {
+  accent: string;
+  rest: string;
+};
+
 export type PortfolioData = {
   name: string;
   title: string;
   introEyebrow: string;
-  introHeadline: string;
+  introHeadline: IntroHeadline;
   introSubhead: string;
   introHighlights: string[];
   projects: Project[];
