@@ -8,12 +8,14 @@ import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { ProjectDesktopList } from "@/components/common/ProjectDesktopList";
 import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
+import { initProjectCurve } from "@/lib/animation/projectCurve";
 import { getProjectCardIndex } from "@/lib/animation/projectReveal";
 
 // 프로젝트 카드와 배경 reveal을 렌더링하고 전역 진행 indicator를 동기화한다.
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const bgFrameRef = useRef<HTMLDivElement | null>(null);
+  const curveRef = useRef<HTMLDivElement | null>(null);
   const mobileCardsRef = useRef<Array<HTMLElement | null>>([]);
   const desktopRowsRef = useRef<Array<HTMLElement | null>>([]);
   const [bgActive, setBgActive] = useState(false);
@@ -34,6 +36,38 @@ export const ProjectReveal = () => {
     register("projects", sectionRef);
     return () => unregister("projects");
   }, [register, unregister]);
+
+  // Intro의 밝은 면을 Projects 위로 이어 붙인 뒤 진입 스크롤에서 평탄화한다.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const curve = curveRef.current;
+    if (!section || !curve || prefersReducedMotion) return;
+
+    let isActive = true;
+    let cleanupCurve: (() => void) | null = null;
+
+    void initProjectCurve({ section, curve })
+      .then((cleanup) => {
+        if (!isActive) {
+          cleanup();
+          return;
+        }
+
+        cleanupCurve = cleanup;
+      })
+      .catch((error) => {
+        if (!isActive) return;
+        console.error(
+          "Project entry curve failed; using the static curve.",
+          error,
+        );
+      });
+
+    return () => {
+      isActive = false;
+      cleanupCurve?.();
+    };
+  }, [prefersReducedMotion]);
 
   // 배경 frame의 노출 비율에 hysteresis를 적용해 경계 깜빡임을 막는다.
   useEffect(() => {
@@ -139,6 +173,14 @@ export const ProjectReveal = () => {
       data-bg-active={bgActive ? "true" : "false"}
       aria-labelledby="projects-title"
     >
+      <div
+        ref={curveRef}
+        className="project-entry-curve"
+        aria-hidden="true"
+      >
+        <div className="project-entry-curve-shape" />
+      </div>
+
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
         <div
           ref={bgFrameRef}

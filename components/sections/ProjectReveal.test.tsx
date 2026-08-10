@@ -13,9 +13,11 @@ import {
 import { ProjectReveal } from "./ProjectReveal";
 
 const projectMocks = vi.hoisted(() => ({
+  cleanupCurve: vi.fn(),
   getProjectCardIndex: vi.fn((cards: HTMLElement[]) =>
     cards[0]?.dataset.projectSource === "desktop" ? 2 : 1,
   ),
+  initProjectCurve: vi.fn(),
   register: vi.fn(),
   removeMediaListener: vi.fn(),
   setProjectsActive: vi.fn(),
@@ -94,6 +96,10 @@ vi.mock("@/lib/animation/projectReveal", () => ({
   getProjectCardIndex: projectMocks.getProjectCardIndex,
 }));
 
+vi.mock("@/lib/animation/projectCurve", () => ({
+  initProjectCurve: projectMocks.initProjectCurve,
+}));
+
 let mountedRoots: Root[] = [];
 let mediaMatches = false;
 let mediaListener: (() => void) | null = null;
@@ -131,6 +137,7 @@ beforeEach(() => {
   mediaMatches = false;
   mediaListener = null;
   Object.values(projectMocks).forEach((mock) => mock.mockClear());
+  projectMocks.initProjectCurve.mockResolvedValue(projectMocks.cleanupCurve);
 
   vi.stubGlobal("IntersectionObserver", IntersectionObserverMock);
   vi.stubGlobal(
@@ -193,9 +200,15 @@ afterEach(async () => {
 
 describe("ProjectReveal indicator", () => {
   it("breakpoint가 바뀌면 현재 레이아웃의 프로젝트 목록으로 단계를 다시 계산한다", async () => {
-    const { root } = await mountProjects();
+    const { container, root } = await mountProjects();
+    const section = container.querySelector<HTMLElement>("#projects");
+    const curve = container.querySelector<HTMLElement>(".project-entry-curve");
 
     expect(projectMocks.setProjectsTotal).toHaveBeenCalledWith(3);
+    expect(projectMocks.initProjectCurve).toHaveBeenCalledWith({
+      section,
+      curve,
+    });
     expect(projectMocks.setProjectsActive).toHaveBeenCalledWith(true);
     expect(projectMocks.getProjectCardIndex.mock.calls.at(-1)?.[0]).toSatisfy(
       (cards: HTMLElement[]) =>
@@ -220,5 +233,6 @@ describe("ProjectReveal indicator", () => {
       expect.any(Function),
     );
     expect(projectMocks.setProjectsActive).toHaveBeenLastCalledWith(false);
+    expect(projectMocks.cleanupCurve).toHaveBeenCalledOnce();
   });
 });

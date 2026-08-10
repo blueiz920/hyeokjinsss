@@ -1,4 +1,37 @@
 @layer components {
+  .project-section {
+    isolation: isolate;
+  }
+
+  .project-entry-curve {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 10vh;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateY(-1px);
+    will-change: height;
+  }
+
+  .project-entry-curve-shape {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 150%;
+    height: 750%;
+    border-radius: 50%;
+    background: #f3ede3;
+    transform: translate(-50%, -86.666%);
+  }
+
+  @media (max-width: 720px) {
+    .project-entry-curve {
+      height: 7.5vh;
+    }
+  }
+
   .project-mobile-card {
     background: transparent;
   }
@@ -384,6 +417,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .project-entry-curve {
+    height: 0;
+    will-change: auto;
+  }
+
   .project-reveal-bg,
   .project-reveal-veil,
   .project-mobile-link {
