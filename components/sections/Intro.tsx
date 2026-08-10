@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
-import { initIntroAnimation, initIntroScroll } from "@/lib/animation/intro";
+import {
+  initIntroAnimation,
+  initIntroScroll,
+  showIntro,
+} from "@/lib/animation/intro";
 import { waitIntroReady } from "@/lib/animation/introLoader";
 import {
   SECTION_INTENT_EVENT,
@@ -11,7 +15,20 @@ import {
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 
-const INTRO_ENTRY_FALLBACK_MS = 1800;
+// 정상 sequence(약 2.6초)는 유지하고 cold import 실패 경계만 여유 있게 둔다.
+const INTRO_ENTRY_FALLBACK_MS = 4000;
+
+const IntroChars = ({ text }: { text: string }) => (
+  <>
+    {Array.from(text).map((character, index) => (
+      <span className="intro-char-mask" key={`${character}-${index}`}>
+        <span className="intro-char" data-intro-char>
+          {character === " " ? "\u00a0" : character}
+        </span>
+      </span>
+    ))}
+  </>
+);
 
 export const Intro = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -39,6 +56,7 @@ export const Intro = () => {
     let isLeaving = false;
     let ownsLock = false;
     let scrollStarted = false;
+    let hasFinished = false;
 
     const releaseIntro = () => {
       if (entryTimer) {
@@ -74,8 +92,16 @@ export const Intro = () => {
       })();
     };
 
-    const finishIntro = () => {
+    const finishIntro = (cancelEntry = false) => {
+      if (hasFinished) return;
+
+      hasFinished = true;
       isEntering = false;
+      if (cancelEntry) {
+        introDestroy?.();
+        introDestroy = null;
+      }
+      showIntro(root);
       if (!isLeaving) delete root.dataset.introEntryMuted;
       releaseIntro();
       startScroll();
@@ -87,7 +113,10 @@ export const Intro = () => {
         ownsLock =
           document.documentElement.dataset.introLocked === "true";
         document.documentElement.dataset.introEntering = "true";
-        entryTimer = window.setTimeout(finishIntro, INTRO_ENTRY_FALLBACK_MS);
+        entryTimer = window.setTimeout(
+          () => finishIntro(true),
+          INTRO_ENTRY_FALLBACK_MS,
+        );
       }
       void (async () => {
         try {
@@ -96,8 +125,9 @@ export const Intro = () => {
             prefersReducedMotion,
             finishIntro,
           );
-          if (!alive) {
+          if (!alive || !isEntering) {
             dispose();
+            showIntro(root);
             return;
           }
           introDestroy = dispose;
@@ -157,9 +187,22 @@ export const Intro = () => {
     >
       <div className="intro-layout">
         <h1 id="intro-title" className="intro-role" data-intro-item>
-          <span className="intro-role-line">{portfolio.introHeadline.accent}</span>
-          <span className="intro-role-line intro-role-line-offset">
-            {portfolio.introHeadline.rest}
+          <span className="sr-only">
+            {portfolio.introHeadline.accent} {portfolio.introHeadline.rest}
+          </span>
+          <span
+            className="intro-role-line intro-role-visual"
+            data-intro-role-line
+            aria-hidden="true"
+          >
+            <IntroChars text={portfolio.introHeadline.accent} />
+          </span>
+          <span
+            className="intro-role-line intro-role-line-offset intro-role-visual"
+            data-intro-role-line
+            aria-hidden="true"
+          >
+            <IntroChars text={portfolio.introHeadline.rest} />
           </span>
         </h1>
 
@@ -200,7 +243,10 @@ export const Intro = () => {
         </ul>
 
         <p className="intro-name" data-intro-item>
-          {portfolio.introEyebrow}
+          <span className="sr-only">{portfolio.introEyebrow}</span>
+          <span className="intro-name-visual" aria-hidden="true">
+            <IntroChars text={portfolio.introEyebrow} />
+          </span>
         </p>
       </div>
     </section>

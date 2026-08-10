@@ -11,6 +11,7 @@ import {
   vi,
 } from "vitest";
 import { markIntroReady } from "@/lib/animation/introLoader";
+import { portfolio } from "@/data/portfolio";
 import {
   SECTION_INTENT_EVENT,
   type SectionIntentDetail,
@@ -22,6 +23,7 @@ const introMocks = vi.hoisted(() => ({
   initIntroScroll: vi.fn(),
   register: vi.fn(),
   scrollTo: vi.fn(),
+  showIntro: vi.fn(),
   unlockScroll: vi.fn(),
   unregister: vi.fn(),
 }));
@@ -48,6 +50,7 @@ vi.mock("@/hooks/useSectionRegistry", () => ({
 vi.mock("@/lib/animation/intro", () => ({
   initIntroAnimation: introMocks.initIntroAnimation,
   initIntroScroll: introMocks.initIntroScroll,
+  showIntro: introMocks.showIntro,
 }));
 
 let mountedRoots: Root[] = [];
@@ -95,6 +98,38 @@ afterEach(async () => {
 });
 
 describe("Intro readiness", () => {
+  it("완성 텍스트는 한 번만 노출하고 시각 글자는 mask 안에 둔다", async () => {
+    const section = await mountIntro();
+    const role = section.querySelector(".intro-role");
+    const name = section.querySelector(".intro-name");
+    const roleLines = section.querySelectorAll("[data-intro-role-line]");
+    const visualChars = section.querySelectorAll("[data-intro-char]");
+
+    expect(role?.querySelector(".sr-only")?.textContent).toBe(
+      `${portfolio.introHeadline.accent} ${portfolio.introHeadline.rest}`,
+    );
+    expect(name?.querySelector(".sr-only")?.textContent).toBe(
+      portfolio.introEyebrow,
+    );
+    expect(roleLines).toHaveLength(2);
+    roleLines.forEach((line) => {
+      expect(line.getAttribute("aria-hidden")).toBe("true");
+    });
+    expect(name?.querySelector(".intro-name-visual")?.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
+    expect(visualChars).toHaveLength(
+      Array.from(portfolio.introHeadline.accent).length +
+        Array.from(portfolio.introHeadline.rest).length +
+        Array.from(portfolio.introEyebrow).length,
+    );
+    visualChars.forEach((character) => {
+      expect(character.parentElement?.classList.contains("intro-char-mask")).toBe(
+        true,
+      );
+    });
+  });
+
   it("로더 완료 전에는 진입 애니메이션을 시작하지 않고 완료 신호 뒤 시작한다", async () => {
     const section = await mountIntro();
 
@@ -138,6 +173,47 @@ describe("Intro readiness", () => {
       expect.any(Function),
     );
     expect(introMocks.initIntroScroll).not.toHaveBeenCalled();
+  });
+
+  it("entry animation 실패 시 Intro를 최종 가시 상태로 복원한다", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    introMocks.initIntroAnimation.mockRejectedValueOnce(new Error("GSAP failed"));
+    markIntroReady();
+    const section = await mountIntro();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(introMocks.showIntro).toHaveBeenCalledWith(section);
+    expect(introMocks.initIntroScroll).toHaveBeenCalledWith({
+      root: section,
+      prefersReducedMotion: false,
+    });
+    errorSpy.mockRestore();
+  });
+
+  it("fallback은 실행 중인 entry timeline을 중단하고 한 번만 최종 상태를 복원한다", async () => {
+    vi.useFakeTimers();
+    const dispose = vi.fn();
+    introMocks.initIntroAnimation.mockResolvedValue(dispose);
+    markIntroReady();
+    const section = await mountIntro();
+
+    await act(async () => {
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(4000);
+    });
+
+    expect(dispose).toHaveBeenCalledOnce();
+    expect(introMocks.showIntro).toHaveBeenCalledOnce();
+    expect(introMocks.showIntro).toHaveBeenCalledWith(section);
+    expect(introMocks.unlockScroll).toHaveBeenCalledOnce();
+    expect(introMocks.initIntroScroll).toHaveBeenCalledWith({
+      root: section,
+      prefersReducedMotion: false,
+    });
+    vi.useRealTimers();
   });
 
   it("진입 중 다른 section 이동은 잠금을 즉시 풀고 Intro를 숨긴다", async () => {

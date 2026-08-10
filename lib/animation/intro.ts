@@ -1,6 +1,26 @@
 import { loadGsap } from "@/lib/gsap/loadGsap";
-import { motionDefaults } from "./runtime";
 import { getMotionProfile } from "@/lib/motion/mediaPolicy";
+
+const roleStart = 0.46;
+const nameStart = 0.64;
+const supportStart = 1.5;
+
+export const showIntro = (root: HTMLElement) => {
+  root.querySelectorAll<HTMLElement>("[data-intro-item]").forEach((item) => {
+    item.style.opacity = "1";
+  });
+  root.querySelectorAll<HTMLElement>("[data-intro-char]").forEach((char) => {
+    char.style.transform = "none";
+    char.style.willChange = "auto";
+  });
+  root
+    .querySelectorAll<HTMLElement>(".intro-context, .intro-proof-list")
+    .forEach((item) => {
+      item.style.clipPath = "none";
+      item.style.transform = "none";
+      item.style.willChange = "auto";
+    });
+};
 
 // 로더가 끝난 뒤 Intro의 주요 블록을 순서대로 드러낸다.
 export const initIntroAnimation = async (
@@ -8,7 +28,12 @@ export const initIntroAnimation = async (
   prefersReducedMotion: boolean,
   onComplete: () => void = () => {},
 ) => {
-  const { gsap } = await loadGsap();
+  if (prefersReducedMotion) {
+    onComplete();
+    return () => {};
+  }
+
+  const { gsap, CustomEase } = await loadGsap();
   const items = root.querySelectorAll<HTMLElement>("[data-intro-item]");
 
   if (!items.length) {
@@ -16,22 +41,70 @@ export const initIntroAnimation = async (
     return () => {};
   }
 
-  const yDistance = prefersReducedMotion ? 12 : 28;
-
-  const timeline = gsap.timeline({ onComplete });
-  timeline.fromTo(
-    items,
-    { opacity: 0, y: yDistance },
-    {
-      opacity: 1,
-      y: 0,
-      duration: prefersReducedMotion ? 0.4 : motionDefaults.duration,
-      ease: motionDefaults.ease,
-      stagger: prefersReducedMotion ? 0.05 : 0.12,
-    },
+  const roleLines = root.querySelectorAll<HTMLElement>("[data-intro-role-line]");
+  const nameChars = root.querySelectorAll<HTMLElement>(
+    ".intro-name [data-intro-char]",
+  );
+  const context = root.querySelector<HTMLElement>(".intro-context");
+  const proof = root.querySelector<HTMLElement>(".intro-proof-list");
+  const entryEase = CustomEase.create(
+    "intro-entry",
+    "0.62, 0.05, 0.01, 0.99",
   );
 
+  const timeline = gsap.timeline({ onComplete });
+
+  roleLines.forEach((line) => {
+    const chars = line.querySelectorAll<HTMLElement>("[data-intro-char]");
+    if (!chars.length) return;
+
+    timeline.fromTo(
+      chars,
+      { y: 0, yPercent: 80 },
+      {
+        y: 0,
+        yPercent: 0,
+        duration: 1.25,
+        ease: entryEase,
+        stagger: 0.06,
+      },
+      roleStart,
+    );
+  });
+
+  if (nameChars.length) {
+    timeline.fromTo(
+      nameChars,
+      { y: 0, yPercent: 80 },
+      {
+        y: 0,
+        yPercent: 0,
+        duration: 1.25,
+        ease: entryEase,
+        stagger: 0.06,
+      },
+      nameStart,
+    );
+  }
+
+  [context, proof].forEach((item, index) => {
+    if (!item) return;
+
+    timeline.to(
+      item,
+      {
+        clipPath: "inset(0% 0% 0% 0%)",
+        opacity: 1,
+        y: 0,
+        duration: 0.65,
+        ease: entryEase,
+      },
+      supportStart + index * 0.07,
+    );
+  });
+
   return () => {
+    timeline.revert();
     timeline.kill();
   };
 };

@@ -27,6 +27,11 @@
     opacity: 0;
   }
 
+  #intro [data-intro-item].intro-role,
+  #intro [data-intro-item].intro-name {
+    opacity: 1;
+  }
+
   #intro[data-intro-entry-muted="true"] [data-intro-item] {
     visibility: hidden !important;
     opacity: 0 !important;
@@ -50,6 +55,18 @@
     max-width: 100%;
   }
 
+  .intro-char-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+
+  .intro-char {
+    display: block;
+    transform: translate3d(0, 80%, 0);
+    will-change: transform;
+  }
+
   .intro-role-line-offset {
     margin-left: clamp(0.75rem, 9vw, 3rem);
   }
@@ -58,6 +75,9 @@
     display: grid;
     gap: 1.75rem;
     margin-top: clamp(2.75rem, 8vw, 4rem);
+    clip-path: inset(100% 0% 0% 0%);
+    transform: translate3d(0, 1.25rem, 0);
+    will-change: clip-path, transform;
   }
 
   .intro-statement {
@@ -113,6 +133,9 @@
     letter-spacing: 0.105em;
     line-height: 1.35;
     text-transform: uppercase;
+    clip-path: inset(100% 0% 0% 0%);
+    transform: translate3d(0, 1.25rem, 0);
+    will-change: clip-path, transform;
   }
 
   .intro-proof-list li {
@@ -197,6 +220,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   @layer components {
+    #intro [data-intro-item] {
+      opacity: 1;
+    }
+
+    .intro-char,
+    .intro-context,
+    .intro-proof-list {
+      clip-path: none;
+      transform: none;
+      will-change: auto;
+    }
+
     .intro-action {
       transition: none;
     }

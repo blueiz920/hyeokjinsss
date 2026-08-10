@@ -2,6 +2,7 @@ let gsapPromise: Promise<{
   gsap: typeof import("gsap").gsap;
   ScrollTrigger: typeof import("gsap/ScrollTrigger").ScrollTrigger;
   MotionPathPlugin: typeof import("gsap/MotionPathPlugin").MotionPathPlugin;
+  CustomEase: typeof import("gsap/CustomEase").CustomEase;
 }> | null = null;
 
 export const loadGsap = async () => {
@@ -14,14 +15,18 @@ export const loadGsap = async () => {
       import("gsap"),
       import("gsap/ScrollTrigger"),
       import("gsap/MotionPathPlugin"),
-    ]).then(([gsapModule, scrollTriggerModule, motionPathModule]) => {
-      const gsap = gsapModule.gsap || gsapModule.default;
-      const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
-      const MotionPathPlugin = motionPathModule.MotionPathPlugin;
+      import("gsap/CustomEase"),
+    ]).then(
+      ([gsapModule, scrollTriggerModule, motionPathModule, customEaseModule]) => {
+        const gsap = gsapModule.gsap || gsapModule.default;
+        const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+        const MotionPathPlugin = motionPathModule.MotionPathPlugin;
+        const CustomEase = customEaseModule.CustomEase;
 
-      gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
-      return { gsap, ScrollTrigger, MotionPathPlugin };
-    });
+        gsap.registerPlugin(ScrollTrigger, MotionPathPlugin, CustomEase);
+        return { gsap, ScrollTrigger, MotionPathPlugin, CustomEase };
+      },
+    );
   }
 
   return gsapPromise;
