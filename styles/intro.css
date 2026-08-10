@@ -55,15 +55,22 @@
     max-width: 100%;
   }
 
-  .intro-char-mask {
+  .intro-line-mask {
+    clip-path: inset(0 -0.12em);
+  }
+
+  .intro-name-visual {
+    display: block;
+  }
+
+  .intro-char-cell {
     display: inline-block;
-    overflow: hidden;
     vertical-align: top;
   }
 
   .intro-char {
     display: block;
-    transform: translate3d(0, 80%, 0);
+    transform: translate3d(0, 110%, 0);
     will-change: transform;
   }
 

@@ -18,9 +18,12 @@ export const IntroLoader = () => {
   const shouldAnimateRef = useRef(false);
   const [isVisible, setIsVisible] = useState(true);
 
+  const revealIntro = useCallback(() => {
+    markIntroReady();
+  }, []);
+
   const finishLoader = useCallback(() => {
     delete document.documentElement.dataset.introLoading;
-    markIntroReady();
     setIsVisible(false);
   }, []);
 
@@ -56,6 +59,7 @@ export const IntroLoader = () => {
       try {
         const dispose = await initIntroLoader({
           root: rootRef.current!,
+          onReveal: revealIntro,
           onComplete: finishLoader,
         });
 
@@ -66,7 +70,10 @@ export const IntroLoader = () => {
 
         destroy = dispose;
       } catch {
-        if (alive) finishLoader();
+        if (alive) {
+          revealIntro();
+          finishLoader();
+        }
       }
     })();
 
@@ -74,7 +81,7 @@ export const IntroLoader = () => {
       alive = false;
       destroy?.();
     };
-  }, [finishLoader, isVisible]);
+  }, [finishLoader, isVisible, revealIntro]);
 
   if (!isVisible) return null;
 

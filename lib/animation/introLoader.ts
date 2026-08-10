@@ -4,6 +4,7 @@ const INTRO_READY_EVENT = "portfolio:intro-ready";
 
 type IntroLoaderOptions = {
   root: HTMLElement;
+  onReveal: () => void;
   onComplete: () => void;
 };
 
@@ -28,7 +29,11 @@ export const waitIntroReady = (onReady: () => void) => {
   return () => document.removeEventListener(INTRO_READY_EVENT, handleReady);
 };
 
-export const initIntroLoader = async ({ root, onComplete }: IntroLoaderOptions) => {
+export const initIntroLoader = async ({
+  root,
+  onReveal,
+  onComplete,
+}: IntroLoaderOptions) => {
   const { gsap } = await loadGsap();
   const screen = root.querySelector<HTMLElement>("[data-loader-screen]");
   const curve = root.querySelector<HTMLElement>("[data-loader-curve]");
@@ -36,6 +41,7 @@ export const initIntroLoader = async ({ root, onComplete }: IntroLoaderOptions) 
   const words = root.querySelectorAll<HTMLElement>("[data-loader-word]");
 
   if (!screen || !curve || !wordGroup || !words.length) {
+    onReveal();
     onComplete();
     return () => {};
   }
@@ -77,6 +83,7 @@ export const initIntroLoader = async ({ root, onComplete }: IntroLoaderOptions) 
   const exitStart = 1.52;
 
   timeline
+    .call(onReveal, [], exitStart)
     .to(
       wordGroup,
       {

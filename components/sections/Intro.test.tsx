@@ -124,9 +124,10 @@ describe("Intro readiness", () => {
         Array.from(portfolio.introEyebrow).length,
     );
     visualChars.forEach((character) => {
-      expect(character.parentElement?.classList.contains("intro-char-mask")).toBe(
+      expect(character.parentElement?.classList.contains("intro-char-cell")).toBe(
         true,
       );
+      expect(character.closest(".intro-line-mask")).not.toBeNull();
     });
   });
 

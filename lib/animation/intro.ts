@@ -1,8 +1,8 @@
 import { loadGsap } from "@/lib/gsap/loadGsap";
 import { getMotionProfile } from "@/lib/motion/mediaPolicy";
 
-const roleStart = 0.46;
-const nameStart = 0.64;
+const roleStart = 0.06;
+const nameStart = 0.18;
 const supportStart = 1.5;
 
 export const showIntro = (root: HTMLElement) => {
@@ -60,7 +60,7 @@ export const initIntroAnimation = async (
 
     timeline.fromTo(
       chars,
-      { y: 0, yPercent: 80 },
+      { y: 0, yPercent: 110 },
       {
         y: 0,
         yPercent: 0,
@@ -75,7 +75,7 @@ export const initIntroAnimation = async (
   if (nameChars.length) {
     timeline.fromTo(
       nameChars,
-      { y: 0, yPercent: 80 },
+      { y: 0, yPercent: 110 },
       {
         y: 0,
         yPercent: 0,

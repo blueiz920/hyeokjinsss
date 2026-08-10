@@ -65,7 +65,7 @@ describe("initIntroAnimation", () => {
       root.querySelectorAll("[data-intro-role-line]")[0]?.querySelectorAll(
         "[data-intro-char]",
       ),
-      { y: 0, yPercent: 80 },
+      { y: 0, yPercent: 110 },
       expect.objectContaining({
         duration: 1.25,
         ease: entryEase,
@@ -73,14 +73,14 @@ describe("initIntroAnimation", () => {
         y: 0,
         yPercent: 0,
       }),
-      0.46,
+      0.06,
     ]);
-    expect(timeline.fromTo.mock.calls[1]?.[3]).toBe(0.46);
+    expect(timeline.fromTo.mock.calls[1]?.[3]).toBe(0.06);
     expect(timeline.fromTo.mock.calls[2]).toEqual([
       root.querySelectorAll(".intro-name [data-intro-char]"),
-      { y: 0, yPercent: 80 },
+      { y: 0, yPercent: 110 },
       expect.objectContaining({ y: 0, yPercent: 0 }),
-      0.64,
+      0.18,
     ]);
     expect(timeline.to).toHaveBeenCalledTimes(2);
     expect(timeline.to.mock.calls[0]).toEqual([

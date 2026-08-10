@@ -21,7 +21,7 @@ const INTRO_ENTRY_FALLBACK_MS = 4000;
 const IntroChars = ({ text }: { text: string }) => (
   <>
     {Array.from(text).map((character, index) => (
-      <span className="intro-char-mask" key={`${character}-${index}`}>
+      <span className="intro-char-cell" key={`${character}-${index}`}>
         <span className="intro-char" data-intro-char>
           {character === " " ? "\u00a0" : character}
         </span>
@@ -191,14 +191,14 @@ export const Intro = () => {
             {portfolio.introHeadline.accent} {portfolio.introHeadline.rest}
           </span>
           <span
-            className="intro-role-line intro-role-visual"
+            className="intro-role-line intro-role-visual intro-line-mask"
             data-intro-role-line
             aria-hidden="true"
           >
             <IntroChars text={portfolio.introHeadline.accent} />
           </span>
           <span
-            className="intro-role-line intro-role-line-offset intro-role-visual"
+            className="intro-role-line intro-role-line-offset intro-role-visual intro-line-mask"
             data-intro-role-line
             aria-hidden="true"
           >
@@ -244,7 +244,10 @@ export const Intro = () => {
 
         <p className="intro-name" data-intro-item>
           <span className="sr-only">{portfolio.introEyebrow}</span>
-          <span className="intro-name-visual" aria-hidden="true">
+          <span
+            className="intro-name-visual intro-line-mask"
+            aria-hidden="true"
+          >
             <IntroChars text={portfolio.introEyebrow} />
           </span>
         </p>
