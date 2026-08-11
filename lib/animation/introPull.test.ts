@@ -36,6 +36,7 @@ const createPull = () => {
   root.setPointerCapture = vi.fn();
   root.hasPointerCapture = vi.fn(() => true);
   root.releasePointerCapture = vi.fn();
+  document.body.appendChild(root);
   return root;
 };
 
@@ -68,6 +69,9 @@ const sendPointer = (
 afterEach(() => {
   vi.clearAllMocks();
   vi.useRealTimers();
+  document.body.replaceChildren();
+  delete document.documentElement.dataset.introEntering;
+  delete document.documentElement.dataset.introReady;
 });
 
 describe("initIntroPull", () => {
@@ -105,8 +109,147 @@ describe("initIntroPull", () => {
     );
     expect(onDrop).not.toHaveBeenCalled();
 
-    root.dispatchEvent(new Event("pointerleave"));
+    const leave = new Event("pointerout");
+    Object.defineProperty(leave, "relatedTarget", { value: null });
+    window.dispatchEvent(leave);
     expect(root.dataset.pullHover).toBeUndefined();
+
+    cleanup();
+  });
+
+  it("선에 닿기 전 넓은 거리에서 위치 기반으로 미세 반응한다", async () => {
+    const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    sendPointer(root, "pointermove", {
+      clientX: 120,
+      clientY: 140,
+      pointerType: "mouse",
+    });
+
+    expect(root.dataset.pullAware).toBe("true");
+    expect(root.dataset.pullHover).toBeUndefined();
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("120px");
+    expect(
+      Number(root.style.getPropertyValue("--intro-pull-awareness")),
+    ).toBeGreaterThan(0);
+
+    cleanup();
+  });
+
+  it("Intro 진입 완료 뒤 당김선을 두 번 이하로 스스로 시연한다", async () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    vi.advanceTimersByTime(799);
+    expect(root.dataset.pullDemo).toBeUndefined();
+
+    vi.advanceTimersByTime(1);
+    expect(root.dataset.pullDemo).toBe("true");
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("372px");
+    expect(root.style.getPropertyValue("--intro-pull-y")).toBe("82px");
+
+    vi.advanceTimersByTime(5500);
+    expect(pullMocks.to).toHaveBeenCalledTimes(3);
+    vi.advanceTimersByTime(6000);
+    expect(pullMocks.to).toHaveBeenCalledTimes(4);
+
+    cleanup();
+  });
+
+  it("Intro 진입 중에는 자가 시연을 시작하지 않는다", async () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.introReady = "true";
+    document.documentElement.dataset.introEntering = "true";
+    const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    vi.advanceTimersByTime(2000);
+    expect(root.dataset.pullDemo).toBeUndefined();
+
+    delete document.documentElement.dataset.introEntering;
+    await Promise.resolve();
+    vi.advanceTimersByTime(799);
+    expect(root.dataset.pullDemo).toBeUndefined();
+
+    vi.advanceTimersByTime(1);
+    expect(root.dataset.pullDemo).toBe("true");
+
+    cleanup();
+  });
+
+  it("사용자가 먼저 반응하면 예정된 자가 시연을 취소한다", async () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    sendPointer(root, "pointermove", {
+      clientX: 120,
+      clientY: 80,
+      pointerType: "mouse",
+    });
+    vi.advanceTimersByTime(8000);
+
+    expect(root.dataset.pullDemo).toBeUndefined();
+    expect(pullMocks.to).toHaveBeenCalledTimes(1);
 
     cleanup();
   });
@@ -231,5 +374,50 @@ describe("initIntroPull", () => {
     expect(root.style.getPropertyValue("--intro-pull-y")).toBe("72px");
 
     cleanup();
+  });
+
+  it("reduced motion은 선을 움직이지 않고 정적인 PULL 안내만 제공한다", async () => {
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: true,
+    });
+
+    expect(root.dataset.pullDemo).toBe("true");
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("372px");
+    expect(root.style.getPropertyValue("--intro-pull-y")).toBe("72px");
+    expect(pullMocks.loadGsap).not.toHaveBeenCalled();
+
+    root.focus();
+    expect(root.dataset.pullDemo).toBeUndefined();
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("300px");
+    expect(root.style.getPropertyValue("--intro-pull-y")).toBe("72px");
+
+    cleanup();
+  });
+
+  it("오래된 cleanup이 최신 당김선 상태를 지우지 않는다", async () => {
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    const firstCleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: true,
+    });
+    const latestCleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: true,
+    });
+
+    firstCleanup();
+    expect(root.dataset.pullDemo).toBe("true");
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("372px");
+
+    latestCleanup();
+    expect(root.dataset.pullDemo).toBeUndefined();
+    expect(root.style.getPropertyValue("--intro-pull-x")).toBe("");
   });
 });

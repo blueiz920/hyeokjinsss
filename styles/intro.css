@@ -89,6 +89,7 @@
   }
 
   .intro-pull {
+    --intro-pull-awareness: 0;
     --intro-pull-x: 50%;
     --intro-pull-y: 50%;
     position: relative;
@@ -168,10 +169,25 @@
     animation: intro-pull-hint 820ms ease-out 1;
   }
 
+  .intro-pull[data-pull-aware="true"] .intro-pull-label {
+    opacity: var(--intro-pull-awareness);
+  }
+
+  .intro-pull[data-pull-demo="true"] .intro-pull-label {
+    opacity: 0.72;
+    animation: intro-pull-hint 820ms ease-out 1;
+  }
+
   .intro-pull:focus-visible .intro-pull-label,
   .intro-pull[data-pull-active="true"] .intro-pull-label {
     opacity: 1;
     animation: none;
+  }
+
+  .intro-pull[data-pull-aware="true"] .intro-pull-line [data-pull-line],
+  .intro-pull[data-pull-demo="true"] .intro-pull-line [data-pull-line] {
+    stroke: rgba(24, 23, 21, 0.64);
+    stroke-width: 1.4;
   }
 
   .intro-pull[data-pull-hover="true"] .intro-pull-line [data-pull-line],
@@ -265,6 +281,7 @@
 
     .intro-pull-line [data-pull-line],
     .intro-pull-label,
+    .intro-pull[data-pull-demo="true"] .intro-pull-label,
     .intro-pull[data-pull-hover="true"] .intro-pull-label {
       transition: none;
       animation: none;
