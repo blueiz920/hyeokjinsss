@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TransitionLink } from "@/components/common/TransitionLink";
+import { MoumDetail } from "@/components/sections/MoumDetail";
 import { portfolio } from "@/data/portfolio";
 
 type ProjectPageProps = {
@@ -39,6 +40,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   if (!project) {
     notFound();
+  }
+
+  if (project.slug === "moum-zip") {
+    return <MoumDetail project={project} />;
   }
 
   return (

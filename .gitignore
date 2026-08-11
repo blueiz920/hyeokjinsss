@@ -71,6 +71,12 @@ subagent-*
 /docs/design-references/tympanus.net/
 /docs/research/www.marcohope.com/
 /docs/design-references/www.marcohope.com/
+/docs/research/rauno.me/
+/docs/design-references/rauno.me/
+/docs/research/emilkowal.ski/
+/docs/design-references/emilkowal.ski/
+/docs/research/paco.me/
+/docs/design-references/paco.me/
 
 # Local guardrail notes
 lib/perf/guardrails.md

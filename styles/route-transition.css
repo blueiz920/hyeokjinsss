@@ -75,9 +75,12 @@
   }
 
   @media (max-width: 539px) {
-    .route-transition-top-curve,
     .route-transition-bottom-curve {
       height: 5vh;
+    }
+
+    .route-transition-top-curve {
+      height: 0;
     }
   }
 

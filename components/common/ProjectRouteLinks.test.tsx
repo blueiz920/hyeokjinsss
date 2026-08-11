@@ -1,7 +1,10 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { generateMetadata, generateStaticParams } from "@/app/projects/[slug]/page";
+import ProjectPage, {
+  generateMetadata,
+  generateStaticParams,
+} from "@/app/projects/[slug]/page";
 import { portfolio } from "@/data/portfolio";
 import type { Project } from "@/data/types";
 import { ProjectDesktopList } from "./ProjectDesktopList";
@@ -115,5 +118,26 @@ describe("project route links", () => {
       title: project.title,
       description: project.summary,
     });
+  });
+
+  it("renders the Moum case study with its four evidence-backed chapters", async () => {
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug: "moum-zip" }),
+    });
+    const container = await mountProject(page);
+
+    expect(
+      container.querySelector('[data-project-detail="moum-zip"]'),
+    ).not.toBeNull();
+    expect(container.querySelector("h1")?.textContent).toBe("모음.zip");
+    expect(container.querySelectorAll(".project-detail-chapter")).toHaveLength(
+      4,
+    );
+    expect(container.querySelectorAll(".project-evidence")).toHaveLength(4);
+    expect(
+      container.querySelector('nav[aria-label="프로젝트 상세 목차"]'),
+    ).not.toBeNull();
+    expect(container.textContent).toContain("1.5s → 0.8s");
+    expect(container.textContent).toContain("Vitest 43개 케이스");
   });
 });
