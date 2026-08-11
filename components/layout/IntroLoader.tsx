@@ -5,6 +5,7 @@ import {
   initIntroLoader,
   markIntroReady,
 } from "@/lib/animation/introLoader";
+import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 
 const LOADER_WORDS = [
   "문제를 이해하고",
@@ -17,6 +18,7 @@ export const IntroLoader = () => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const shouldAnimateRef = useRef(false);
   const [isVisible, setIsVisible] = useState(true);
+  const { unlockScroll } = useScrollRuntime();
 
   const revealIntro = useCallback(() => {
     markIntroReady();
@@ -24,8 +26,12 @@ export const IntroLoader = () => {
 
   const finishLoader = useCallback(() => {
     delete document.documentElement.dataset.introLoading;
+    if (!document.getElementById("intro")) {
+      delete document.documentElement.dataset.introLocked;
+      unlockScroll();
+    }
     setIsVisible(false);
-  }, []);
+  }, [unlockScroll]);
 
   useLayoutEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -36,6 +42,7 @@ export const IntroLoader = () => {
       delete document.documentElement.dataset.introLocked;
       delete document.documentElement.dataset.introLoading;
       markIntroReady();
+      unlockScroll();
       const frameId = window.requestAnimationFrame(() => setIsVisible(false));
       return () => window.cancelAnimationFrame(frameId);
     }
@@ -47,7 +54,7 @@ export const IntroLoader = () => {
     return () => {
       delete document.documentElement.dataset.introLoading;
     };
-  }, []);
+  }, [unlockScroll]);
 
   useEffect(() => {
     if (!isVisible || !shouldAnimateRef.current || !rootRef.current) return;

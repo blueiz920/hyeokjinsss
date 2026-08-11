@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Project } from "@/data/types";
+import { TransitionLink } from "@/components/common/TransitionLink";
 
 type ProjectDesktopListProps = {
   projects: Project[];
@@ -112,9 +113,11 @@ export const ProjectDesktopList = ({
             className="project-desktop-item"
             onPointerEnter={(event) => startPreview(index, event)}
           >
-            <article
+            <TransitionLink
+              href={`/projects/${project.slug}`}
+              label={project.title}
               className="project-desktop-row"
-              aria-label={project.title}
+              aria-label={`${project.title} 프로젝트 자세히 보기`}
             >
               <div className="project-desktop-heading">
                 <p className="project-desktop-role">{project.role}</p>
@@ -125,7 +128,7 @@ export const ProjectDesktopList = ({
               <div className="project-desktop-meta">
                 <p>{project.summary}</p>
               </div>
-            </article>
+            </TransitionLink>
           </li>
         ))}
       </ul>

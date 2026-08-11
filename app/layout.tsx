@@ -7,6 +7,7 @@ import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
 import { PointerGlow } from "@/components/common/PointerGlow";
 import { MagneticLayer } from "@/components/common/MagneticLayer";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
+import { RouteTransition } from "@/components/common/RouteTransition";
 import { IntroLoader } from "@/components/layout/IntroLoader";
 import { siteConfig } from "@/data/site";
 
@@ -47,11 +48,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
             <ScrollIndicatorsProvider>
-              <IntroLoader />
-              <PointerGlow />
-              <MagneticLayer />
-              <ScrollProgress />
-              {children}
+              <RouteTransition>
+                <IntroLoader />
+                <PointerGlow />
+                <MagneticLayer />
+                <ScrollProgress />
+                {children}
+              </RouteTransition>
             </ScrollIndicatorsProvider>
           </SectionRegistryProvider>
         </ScrollRuntimeProvider>
