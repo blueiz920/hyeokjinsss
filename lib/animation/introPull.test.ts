@@ -318,6 +318,39 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
+  it("touch drag 시작은 브라우저 스크롤 제스처로 넘어가지 않는다", async () => {
+    const root = createPull();
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+    const event = new Event("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperties(event, {
+      button: { value: 0 },
+      clientX: { value: 300 },
+      clientY: { value: 72 },
+      pointerId: { value: 1 },
+      pointerType: { value: "touch" },
+    });
+
+    root.querySelector("[data-pull-hit]")?.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(root.dataset.pullActive).toBe("true");
+
+    cleanup();
+  });
+
   it("임계점 전 release와 pointer cancel은 이동하지 않고 원위치로 돌아간다", async () => {
     const root = createPull();
     const onDrop = vi.fn();

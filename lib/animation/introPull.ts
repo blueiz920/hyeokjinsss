@@ -273,6 +273,7 @@ export const initIntroPull = async ({
     if (!hovering && event.target !== hit) return;
 
     const pointer = readPointer(event);
+    event.preventDefault();
     active = true;
     pointerId = event.pointerId;
     gsap?.killTweensOf(point);
@@ -394,7 +395,7 @@ export const initIntroPull = async ({
   root.addEventListener("pointerup", onPointerUp);
   root.addEventListener("pointercancel", onPointerCancel);
   root.addEventListener("focus", onFocus);
-  window.addEventListener("pointermove", onPointerMove);
+  window.addEventListener("pointermove", onPointerMove, { passive: false });
   window.addEventListener("pointerout", onPointerOut);
   window.addEventListener("scroll", onScroll, { passive: true });
   renderPull();

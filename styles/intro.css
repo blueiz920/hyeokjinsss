@@ -101,6 +101,7 @@
     color: inherit;
     cursor: grab;
     font: inherit;
+    touch-action: none;
   }
 
   .intro-pull[data-pull-active="true"] {
