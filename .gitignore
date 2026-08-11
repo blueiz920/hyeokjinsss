@@ -80,3 +80,6 @@ subagent-*
 
 # Local guardrail notes
 lib/perf/guardrails.md
+
+# Local writing-review artifacts
+/_workspace/

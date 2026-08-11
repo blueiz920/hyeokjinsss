@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Project } from "@/data/types";
 import { TransitionLink } from "@/components/common/TransitionLink";
+import { ProjectNext } from "@/components/sections/ProjectNext";
 
 type MoumDetailProps = {
   project: Project;
@@ -18,7 +19,8 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
   const githubLink = project.links.find(({ label }) => label === "GitHub");
 
   return (
-    <main className="project-detail" data-project-detail="moum-zip">
+    <>
+      <main className="project-detail" data-project-detail="moum-zip">
       <section className="project-detail-hero" aria-labelledby="project-title">
         <div className="project-detail-shell">
           <div className="project-detail-topline">
@@ -40,10 +42,13 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
 
           <div className="project-detail-intro">
             <p className="project-detail-summary">
-              검색에서 모임 운영까지 이어지는 흐름 안에서, 느린 첫 화면과
-              사라지는 검색 조건, 발견되지 않는 새 콘텐츠를 다뤘습니다.
+              느린 첫 화면과 사라지는 검색 조건을 고쳤습니다. 새 모임도 검색
+              엔진에 잡히도록 했습니다.
             </p>
-            <p className="project-detail-context">{project.summary}</p>
+            <p className="project-detail-context">
+              스터디·프로젝트 모임을 검색하고 운영하는 플랫폼입니다. 검색 상태,
+              SEO, 활동 시각화 흐름을 맡았습니다.
+            </p>
           </div>
 
           <dl className="project-detail-meta">
@@ -107,26 +112,25 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
 
           <article className="project-detail-article">
             <p className="project-detail-lead">
-              모임을 찾는 첫 화면이 느리거나, 공유한 주소에서 검색 조건이
-              사라진다면 탐색 경험은 쉽게 끊깁니다. 기능을 더하기 전에 사용자가
-              실제로 지나가는 경로부터 다시 살폈습니다.
+              문제는 기능 수가 아니었습니다. 찾고, 돌아오고, 다시 발견하는
+              흐름이 자주 끊겼습니다.
             </p>
 
             <section id="rendering" className="project-detail-chapter">
               <header>
                 <p>01 / Rendering</p>
-                <h2>검색 결과보다 먼저 보여야 했던 것</h2>
+                <h2>먼저 보여야 할 화면</h2>
               </header>
               <div className="project-detail-prose">
                 <p>
-                  검색 결과와 카테고리 조회를 서버에서 함께 기다리면서 초기 HTML
-                  응답과 히어로 렌더가 늦어지고 있었습니다. Lighthouse로 병목을
-                  확인한 뒤, 사용자가 가장 먼저 보는 히어로를 데이터 조회 경로에서
+                  검색 결과와 카테고리 조회를 서버에서 함께 기다리느라 초기 HTML
+                  응답과 히어로 렌더가 늦었습니다. Lighthouse로 병목을 확인한 뒤,
+                  사용자가 가장 먼저 보는 히어로를 데이터 조회 경로에서
                   분리했습니다.
                 </p>
                 <p>
                   나머지 데이터는 non-blocking prefetch와 Suspense fallback으로
-                  넘겨 첫 화면이 결과 목록을 기다리지 않도록 했습니다.
+                  넘겼습니다. 첫 화면이 결과 목록을 기다리지 않도록 했습니다.
                 </p>
               </div>
 
@@ -160,17 +164,17 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
             <section id="search-state" className="project-detail-chapter">
               <header>
                 <p>02 / Search state</p>
-                <h2>주소가 검색 상태를 기억하도록</h2>
+                <h2>검색 조건을 주소에 담다</h2>
               </header>
               <div className="project-detail-prose">
                 <p>
                   화면 안에만 있던 키워드·카테고리·지역·정렬 조건을 URL 쿼리와
-                  연결했습니다. 새로고침하거나 검색 결과를 공유하고, 뒤로 가기를
-                  사용해도 같은 조건으로 돌아올 수 있게 만들었습니다.
+                  연결했습니다. 새로고침하거나 검색 결과를 공유해도, 뒤로 가기를
+                  사용해도 같은 조건으로 돌아옵니다.
                 </p>
                 <p>
-                  인증 여부에 따른 좋아요·참여 분기까지 포함해 검색 파라미터와
-                  결과 매핑 로직을 Vitest 43개 케이스로 검증했습니다.
+                  인증 여부에 따른 좋아요·참여 분기까지 포함했습니다. 검색
+                  파라미터와 결과 매핑 로직은 Vitest 43개 케이스로 검증했습니다.
                 </p>
               </div>
 
@@ -191,17 +195,18 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
             <section id="discovery" className="project-detail-chapter">
               <header>
                 <p>03 / Discovery</p>
-                <h2>새 모임이 검색 엔진에서 빠지지 않게</h2>
+                <h2>새 모임도 검색되도록</h2>
               </header>
               <div className="project-detail-prose">
                 <p>
-                  정적 페이지 중심의 sitemap만으로는 새로 생성되는 모임 상세
-                  페이지를 담을 수 없었습니다. 목록 API를 cursor 기반으로 끝까지
-                  순회해 URL을 모으고, 중복을 제거한 뒤 동적 sitemap에 반영했습니다.
+                  정적 페이지 중심의 sitemap에는 새로 생긴 모임 상세 페이지를
+                  담을 수 없었습니다. 목록 API를 cursor 기반으로 끝까지 순회해
+                  URL을 모으고, 중복을 제거한 뒤 동적 sitemap에 반영했습니다.
                 </p>
                 <p>
-                  매 요청마다 전체 목록을 다시 수집하지 않도록 6시간 단위 재검증을
-                  적용해 크롤링 범위와 서버 비용 사이의 균형을 맞췄습니다.
+                  매 요청마다 전체 목록을 다시 수집하지 않도록 6시간 단위
+                  재검증을 적용했습니다. 크롤링 범위와 서버 비용 사이의 균형을
+                  맞췄습니다.
                 </p>
               </div>
 
@@ -219,16 +224,16 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
             <section id="activity" className="project-detail-chapter">
               <header>
                 <p>04 / Activity</p>
-                <h2>운영 중인 모임의 움직임을 읽는 화면</h2>
+                <h2>모임 활동을 한눈에</h2>
               </header>
               <div className="project-detail-prose">
                 <p>
-                  모임 대시보드에서 멤버 활동을 한눈에 확인할 수 있도록 게시글·댓글·
+                  모임 대시보드에서 멤버 활동을 한눈에 볼 수 있도록 게시글·댓글·
                   출석 데이터를 모은 잔디 기능을 제안하고 구현했습니다.
                 </p>
                 <p>
-                  사용자별 결과는 cacheTag와 cacheLife로 재사용하고, 활동이 바뀌는
-                  순간 grass 태그를 무효화해 반복 조회를 줄이면서 최신 상태를
+                  사용자별 결과는 cacheTag와 cacheLife로 재사용했습니다. 활동이
+                  바뀌면 grass 태그를 무효화해 반복 조회를 줄이고 최신 상태를
                   유지했습니다.
                 </p>
               </div>
@@ -252,34 +257,20 @@ export const MoumDetail = ({ project }: MoumDetailProps) => {
             <footer className="project-detail-outcome">
               <p>What changed</p>
               <h2>
-                더 빠르게 도착하고,
-                <br />같은 조건으로 다시 돌아오는 검색 경험.
+                빨리 찾고,
+                <br />같은 조건으로 돌아오는 검색.
               </h2>
               <p>
-                화면 하나의 속도 개선에서 끝내지 않고 검색 상태, 발견 경로,
-                운영 데이터까지 사용자가 이어서 경험하는 흐름으로 정리했습니다.
+                화면 하나의 속도 개선에 그치지 않았습니다. 검색 상태, 발견 경로,
+                운영 데이터까지 한 흐름으로 묶었습니다.
               </p>
             </footer>
           </article>
         </div>
       </section>
+      </main>
 
-      <section className="project-detail-next" aria-labelledby="next-project-title">
-        <div className="project-detail-next-curve" aria-hidden="true">
-          <div />
-        </div>
-        <div className="project-detail-shell">
-          <p>Next project</p>
-          <TransitionLink
-            href="/projects/k-festival"
-            label="K-Festival"
-            className="project-detail-next-link"
-          >
-            <span id="next-project-title">K-Festival</span>
-            <span aria-hidden="true">↗</span>
-          </TransitionLink>
-        </div>
-      </section>
-    </main>
+      <ProjectNext href="/projects/k-festival" title="K-Festival" />
+    </>
   );
 };

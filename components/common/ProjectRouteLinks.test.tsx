@@ -1,6 +1,15 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import ProjectPage, {
   generateMetadata,
   generateStaticParams,
@@ -30,11 +39,27 @@ vi.mock("@/lib/animation/projectReveal", () => ({
   useProjectCardMotion: () => ({ cardStyle: {}, imageStyle: {} }),
 }));
 
+const nextMocks = vi.hoisted(() => ({
+  initFooterCurve: vi.fn(),
+}));
+
+vi.mock("@/hooks/useScrollRuntime", () => ({
+  useScrollRuntime: () => ({ prefersReducedMotion: false }),
+}));
+
+vi.mock("@/lib/animation/footerCurve", () => ({
+  initFooterCurve: nextMocks.initFooterCurve,
+}));
+
 const project: Project = portfolio.projects[0];
 let mountedRoots: Root[] = [];
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+});
+
+beforeEach(() => {
+  nextMocks.initFooterCurve.mockResolvedValue(vi.fn());
 });
 
 afterAll(() => {
@@ -59,6 +84,7 @@ afterEach(async () => {
 
   mountedRoots = [];
   document.body.replaceChildren();
+  vi.clearAllMocks();
 });
 
 describe("project route links", () => {
@@ -139,5 +165,9 @@ describe("project route links", () => {
     ).not.toBeNull();
     expect(container.textContent).toContain("1.5s → 0.8s");
     expect(container.textContent).toContain("Vitest 43개 케이스");
+    expect(container.querySelector(".project-detail-next")?.tagName).toBe(
+      "FOOTER",
+    );
+    await vi.waitFor(() => expect(nextMocks.initFooterCurve).toHaveBeenCalledOnce());
   });
 });

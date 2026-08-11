@@ -13,7 +13,8 @@ type RouteRun = {
 
 const routeRuns = new WeakMap<HTMLElement, RouteRun>();
 
-const curveHeight = () => (window.innerWidth < 540 ? "5vh" : "10vh");
+const topCurveHeight = "10vh";
+const bottomCurveHeight = () => (window.innerWidth < 540 ? "5vh" : "10vh");
 
 const getRouteParts = (root: HTMLElement): RouteParts | null => {
   const screen = root.querySelector<HTMLElement>("[data-route-screen]");
@@ -50,8 +51,6 @@ const playRouteTimeline = (
   parts: RouteParts,
   phase: "cover" | "reveal",
 ) => {
-  const height = curveHeight();
-
   if (phase === "cover") {
     timeline.to(
       parts.screen,
@@ -60,7 +59,7 @@ const playRouteTimeline = (
     );
     timeline.to(
       parts.topCurve,
-      { height, duration: 0.4, ease: "power4.in" },
+      { height: topCurveHeight, duration: 0.4, ease: "power4.in" },
       0,
     );
     return;
@@ -94,16 +93,16 @@ const runRoutePhase = async (root: HTMLElement, phase: "cover" | "reveal") => {
 
   const { gsap } = await loadGsap();
   routeRuns.get(root)?.cancel();
-  const height = curveHeight();
+  const bottomHeight = bottomCurveHeight();
 
   if (phase === "cover") {
     gsap.set(parts.screen, { y: 0, yPercent: 100 });
     gsap.set(parts.topCurve, { height: 0 });
-    gsap.set(parts.bottomCurve, { height });
+    gsap.set(parts.bottomCurve, { height: bottomHeight });
     gsap.set(parts.label, { autoAlpha: 0 });
   } else {
     gsap.set(parts.label, { autoAlpha: 0, y: 0 });
-    gsap.set(parts.bottomCurve, { height });
+    gsap.set(parts.bottomCurve, { height: bottomHeight });
   }
 
   await new Promise<void>((resolve, reject) => {

@@ -1,6 +1,6 @@
 @layer components {
   .route-transition {
-    --route-surface: rgb(24 23 21);
+    --route-surface: rgb(47 45 42);
     position: fixed;
     inset: 0;
     z-index: 75;
@@ -46,7 +46,7 @@
     position: absolute;
     inset-inline: 0;
     z-index: 2;
-    height: 10vh;
+    height: 0;
     overflow: hidden;
     pointer-events: none;
     will-change: height;
@@ -54,8 +54,7 @@
 
   .route-transition-top-curve {
     top: 0;
-    height: 0;
-    transform: translateY(-99%);
+    transform: translateY(-99%) scale(1, -1);
   }
 
   .route-transition-bottom-curve {
@@ -68,20 +67,10 @@
     left: 50%;
     top: 0;
     width: 150%;
-    height: 750%;
+    height: 745%;
     border-radius: 50%;
     background: var(--route-surface);
     transform: translate(-50%, -86.666%);
-  }
-
-  @media (max-width: 539px) {
-    .route-transition-bottom-curve {
-      height: 5vh;
-    }
-
-    .route-transition-top-curve {
-      height: 0;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

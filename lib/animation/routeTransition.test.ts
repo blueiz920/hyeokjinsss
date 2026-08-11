@@ -65,6 +65,27 @@ describe("route transition animation", () => {
     );
   });
 
+  it("keeps the mobile leading curve deep while shortening the trailing curve", async () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+    });
+    const { gsap, timeline } = createGsap();
+    const root = createRoot();
+
+    await coverRoute(root);
+
+    expect(gsap.set).toHaveBeenCalledWith(
+      root.querySelector("[data-route-bottom-curve]"),
+      { height: "5vh" },
+    );
+    expect(timeline.to).toHaveBeenCalledWith(
+      root.querySelector("[data-route-top-curve]"),
+      { height: "10vh", duration: 0.4, ease: "power4.in" },
+      0,
+    );
+  });
+
   it("holds the covered screen while the destination label becomes readable", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     const { gsap, timeline } = createGsap();

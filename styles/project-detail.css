@@ -1,8 +1,12 @@
 @layer components {
-  .project-detail {
+  .project-detail,
+  .project-detail-next {
     --detail-cream: #f3ede3;
     --detail-ink: #181715;
     --detail-muted: #928a86;
+  }
+
+  .project-detail {
     background: var(--detail-cream);
     color: var(--detail-ink);
     overflow: clip;
@@ -472,7 +476,7 @@
     left: 50%;
     top: 0;
     width: 150%;
-    height: 750%;
+    height: 745%;
     border-radius: 50%;
     background: var(--detail-cream);
     transform: translate(-50%, -86.666%);
@@ -635,6 +639,10 @@
 
     .project-detail-next {
       min-height: 62svh;
+    }
+
+    .project-detail-next-curve {
+      height: 5vh;
     }
 
     .project-detail-next-link {
