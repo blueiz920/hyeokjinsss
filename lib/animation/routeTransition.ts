@@ -35,6 +35,7 @@ const setRouteStart = (parts: RouteParts) => {
   topCurve.style.removeProperty("height");
   bottomCurve.style.removeProperty("height");
   label.style.removeProperty("opacity");
+  label.style.removeProperty("transform");
   label.style.removeProperty("visibility");
 };
 
@@ -66,14 +67,24 @@ const playRouteTimeline = (
   }
 
   timeline.to(
+    parts.label,
+    { autoAlpha: 1, y: -50, duration: 0.8, ease: "power4.out" },
+    0.05,
+  );
+  timeline.to(
     parts.screen,
     { yPercent: -100, duration: 0.8, ease: "power3.inOut" },
-    0,
+    0.65,
+  );
+  timeline.to(
+    parts.label,
+    { autoAlpha: 0, duration: 0.6, ease: "none" },
+    0.65,
   );
   timeline.to(
     parts.bottomCurve,
     { height: 0, duration: 0.85, ease: "power3.inOut" },
-    0,
+    0.85,
   );
 };
 
@@ -91,7 +102,7 @@ const runRoutePhase = async (root: HTMLElement, phase: "cover" | "reveal") => {
     gsap.set(parts.bottomCurve, { height });
     gsap.set(parts.label, { autoAlpha: 0 });
   } else {
-    gsap.set(parts.label, { autoAlpha: 1 });
+    gsap.set(parts.label, { autoAlpha: 0, y: 0 });
     gsap.set(parts.bottomCurve, { height });
   }
 

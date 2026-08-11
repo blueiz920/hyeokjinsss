@@ -65,7 +65,7 @@ describe("route transition animation", () => {
     );
   });
 
-  it("reveals with the destination label and bottom curve", async () => {
+  it("holds the covered screen while the destination label becomes readable", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     const { gsap, timeline } = createGsap();
     const root = createRoot();
@@ -74,17 +74,27 @@ describe("route transition animation", () => {
 
     expect(gsap.set).toHaveBeenCalledWith(
       root.querySelector("[data-route-label]"),
-      { autoAlpha: 1 },
+      { autoAlpha: 0, y: 0 },
+    );
+    expect(timeline.to).toHaveBeenCalledWith(
+      root.querySelector("[data-route-label]"),
+      { autoAlpha: 1, y: -50, duration: 0.8, ease: "power4.out" },
+      0.05,
     );
     expect(timeline.to).toHaveBeenCalledWith(
       root.querySelector("[data-route-screen]"),
       { yPercent: -100, duration: 0.8, ease: "power3.inOut" },
-      0,
+      0.65,
+    );
+    expect(timeline.to).toHaveBeenCalledWith(
+      root.querySelector("[data-route-label]"),
+      { autoAlpha: 0, duration: 0.6, ease: "none" },
+      0.65,
     );
     expect(timeline.to).toHaveBeenCalledWith(
       root.querySelector("[data-route-bottom-curve]"),
       { height: 0, duration: 0.85, ease: "power3.inOut" },
-      0,
+      0.85,
     );
     expect(gsap.set).toHaveBeenCalledWith(
       root.querySelector("[data-route-bottom-curve]"),
@@ -102,6 +112,7 @@ describe("route transition animation", () => {
     topCurve.style.height = "10vh";
     bottomCurve.style.height = "0px";
     label.style.opacity = "1";
+    label.style.transform = "translateY(-50px)";
     label.style.visibility = "visible";
 
     resetRoute(root);
@@ -110,6 +121,7 @@ describe("route transition animation", () => {
     expect(topCurve.style.height).toBe("");
     expect(bottomCurve.style.height).toBe("");
     expect(label.style.opacity).toBe("");
+    expect(label.style.transform).toBe("");
     expect(label.style.visibility).toBe("");
   });
 
