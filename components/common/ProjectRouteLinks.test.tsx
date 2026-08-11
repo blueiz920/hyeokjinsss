@@ -170,4 +170,36 @@ describe("project route links", () => {
     );
     await vi.waitFor(() => expect(nextMocks.initFooterCurve).toHaveBeenCalledOnce());
   });
+
+  it.each([
+    {
+      slug: "k-festival",
+      chapters: 4,
+      evidence: ["8 → 0", 'duplex: "half"', "Zustand language"],
+      next: "Yajoba",
+    },
+    {
+      slug: "yajoba",
+      chapters: 3,
+      evidence: ["2 → 1", "productId", "html2canvas"],
+      next: "모음.zip",
+    },
+  ])(
+    "renders the $slug evidence and next project",
+    async ({ slug, chapters, evidence, next }) => {
+      const page = await ProjectPage({ params: Promise.resolve({ slug }) });
+      const container = await mountProject(page);
+
+      expect(
+        container.querySelector(`[data-project-detail="${slug}"]`),
+      ).not.toBeNull();
+      expect(container.querySelectorAll(".project-detail-chapter")).toHaveLength(
+        chapters,
+      );
+      evidence.forEach((item) => expect(container.textContent).toContain(item));
+      expect(
+        container.querySelector(".project-detail-next")?.textContent,
+      ).toContain(next);
+    },
+  );
 });

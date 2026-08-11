@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { TransitionLink } from "@/components/common/TransitionLink";
+import { KFestivalDetail } from "@/components/sections/KFestivalDetail";
 import { MoumDetail } from "@/components/sections/MoumDetail";
+import { YajobaDetail } from "@/components/sections/YajobaDetail";
 import { portfolio } from "@/data/portfolio";
 
 type ProjectPageProps = {
@@ -46,21 +47,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     return <MoumDetail project={project} />;
   }
 
-  return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col justify-center gap-6 px-5 py-24 sm:px-8">
-      <h1 className="text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">
-        {project.title}
-      </h1>
-      <p className="max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
-        {project.summary}
-      </p>
-      <TransitionLink
-        href="/"
-        label="Projects"
-        className="w-fit text-sm text-amber-200 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-200"
-      >
-        Projects
-      </TransitionLink>
-    </main>
-  );
+  if (project.slug === "k-festival") {
+    return <KFestivalDetail project={project} />;
+  }
+
+  return <YajobaDetail project={project} />;
 }

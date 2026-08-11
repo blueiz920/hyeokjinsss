@@ -12,6 +12,14 @@
     overflow: clip;
   }
 
+  .project-detail[data-project-detail="k-festival"] {
+    --detail-muted: #7f8b87;
+  }
+
+  .project-detail[data-project-detail="yajoba"] {
+    --detail-muted: #747d8a;
+  }
+
   .project-detail :focus-visible {
     outline-color: var(--detail-ink);
   }
@@ -567,6 +575,10 @@
     .project-detail-heading h1 {
       font-size: clamp(4rem, 21vw, 5.5rem);
       line-height: 0.9;
+    }
+
+    .project-detail[data-project-detail="k-festival"] .project-detail-heading h1 {
+      font-size: clamp(3.6rem, 17vw, 4.5rem);
     }
 
     .project-detail-summary {
