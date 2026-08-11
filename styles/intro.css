@@ -237,6 +237,14 @@
   }
 }
 
+@media (max-width: 767px) and (max-height: 46rem) {
+  @layer components {
+    .intro-layout {
+      min-height: 100svh;
+    }
+  }
+}
+
 @media (min-width: 768px) {
   @layer components {
     .intro-layout {

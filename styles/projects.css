@@ -3,6 +3,10 @@
     isolation: isolate;
   }
 
+  .project-section:focus-visible {
+    outline: none;
+  }
+
   .project-entry-curve {
     position: absolute;
     inset-inline: 0;
