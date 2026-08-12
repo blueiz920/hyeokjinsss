@@ -15,6 +15,14 @@ const DESKTOP_QUERY = "(min-width: 1024px)";
 const ARM_START = "top 92%";
 const ENTRY_START = "top top";
 const ENTRY_EASE = "power3.inOut";
+const PLAYED_STATE = "skillsIntroPlayed";
+
+const hasPlayedIntro = () =>
+  document.documentElement.dataset[PLAYED_STATE] === "true";
+
+const markIntroPlayed = () => {
+  document.documentElement.dataset[PLAYED_STATE] = "true";
+};
 
 // 섹션을 목적지로 진입할 때만 3.1초 장면을 재생하고 다른 이동은 통과시킨다.
 export const initSkillsIntro = async ({
@@ -23,7 +31,15 @@ export const initSkillsIntro = async ({
   root,
   unlockScroll: unlockRuntime,
 }: SkillsIntroOptions) => {
-  if (typeof window === "undefined" || prefersReducedMotion) return () => {};
+  if (typeof window === "undefined") return () => {};
+
+  if (prefersReducedMotion || hasPlayedIntro()) {
+    markIntroPlayed();
+    root.dataset.skillPanelReady = "true";
+    return () => {
+      delete root.dataset.skillPanelReady;
+    };
+  }
 
   const title = root.querySelector<HTMLElement>(".skills-expertise-title");
   const titleLines = Array.from(
@@ -288,6 +304,7 @@ export const initSkillsIntro = async ({
     if (!armMotion()) return;
 
     hasPlayed = true;
+    markIntroPlayed();
     isRunning = true;
     stageMotion();
     lockScroll();
@@ -356,8 +373,17 @@ export const initSkillsIntro = async ({
     clearMotion();
     if (!media.matches) return;
 
+    if (hasPlayedIntro()) {
+      root.dataset.skillPanelReady = "true";
+      return;
+    }
+
     canEnter = root.getBoundingClientRect().top > 0;
-    if (!canEnter) root.dataset.skillPanelReady = "true";
+    if (!canEnter) {
+      markIntroPlayed();
+      root.dataset.skillPanelReady = "true";
+      return;
+    }
     armTrigger = ScrollTrigger.create({
       onEnter: armMotion,
       onLeaveBack: () => {

@@ -503,6 +503,12 @@ html[data-skills-locked="true"] body {
     background: #56575b;
   }
 
+  html[data-skills-intro-played="true"]
+    .skills-static-section:not([data-skill-entry])
+    .skills-expertise-visual-inner {
+    background: #56575b;
+  }
+
   .skills-expertise-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -741,9 +747,10 @@ html[data-skills-locked="true"] body {
 }
 
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
-  .skills-static-section:not([data-skill-entry]):not(
-      [data-skill-panel-ready="true"]
-    )
+  html:not([data-skills-intro-played="true"])
+    .skills-static-section:not([data-skill-entry]):not(
+        [data-skill-panel-ready="true"]
+      )
     .skills-expertise-stage {
     visibility: hidden;
     opacity: 0;

@@ -117,6 +117,7 @@ beforeEach(() => {
 afterEach(() => {
   delete document.documentElement.dataset.sectionTarget;
   delete document.documentElement.dataset.skillsLocked;
+  delete document.documentElement.dataset.skillsIntroPlayed;
   vi.clearAllMocks();
   vi.unstubAllGlobals();
 });
@@ -162,6 +163,7 @@ describe("initSkillsIntro", () => {
     expect(document.documentElement.dataset.skillsLocked).toBe("true");
     expect(introMocks.lockScroll).toHaveBeenCalledOnce();
     expect(harness.timeline.play).toHaveBeenCalledOnce();
+    expect(document.documentElement.dataset.skillsIntroPlayed).toBe("true");
     const visual = root.querySelector(".skills-expertise-stage");
     const visualStage = harness.gsap.set.mock.calls.find(
       ([target, options]) =>
@@ -261,10 +263,80 @@ describe("initSkillsIntro", () => {
     });
 
     expect(introMocks.loadGsap).not.toHaveBeenCalled();
+    expect(document.documentElement.dataset.skillsIntroPlayed).toBe("true");
     expect(staticRoot.dataset.skillPanelReady).toBe("true");
     expect(() => reducedCleanup()).not.toThrow();
     expect(() => staticCleanup()).not.toThrow();
     expect(staticRoot.dataset.skillPanelReady).toBeUndefined();
+  });
+
+  it("같은 문서에서 다시 마운트되면 intro trigger를 재생성하지 않는다", async () => {
+    const firstRoot = createIntroDom();
+    const media = createMedia();
+    const harness = createHarness();
+    vi.stubGlobal("matchMedia", vi.fn(() => media.media));
+
+    const firstCleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
+      prefersReducedMotion: false,
+      root: firstRoot,
+      unlockScroll: introMocks.unlockScroll,
+    });
+    (harness.triggerOptions[0] as { onEnter: () => void }).onEnter();
+    (harness.triggerOptions[1] as { onEnter: () => void }).onEnter();
+    expect(document.documentElement.dataset.skillsIntroPlayed).toBe("true");
+
+    firstCleanup();
+    const loadCount = introMocks.loadGsap.mock.calls.length;
+    const secondRoot = createIntroDom();
+    const secondCleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
+      prefersReducedMotion: false,
+      root: secondRoot,
+      unlockScroll: introMocks.unlockScroll,
+    });
+
+    expect(secondRoot.dataset.skillPanelReady).toBe("true");
+    expect(secondRoot.dataset.skillEntry).toBeUndefined();
+    expect(introMocks.loadGsap).toHaveBeenCalledTimes(loadCount);
+    expect(introMocks.lockScroll).toHaveBeenCalledOnce();
+    expect(harness.timeline.play).toHaveBeenCalledOnce();
+
+    secondCleanup();
+    expect(secondRoot.dataset.skillPanelReady).toBeUndefined();
+  });
+
+  it("복원된 스크롤이 이미 section을 지난 경우 정적 완료 상태로 고정한다", async () => {
+    const root = createIntroDom();
+    vi.spyOn(root, "getBoundingClientRect").mockReturnValue({
+      bottom: 800,
+      height: 800,
+      left: 0,
+      right: 1440,
+      top: -120,
+      width: 1440,
+      x: 0,
+      y: -120,
+      toJSON: () => ({}),
+    });
+    const media = createMedia();
+    const harness = createHarness();
+    vi.stubGlobal("matchMedia", vi.fn(() => media.media));
+
+    const cleanup = await initSkillsIntro({
+      lockScroll: introMocks.lockScroll,
+      prefersReducedMotion: false,
+      root,
+      unlockScroll: introMocks.unlockScroll,
+    });
+
+    expect(document.documentElement.dataset.skillsIntroPlayed).toBe("true");
+    expect(root.dataset.skillPanelReady).toBe("true");
+    expect(harness.ScrollTrigger.create).not.toHaveBeenCalled();
+    expect(harness.gsap.timeline).not.toHaveBeenCalled();
+    expect(introMocks.lockScroll).not.toHaveBeenCalled();
+
+    cleanup();
   });
 
   it("다른 section 목적지로 통과할 때 장면과 잠금을 시작하지 않는다", async () => {
