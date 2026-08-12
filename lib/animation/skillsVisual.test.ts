@@ -32,18 +32,32 @@ function createVisualDom() {
   const root = document.createElement("section");
   root.innerHTML = `
     <div data-skill-photo></div>
-    <div data-skill-board></div>
-    <div class="skills-expertise-content"></div>
+    <div data-skill-board>
+      <span data-skill-active-number>01 / 05</span>
+      <span data-skill-active-name>Product UI</span>
+      ${Array.from(
+        { length: 5 },
+        (_, index) =>
+          `<div data-skill-deck-page data-skill-name="Skill ${index + 1}"></div>`,
+      ).join("")}
+    </div>
+    <div class="skills-expertise-content">
+      ${Array.from(
+        { length: 5 },
+        () => `<article data-skill-capability></article>`,
+      ).join("")}
+    </div>
   `;
   return root;
 }
 
 type TriggerOptions = {
-  end: string;
-  onEnter: () => void;
-  onLeaveBack: () => void;
-  onRefresh: (self: { scroll: () => number; start: number }) => void;
-  start: string;
+  end?: string;
+  onEnter?: () => void;
+  onEnterBack?: () => void;
+  onLeaveBack?: () => void;
+  onRefresh?: (self: { scroll: () => number; start: number }) => void;
+  start?: string;
 };
 
 function createMotionHarness() {
@@ -58,17 +72,17 @@ function createMotionHarness() {
   timeline.to.mockReturnValue(timeline);
   timeline.progress.mockReturnValue(timeline);
 
-  const trigger = {
-    kill: vi.fn(),
-  };
-  let triggerOptions: TriggerOptions | null = null;
+  const triggers: Array<{ kill: ReturnType<typeof vi.fn> }> = [];
+  const triggerOptions: TriggerOptions[] = [];
   const gsap = {
     set: vi.fn(),
     timeline: vi.fn(() => timeline),
   };
   const ScrollTrigger = {
     create: vi.fn((options: TriggerOptions) => {
-      triggerOptions = options;
+      const trigger = { kill: vi.fn() };
+      triggerOptions.push(options);
+      triggers.push(trigger);
       return trigger;
     }),
     refresh: vi.fn(),
@@ -80,7 +94,7 @@ function createMotionHarness() {
     gsap,
     ScrollTrigger,
     timeline,
-    trigger,
+    triggers,
   };
 }
 
@@ -114,19 +128,66 @@ describe("initSkillsVisual", () => {
     );
     expect(harness.timeline.to).toHaveBeenCalledTimes(2);
 
-    const options = harness.getOptions();
-    if (!options) throw new Error("ScrollTrigger options were not captured.");
-    options.onEnter();
+    const options = harness
+      .getOptions()
+      .find(({ start }) => start === "top -8%");
+    if (!options) throw new Error("Swap trigger options were not captured.");
+    options.onEnter?.();
     expect(harness.timeline.play).toHaveBeenCalledOnce();
-    options.onLeaveBack();
+    options.onLeaveBack?.();
     expect(harness.timeline.reverse).toHaveBeenCalledOnce();
-    options.onRefresh({ scroll: () => 120, start: 100 });
+    options.onRefresh?.({ scroll: () => 120, start: 100 });
     expect(harness.timeline.progress).toHaveBeenCalledWith(1);
     expect(harness.timeline.pause).toHaveBeenCalledOnce();
 
     cleanup();
-    expect(harness.trigger.kill).toHaveBeenCalledOnce();
+    expect(harness.triggers).toHaveLength(6);
+    harness.triggers.forEach((trigger) => {
+      expect(trigger.kill).toHaveBeenCalledOnce();
+    });
     expect(harness.timeline.kill).toHaveBeenCalledOnce();
+  });
+
+  it("읽고 있는 역량과 기술 보드의 강조 상태를 함께 갱신한다", async () => {
+    const root = createVisualDom();
+    const media = createMedia();
+    const harness = createMotionHarness();
+    vi.stubGlobal("matchMedia", vi.fn(() => media.media));
+
+    const cleanup = await initSkillsVisual({
+      prefersReducedMotion: false,
+      root,
+    });
+    const focusOptions = harness
+      .getOptions()
+      .filter(({ start }) => start === "top center");
+    focusOptions[2]?.onEnter?.();
+
+    const pages = root.querySelectorAll<HTMLElement>(
+      "[data-skill-deck-page]",
+    );
+    const capabilities = root.querySelectorAll<HTMLElement>(
+      "[data-skill-capability]",
+    );
+    expect(pages[2]?.dataset.active).toBe("true");
+    expect(pages[1]?.dataset.active).toBe("false");
+    expect(capabilities[2]?.dataset.active).toBe("true");
+    expect(root.querySelector("[data-skill-active-number]")?.textContent).toBe(
+      "03 / 05",
+    );
+    expect(root.querySelector("[data-skill-active-name]")?.textContent).toBe(
+      "Skill 3",
+    );
+
+    focusOptions[1]?.onEnterBack?.();
+    expect(pages[1]?.dataset.active).toBe("true");
+    expect(capabilities[1]?.dataset.active).toBe("true");
+
+    cleanup();
+    pages.forEach((page) => expect(page.dataset.active).toBeUndefined());
+    capabilities.forEach((capability) =>
+      expect(capability.dataset.active).toBeUndefined(),
+    );
   });
 
   it("예약된 refresh를 실행하고 필수 DOM이 없으면 정적 상태를 유지한다", async () => {
@@ -169,7 +230,10 @@ describe("initSkillsVisual", () => {
     });
     media.setMatches(false);
 
-    expect(harness.trigger.kill).toHaveBeenCalledOnce();
+    expect(harness.triggers).toHaveLength(6);
+    harness.triggers.forEach((trigger) => {
+      expect(trigger.kill).toHaveBeenCalledOnce();
+    });
     expect(harness.timeline.kill).toHaveBeenCalledOnce();
     expect(harness.gsap.set).toHaveBeenLastCalledWith(
       expect.any(Array),

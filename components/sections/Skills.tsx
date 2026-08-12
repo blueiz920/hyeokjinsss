@@ -249,6 +249,15 @@ export const Skills = () => {
                     <span aria-hidden="true"> / </span>
                     <span>{String(pageTotal).padStart(2, "0")}</span>
                   </p>
+                  <p
+                    className="skills-board-desktop-status"
+                    aria-live="polite"
+                  >
+                    <span data-skill-active-number>01 / 05</span>
+                    <span data-skill-active-name>
+                      {portfolio.skills[0]?.title}
+                    </span>
+                  </p>
                 </div>
 
                 <div
@@ -276,6 +285,7 @@ export const Skills = () => {
                         key={skill.title}
                         className="skills-board-page"
                         data-skill-deck-page
+                        data-skill-name={skill.title}
                         role="listitem"
                         aria-label={`${String(index + 1).padStart(2, "0")} / ${String(pageTotal).padStart(2, "0")} ${skill.title}`}
                       >
