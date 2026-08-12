@@ -123,14 +123,14 @@ describe("initSkillsVisual", () => {
     expect(harness.ScrollTrigger.create).toHaveBeenCalledWith(
       expect.objectContaining({
         end: "max",
-        start: "top -8%",
+        start: "top 16%",
       }),
     );
     expect(harness.timeline.to).toHaveBeenCalledTimes(2);
 
     const options = harness
       .getOptions()
-      .find(({ start }) => start === "top -8%");
+      .find(({ start }) => start === "top 16%");
     if (!options) throw new Error("Swap trigger options were not captured.");
     options.onEnter?.();
     expect(harness.timeline.play).toHaveBeenCalledOnce();

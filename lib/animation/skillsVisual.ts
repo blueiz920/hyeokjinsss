@@ -133,7 +133,7 @@ export const initSkillsVisual = async ({
 
     swapTrigger = ScrollTrigger.create({
       trigger: content,
-      start: "top -8%",
+      start: "top 16%",
       end: "max",
       onEnter: () => swapTimeline?.play(),
       onLeaveBack: () => swapTimeline?.reverse(),
