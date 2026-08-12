@@ -17,7 +17,7 @@ export const MoumDetail = ({ project }: MoumDetailProps) => (
     project={project}
     caseIndex="01"
     eyebrow="Community platform"
-    summary="검색 성능 · URL 상태 · 동적 sitemap · 활동 데이터 캐싱"
+    summary="SSR 렌더링 최적화 · URL 상태 · 동적 sitemap · 활동 데이터 캐싱"
     context="스터디·프로젝트 모임을 검색하고 운영하는 플랫폼입니다. 검색 상태, SEO, 활동 시각화 흐름을 맡았습니다."
     period="2026.03 — 2026.04"
     focus="Search page · SEO · Activity"
