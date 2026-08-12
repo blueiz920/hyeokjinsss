@@ -17,23 +17,23 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     project={project}
     caseIndex="02"
     eyebrow="Travel platform"
-    summary="카드마다 반복되던 요청을 없앴습니다. 막혀 있던 배포와 이미지 업로드 경로도 다시 열었습니다."
+    summary="축제 카드마다 발생하던 상세 요청을 없앴습니다. 배포 환경에서 막힌 API와 이미지 업로드 경로도 복구했습니다."
     context="외국인 관광객을 위한 한국 축제 탐색·커뮤니티 플랫폼입니다. 온보딩과 축제 탐색 화면, 배포 환경을 맡았습니다."
     period="2025.04 — 2025.11"
     focus="Data flow · Proxy · i18n"
     coverAlt="K-Festival 축제 탐색 화면"
     coverCaption="전국과 기간을 기준으로 한국 축제를 탐색하는 화면"
     chapters={chapters}
-    lead="로컬에서 되던 기능이 배포 뒤에 막혔습니다. 화면보다 요청이 지나가는 경로부터 확인했습니다."
-    outcomeTitle={<>덜 요청하고,<br />배포 뒤에도 이어지는 흐름.</>}
-    outcomeBody="목록 데이터부터 프록시와 언어 상태까지, 사용자가 축제를 찾고 글을 올리는 경로를 운영 환경에서도 끊기지 않게 만들었습니다."
+    lead="목록 응답과 프록시를 손봐 운영 환경에서 막힌 기능을 다시 연결했습니다."
+    outcomeTitle={<>상세 요청 8건 제거와<br />배포 경로 복구.</>}
+    outcomeBody="축제 기간은 목록 응답에 포함하고, 브라우저가 막은 API와 이미지 업로드는 Serverless 프록시로 중계했습니다."
     nextHref="/projects/yajoba"
     nextTitle="Yajoba"
   >
     <section id="festival-data" className="project-detail-chapter">
       <header>
         <p>01 / Festival data</p>
-        <h2>카드마다 묻지 않도록</h2>
+        <h2>카드별 상세 요청을 없애다</h2>
       </header>
       <div className="project-detail-prose">
         <p>축제 기간이 목록·검색 응답에 없어서 카드마다 상세 API를 다시 호출했습니다. 한 페이지에서 최대 8번의 요청이 추가되는 구조였습니다.</p>
@@ -41,17 +41,17 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
       </div>
       <figure className="project-evidence project-evidence-performance">
         <div className="project-evidence-heading">
-          <p>Extra detail requests</p>
+          <p>추가 상세 요청</p>
           <strong>8 → 0</strong>
         </div>
         <div className="project-render-paths" aria-label="축제 카드 요청 구조 변경 전후">
           <div>
             <span>Before</span>
-            <ol><li>Festival list</li><li>Detail × 8</li><li>Card render</li></ol>
+            <ol><li>축제 목록</li><li>상세 조회 × 8</li><li>카드 렌더링</li></ol>
           </div>
           <div>
             <span>After</span>
-            <ol><li>Festival list</li><li>Date fields</li><li>Card render</li></ol>
+            <ol><li>축제 목록</li><li>기간 필드</li><li>카드 렌더링</li></ol>
           </div>
         </div>
         <figcaption>한 페이지에서 발생하던 상세 요청을 목록 응답 하나로 줄였습니다.</figcaption>
@@ -61,18 +61,18 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="deploy-proxy" className="project-detail-chapter">
       <header>
         <p>02 / Deploy proxy</p>
-        <h2>HTTP API를 배포에 연결하다</h2>
+        <h2>HTTP API를 프록시로 잇다</h2>
       </header>
       <div className="project-detail-prose">
         <p>Vercel의 HTTPS 페이지에서 HTTP 백엔드를 직접 호출하자 브라우저가 Mixed Content 요청을 막았습니다.</p>
-        <p>Serverless 프록시를 두고 브라우저 요청을 서버에서 HTTP API로 중계했습니다. 백엔드 전환을 기다리지 않고 배포 환경을 복구했습니다.</p>
+        <p>Serverless 프록시를 두고 브라우저 요청을 서버에서 HTTP API로 중계했습니다. 백엔드의 HTTPS 전환을 기다리지 않고 배포 환경을 복구했습니다.</p>
       </div>
       <figure className="project-evidence project-evidence-flow">
         <ol aria-label="Vercel 프록시 요청 경로">
-          <li><span>01</span>HTTPS browser</li>
+          <li><span>01</span>HTTPS 브라우저</li>
           <li><span>02</span>/api/proxy</li>
-          <li><span>03</span>HTTP backend</li>
-          <li><span>04</span>Response</li>
+          <li><span>03</span>HTTP 백엔드</li>
+          <li><span>04</span>응답</li>
         </ol>
         <figcaption>브라우저가 막던 요청을 서버 경로로 옮겼습니다.</figcaption>
       </figure>
@@ -81,7 +81,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="image-upload" className="project-detail-chapter">
       <header>
         <p>03 / Image upload</p>
-        <h2>본문을 그대로 전달하다</h2>
+        <h2>multipart 요청을 그대로 전달하다</h2>
       </header>
       <div className="project-detail-prose">
         <p>프록시가 multipart 요청을 req.body로 다시 만들면서 boundary와 본문이 어긋났습니다. 백엔드는 파일을 읽지 못하고 500을 반환했습니다.</p>
@@ -89,9 +89,9 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
       </div>
       <figure className="project-evidence project-evidence-query">
         <div className="project-query-values" aria-hidden="true">
-          <span>Before</span><b>req.body 재전송</b>
-          <span>After</span><b>원본 request stream</b>
-          <span>Result</span><b>multipart 형식 보존</b>
+          <span>변경 전</span><b>req.body 재전송</b>
+          <span>변경 후</span><b>원본 요청 스트림</b>
+          <span>결과</span><b>multipart 형식 보존</b>
         </div>
         <code>fetch(apiUrl, &#123; body: req, duplex: &quot;half&quot; &#125;)</code>
         <figcaption>프록시 구간에서 깨지던 커뮤니티 이미지 업로드를 복구했습니다.</figcaption>
@@ -101,7 +101,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="language-state" className="project-detail-chapter">
       <header>
         <p>04 / Language state</p>
-        <h2>선택한 언어로 다시 받기</h2>
+        <h2>언어 변경에 맞춰 다시 요청하다</h2>
       </header>
       <div className="project-detail-prose">
         <p>UI 언어를 바꿔도 서버 데이터는 이전 언어로 남을 수 있었습니다. 화면과 축제 정보가 서로 다른 언어를 쓰는 문제였습니다.</p>
@@ -109,9 +109,9 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
       </div>
       <figure className="project-evidence project-evidence-query">
         <div className="project-query-values" aria-hidden="true">
-          <span>State</span><b>Zustand language</b>
-          <span>UI</span><b>i18next</b>
-          <span>Data</span><b>lang + queryKey</b>
+          <span>상태</span><b>Zustand language</b>
+          <span>화면</span><b>i18next</b>
+          <span>데이터</span><b>lang + queryKey</b>
         </div>
         <code>[&quot;festivals&quot;, language, filters]</code>
         <figcaption>목록·검색·상세 화면의 문구와 서버 데이터가 같은 언어를 따릅니다.</figcaption>
