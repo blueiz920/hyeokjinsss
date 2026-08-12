@@ -79,7 +79,7 @@ export const ProjectDetail = ({
 
             <dl className="project-detail-meta">
               <div>
-                <dt>Role</dt>
+                <dt>Contribution</dt>
                 <dd>{project.role}</dd>
               </div>
               <div>
@@ -87,7 +87,7 @@ export const ProjectDetail = ({
                 <dd>{period}</dd>
               </div>
               <div>
-                <dt>Focus</dt>
+                <dt>Ownership</dt>
                 <dd>{focus}</dd>
               </div>
               <div>
