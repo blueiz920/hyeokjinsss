@@ -34,6 +34,7 @@ export const portfolio: PortfolioData = {
         "Husky",
       ],
       thumbnail: "/moum.zip.svg",
+      ogImage: "/og/projects/moum-zip.png",
       links: [
         { label: "Live", href: "https://moum-zip-web.vercel.app/" },
         { label: "GitHub", href: "https://github.com/sprint-13/moum-zip" },
@@ -60,6 +61,7 @@ export const portfolio: PortfolioData = {
         "Axios",
       ],
       thumbnail: "/k-festival.svg",
+      ogImage: "/og/projects/k-festival.png",
       links: [
         { label: "Live", href: "https://2025-unithon-team-4-fe.vercel.app/" },
         {
@@ -88,6 +90,7 @@ export const portfolio: PortfolioData = {
         "Axios",
       ],
       thumbnail: "/yajoba.svg",
+      ogImage: "/og/projects/yajoba.png",
       links: [
         { label: "Live", href: "https://yajoba-frontend.vercel.app/" },
         { label: "GitHub", href: "https://github.com/Team-GulBi/Frontend" },

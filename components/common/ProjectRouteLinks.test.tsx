@@ -133,18 +133,40 @@ describe("project route links", () => {
     expect(externalLinks[0].getAttribute("target")).toBe("_blank");
   });
 
-  it("generates static detail params and project metadata from portfolio data", async () => {
+  it("generates static detail params from portfolio data", () => {
     expect(generateStaticParams()).toEqual(
       portfolio.projects.map(({ slug }) => ({ slug })),
     );
-
-    await expect(
-      generateMetadata({ params: Promise.resolve({ slug: project.slug }) }),
-    ).resolves.toMatchObject({
-      title: project.title,
-      description: project.summary,
-    });
   });
+
+  it.each(portfolio.projects)(
+    "generates canonical and Open Graph metadata for $slug",
+    async (metadataProject) => {
+      await expect(
+        generateMetadata({
+          params: Promise.resolve({ slug: metadataProject.slug }),
+        }),
+      ).resolves.toMatchObject({
+        title: metadataProject.title,
+        description: metadataProject.summary,
+        alternates: {
+          canonical: `/projects/${metadataProject.slug}`,
+        },
+        openGraph: {
+          title: metadataProject.title,
+          description: metadataProject.summary,
+          url: `/projects/${metadataProject.slug}`,
+          images: [
+            {
+              url: metadataProject.ogImage,
+              width: 1200,
+              height: 630,
+            },
+          ],
+        },
+      });
+    },
+  );
 
   it("renders the Moum case study with its four evidence-backed chapters", async () => {
     const page = await ProjectPage({

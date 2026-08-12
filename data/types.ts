@@ -11,6 +11,7 @@ export type Project = {
   impact: string;
   stack: string[];
   thumbnail: string;
+  ogImage: string;
   links: ProjectLink[];
 };
 
