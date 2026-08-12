@@ -1,5 +1,6 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import type { ComponentPropsWithoutRef } from "react";
 import {
   afterAll,
   afterEach,
@@ -29,39 +30,55 @@ vi.mock("@/data/portfolio", () => ({
         title: "Product UI",
         tools: ["React", "TypeScript"],
         summary: "사용자 흐름을 화면 구조로 만듭니다.",
-        project: "모음.zip",
+        projects: [{ label: "모음.zip", slug: "moum-zip" }],
         evidence: "컴포넌트를 기능별로 나눴습니다.",
       },
       {
         title: "Data & State",
         tools: ["TanStack Query", "Zustand"],
         summary: "데이터와 상태 기준을 나눕니다.",
-        project: "K-Festival",
+        projects: [
+          { label: "모음.zip", slug: "moum-zip" },
+          { label: "K-Festival", slug: "k-festival" },
+        ],
         evidence: "중복 요청을 줄였습니다.",
       },
       {
         title: "Performance & SEO",
         tools: ["Next.js", "Sitemap"],
         summary: "속도와 검색 경로를 점검합니다.",
-        project: "모음.zip",
+        projects: [{ label: "모음.zip", slug: "moum-zip" }],
         evidence: "LCP를 개선했습니다.",
       },
       {
         title: "Motion & Interaction",
         tools: ["Framer Motion", "GSAP"],
         summary: "읽기 흐름을 보조하는 전환을 설계합니다.",
-        project: "개인 포트폴리오",
+        projects: [
+          { label: "개인 포트폴리오" },
+          { label: "K-Festival", slug: "k-festival" },
+        ],
         evidence: "가독성을 유지했습니다.",
       },
       {
         title: "Delivery & Reliability",
         tools: ["Vitest", "Vercel"],
         summary: "검증과 배포 흐름을 지킵니다.",
-        project: "Yajoba",
+        projects: [{ label: "Yajoba", slug: "yajoba" }],
         evidence: "배포 이슈를 안정화했습니다.",
       },
     ],
   },
+}));
+
+vi.mock("@/components/common/TransitionLink", () => ({
+  TransitionLink: ({
+    href,
+    label,
+    ...props
+  }: ComponentPropsWithoutRef<"a"> & { href: string; label: string }) => (
+    <a {...props} href={href} data-transition-label={label} />
+  ),
 }));
 
 vi.mock("@/hooks/useSectionRegistry", () => ({
@@ -249,6 +266,13 @@ describe("Skills Snap Tabs", () => {
       expect(capability.textContent).toContain("적용 프로젝트");
       expect(capability.textContent).toContain("결과");
     }
+    expect(
+      panels[1]?.querySelector('a[href="/projects/moum-zip"]'),
+    ).not.toBeNull();
+    expect(
+      panels[3]?.querySelector('a[href="/projects/k-festival"]'),
+    ).not.toBeNull();
+    expect(panels[3]?.textContent).toContain("개인 포트폴리오");
     expect(panels[0]?.textContent).toContain("사용자 흐름을 화면 구조로 만듭니다.");
     expect(panels[2]?.textContent).toContain("LCP를 개선했습니다.");
     expect(panels[4]?.textContent).toContain("배포 이슈를 안정화했습니다.");

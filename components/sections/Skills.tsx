@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { portfolio } from "@/data/portfolio";
+import { TransitionLink } from "@/components/common/TransitionLink";
 import { initSkillsIntro } from "@/lib/animation/skillsIntro";
 import { initSkillsVisual } from "@/lib/animation/skillsVisual";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
@@ -405,7 +406,25 @@ export const Skills = () => {
                     <dl className="skills-capability-details">
                       <div>
                         <dt>적용 프로젝트</dt>
-                        <dd>{skill.project}</dd>
+                        <dd>
+                          <ul className="skills-project-list">
+                            {skill.projects.map((project) => (
+                              <li key={project.label}>
+                                {project.slug ? (
+                                  <TransitionLink
+                                    href={`/projects/${project.slug}`}
+                                    label={project.label}
+                                    aria-label={`${project.label} 프로젝트 자세히 보기`}
+                                  >
+                                    {project.label}
+                                  </TransitionLink>
+                                ) : (
+                                  <span>{project.label}</span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </dd>
                       </div>
                       <div>
                         <dt>결과</dt>

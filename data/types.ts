@@ -18,7 +18,10 @@ export type SkillCapability = {
   title: string;
   tools: string[];
   summary: string;
-  project: string;
+  projects: Array<{
+    label: string;
+    slug?: string;
+  }>;
   evidence: string;
 };
 

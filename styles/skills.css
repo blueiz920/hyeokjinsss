@@ -397,6 +397,46 @@ html[data-skills-locked="true"] body {
     word-break: keep-all;
   }
 
+  .skills-project-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .skills-project-list li:not(:last-child)::after {
+    margin-inline: 0.4rem;
+    color: rgba(255, 255, 255, 0.34);
+    content: "·";
+  }
+
+  .skills-project-list a {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration-color: rgba(255, 255, 255, 0.34);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition:
+      color 180ms ease,
+      text-decoration-color 180ms ease;
+  }
+
+  .skills-project-list a:focus-visible {
+    border-radius: 0.125rem;
+    outline: 2px solid currentColor;
+    outline-offset: 0.2rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .skills-project-list a:hover {
+      color: #fff;
+      text-decoration-color: currentColor;
+    }
+  }
+
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     .skills-tool-stage {
       display: grid;
