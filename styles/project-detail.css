@@ -105,7 +105,9 @@
     font-weight: 500;
     line-height: 1.22;
     letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
     text-wrap: pretty;
+    word-break: keep-all;
   }
 
   .project-detail-context {

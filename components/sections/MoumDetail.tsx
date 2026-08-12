@@ -17,7 +17,7 @@ export const MoumDetail = ({ project }: MoumDetailProps) => (
     project={project}
     caseIndex="01"
     eyebrow="Community platform"
-    summary="검색 첫 화면의 렌더링을 앞당기고, URL에 검색 조건을 남겼습니다. 새 모임 상세 페이지도 검색 엔진이 찾을 수 있게 했습니다."
+    summary="검색 성능 · URL 상태 · 동적 sitemap · 활동 데이터 캐싱"
     context="스터디·프로젝트 모임을 검색하고 운영하는 플랫폼입니다. 검색 상태, SEO, 활동 시각화 흐름을 맡았습니다."
     period="2026.03 — 2026.04"
     focus="Search page · SEO · Activity"
@@ -25,13 +25,13 @@ export const MoumDetail = ({ project }: MoumDetailProps) => (
     coverCaption="스터디와 프로젝트 모임을 탐색하는 검색 화면"
     chapters={chapters}
     lead="검색 페이지를 전담해 렌더링, 상태 복원, SEO를 함께 개선했습니다."
-    outcomeTitle={<>LCP 45% 개선과<br />검색 조건 복원.</>}
+    outcomeTitle={<>LCP 47% 개선과<br />검색 조건 복원.</>}
     outcomeBody="히어로 렌더링을 분리해 LCP를 낮췄습니다. 검색 조건은 URL에, 새 모임 URL은 sitemap에 남겼습니다."
     nextHref="/projects/k-festival"
     nextTitle="K-Festival"
   >
     <section id="rendering" className="project-detail-chapter">
-      <header><p>01 / Rendering</p><h2>렌더링 경로 분리로 LCP 45% 개선</h2></header>
+      <header><p>01 / Rendering</p><h2>렌더 경로 분리·Suspense 스트리밍으로 LCP 47% 개선</h2></header>
       <div className="project-detail-prose">
         <p>검색 결과와 카테고리 조회가 끝나야 HTML을 내려주는 구조였습니다. Lighthouse에서 초기 응답과 히어로 렌더가 함께 늦어지는 병목을 확인했습니다.</p>
         <p>히어로를 데이터 조회 경로에서 분리해 먼저 렌더링했습니다. 나머지는 non-blocking prefetch와 Suspense fallback으로 넘겨 LCP를 1.5s에서 0.8s로 줄였습니다.</p>
@@ -51,7 +51,7 @@ export const MoumDetail = ({ project }: MoumDetailProps) => (
           <div><span>Before</span><ol><li>검색 결과</li><li>카테고리</li><li>히어로 렌더링</li></ol></div>
           <div><span>After</span><ol><li>히어로 렌더링</li><li>Suspense 대체 화면</li><li>검색 결과</li></ol></div>
         </div>
-        <figcaption>측정 결과 LCP는 1.5s에서 0.8s로 약 45% 줄었습니다.</figcaption>
+        <figcaption>측정 결과 LCP는 1.5s에서 0.8s로 약 47% 줄었습니다.</figcaption>
       </figure>
     </section>
 

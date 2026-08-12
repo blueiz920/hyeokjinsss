@@ -16,7 +16,7 @@ export const YajobaDetail = ({ project }: YajobaDetailProps) => (
     project={project}
     caseIndex="03"
     eyebrow="Rental service"
-    summary="같은 메시지가 두 번 보이던 문제를 막았습니다. 예약한 물품과 대여 시간은 계약서와 신청 단계까지 이어지게 했습니다."
+    summary="메시지 중복 방지 · 예약→계약 연결 · 계약서 파일 생성"
     context="교내 물품 대여·전자계약 서비스입니다. 계약서 작성과 인증 상태, WebSocket 채팅을 맡았습니다."
     period="2024.11 — 2025.09"
     focus="Contract · Auth · Chat"

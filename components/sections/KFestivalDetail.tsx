@@ -17,7 +17,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     project={project}
     caseIndex="02"
     eyebrow="Travel platform"
-    summary="축제 카드마다 발생하던 상세 요청을 없앴습니다. 배포 환경에서 막힌 API와 이미지 업로드 경로도 복구했습니다."
+    summary="요청 8→0 · 프록시·업로드 복구 · 다국어 상태"
     context="외국인 관광객을 위한 한국 축제 탐색·커뮤니티 플랫폼입니다. 온보딩과 축제 탐색 화면, 배포 환경을 맡았습니다."
     period="2025.04 — 2025.11"
     focus="Festival UI · Deployment"
