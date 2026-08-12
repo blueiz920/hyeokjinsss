@@ -10,7 +10,7 @@ import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SkillMark } from "./SkillMark";
 
-const skillTitleLines = ["구현부터 배포까지", "프론트엔드 역량"] as const;
+const skillTitleLines = ["구현부터 배포까지,", "프론트엔드 역량"] as const;
 
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -181,7 +181,7 @@ export const Skills = () => {
           <h2
             id="skills-title"
             className="skills-expertise-title"
-            aria-label="구현부터 배포까지 프론트엔드 역량"
+            aria-label="구현부터 배포까지, 프론트엔드 역량"
           >
             <span className="skills-title-lines" aria-hidden="true">
               {skillTitleLines.map((line, lineIndex) => (

@@ -205,13 +205,13 @@ describe("Skills Snap Tabs", () => {
     expect(section?.getAttribute("aria-labelledby")).toBe("skills-title");
     expect(
       container.querySelector("#skills-title")?.getAttribute("aria-label"),
-    ).toBe("구현부터 배포까지 프론트엔드 역량");
+    ).toBe("구현부터 배포까지, 프론트엔드 역량");
     expect(
       container.querySelectorAll("[data-skill-title-line]"),
     ).toHaveLength(2);
     expect(
       container.querySelectorAll("[data-skill-title-char]"),
-    ).toHaveLength(17);
+    ).toHaveLength(18);
     expect(grid?.children[0]).toBe(intro);
     expect(grid?.children[1]).toBe(visual);
     expect(grid?.children[2]).toBe(content);
