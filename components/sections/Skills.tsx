@@ -9,7 +9,7 @@ import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SkillMark } from "./SkillMark";
 
-const skillTitleLines = ["문제를 해결하는", "다섯 가지 방식"] as const;
+const skillTitleLines = ["구현부터 배포까지", "프론트엔드 역량"] as const;
 
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -180,7 +180,7 @@ export const Skills = () => {
           <h2
             id="skills-title"
             className="skills-expertise-title"
-            aria-label="문제를 해결하는 다섯 가지 방식"
+            aria-label="구현부터 배포까지 프론트엔드 역량"
           >
             <span className="skills-title-lines" aria-hidden="true">
               {skillTitleLines.map((line, lineIndex) => (
@@ -203,8 +203,7 @@ export const Skills = () => {
             </span>
           </h2>
           <p className="skills-expertise-description">
-            기술을 나열하기보다, 실제 사용자 흐름과 엔지니어링 결과를 만든
-            방식으로 묶었습니다.
+            프로젝트에서 맡은 범위와 사용한 기술, 그 결과를 함께 정리했습니다.
           </p>
         </header>
 

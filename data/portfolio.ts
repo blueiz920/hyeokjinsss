@@ -96,44 +96,44 @@ export const portfolio: PortfolioData = {
   ],
   skills: [
     {
-      title: "Product UI",
+      title: "UI Engineering",
       tools: ["React", "TypeScript", "Tailwind CSS"],
       summary:
-        "검색·계약·온보딩처럼 단계가 긴 화면을 사용자가 다음 행동을 자연스럽게 이해하도록 설계합니다.",
+        "React와 TypeScript로 검색, 온보딩, 전자계약 화면을 기능 단위 컴포넌트로 구현했습니다.",
       project: "모음.zip · K-Festival · Yajoba",
-      evidence: "기능 단위 컴포넌트 분리로 QA 피드백 반영 범위를 작게 유지했습니다.",
+      evidence: "공통 UI와 기능별 상태를 분리해 QA 수정 범위를 좁혔습니다.",
     },
     {
       title: "Data & State",
       tools: ["TanStack Query", "Zustand", "STOMP WebSocket"],
       summary:
-        "서버 데이터와 화면 상태의 책임을 나눠, 화면마다 다른 기준으로 흔들리지 않게 만듭니다.",
+        "TanStack Query로 서버 데이터를 관리하고 Zustand로 언어·인증·화면 상태를 분리했습니다.",
       project: "K-Festival · Yajoba",
-      evidence: "언어·인증 상태와 API 데이터를 분리해 중복 요청과 표시 기준의 충돌을 줄였습니다.",
+      evidence: "K-Festival의 다국어 queryKey와 Yajoba의 예약·계약 데이터를 같은 기준으로 연결했습니다.",
     },
     {
       title: "Performance & SEO",
       tools: ["Next.js", "Rendering", "Sitemap"],
       summary:
-        "첫 화면의 체감 속도와 검색 엔진이 읽는 경로를 함께 점검해 발견 가능한 서비스를 만듭니다.",
+        "Next.js SSR 렌더링 경로를 조정하고 검색 페이지와 동적 상세 페이지의 SEO를 구성했습니다.",
       project: "모음.zip",
-      evidence: "검색 페이지 LCP를 1.5s에서 0.8s로 개선하고 동적 sitemap을 구성했습니다.",
+      evidence: "검색 페이지 LCP 1.5s→0.8s, 동적 sitemap, 활동 데이터 캐싱을 구현했습니다.",
     },
     {
       title: "Motion & Interaction",
       tools: ["Framer Motion", "GSAP", "Lenis"],
       summary:
-        "정보의 우선순위를 해치지 않는 범위에서 전환과 피드백을 설계해 흐름을 선명하게 만듭니다.",
+        "Framer Motion과 GSAP으로 화면 전환과 피드백을 만들고 Lenis로 스크롤 동작을 조율했습니다.",
       project: "개인 포트폴리오",
-      evidence: "섹션별 모션과 스크롤 감도를 분리해 텍스트 가독성을 유지했습니다.",
+      evidence: "프로젝트 미리보기, 섹션 전환, 내비게이션 모션과 reduced-motion 대응을 구현했습니다.",
     },
     {
-      title: "Delivery & Reliability",
+      title: "Testing & Delivery",
       tools: ["Vitest", "GitHub Actions", "Vercel"],
       summary:
-        "기능 완성 뒤에도 재현 가능한 검증과 배포 흐름을 만들어 팀의 개선 속도를 지킵니다.",
+        "Vitest로 상태 로직을 검증하고 GitHub Actions와 Vercel로 배포 흐름을 구성했습니다.",
       project: "모음.zip · K-Festival",
-      evidence: "URL 상태 동기화 43개 테스트와 HTTPS 프록시로 배포 이슈를 안정화했습니다.",
+      evidence: "URL 상태 동기화 43개 케이스를 고정하고 K-Festival의 HTTPS 배포 경로를 복구했습니다.",
     },
   ],
   contactEmail: "rnjsgurwls123@naver.com",
