@@ -276,6 +276,30 @@
     line-height: 1.78;
   }
 
+  .project-detail-related {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid rgba(24, 23, 21, 0.42);
+    color: var(--detail-ink);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .project-detail-related span {
+    transition: transform 180ms ease;
+  }
+
+  .project-detail-related:hover span,
+  .project-detail-related:focus-visible span {
+    transform: translate(0.18rem, -0.18rem);
+  }
+
   .project-evidence {
     margin: 3rem 0 0;
     padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -668,6 +692,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .project-detail a,
+    .project-detail-related span,
     .project-detail-next-link span:last-child {
       transition: none;
     }

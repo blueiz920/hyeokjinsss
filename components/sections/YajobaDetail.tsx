@@ -32,7 +32,7 @@ export const YajobaDetail = ({ project }: YajobaDetailProps) => (
     <section id="chat-message" className="project-detail-chapter">
       <header>
         <p>01 / Chat message</p>
-        <h2>낙관적 메시지 중복을 막다</h2>
+        <h2>낙관적 UI 유지와 메시지 중복 방지</h2>
       </header>
       <div className="project-detail-prose">
         <p>메시지를 보내자마자 pending 말풍선을 그렸지만, 서버 응답에 clientMessageId가 없었습니다. 확정 메시지가 도착하면 같은 내용이 한 번 더 보였습니다.</p>
@@ -60,7 +60,7 @@ export const YajobaDetail = ({ project }: YajobaDetailProps) => (
     <section id="rental-flow" className="project-detail-chapter">
       <header>
         <p>02 / Rental flow</p>
-        <h2>예약 정보를 계약까지 잇다</h2>
+        <h2>productId 기반 예약·계약 데이터 연결</h2>
       </header>
       <div className="project-detail-prose">
         <p>예약 모달과 계약서 화면이 나뉘어 있어 선택한 물품과 대여 시간이 신청 단계까지 이어지지 않았습니다.</p>
@@ -80,7 +80,7 @@ export const YajobaDetail = ({ project }: YajobaDetailProps) => (
     <section id="contract-file" className="project-detail-chapter">
       <header>
         <p>03 / Contract file</p>
-        <h2>계약서 화면을 파일로 만들다</h2>
+        <h2>html2canvas 계약서 생성과 multipart 업로드</h2>
       </header>
       <div className="project-detail-prose">
         <p>승인 API는 서명이 포함된 계약서를 파일로 요구했습니다. 브라우저에 보이는 계약서 전체를 이미지로 만들어야 했습니다.</p>

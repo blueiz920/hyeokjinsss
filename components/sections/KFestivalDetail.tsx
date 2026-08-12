@@ -33,7 +33,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="festival-data" className="project-detail-chapter">
       <header>
         <p>01 / Festival data</p>
-        <h2>카드별 상세 요청을 없애다</h2>
+        <h2>목록 응답 확장으로 상세 요청 8→0</h2>
       </header>
       <div className="project-detail-prose">
         <p>축제 기간이 목록·검색 응답에 없어서 카드마다 상세 API를 다시 호출했습니다. 한 페이지에서 최대 8번의 요청이 추가되는 구조였습니다.</p>
@@ -61,7 +61,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="deploy-proxy" className="project-detail-chapter">
       <header>
         <p>02 / Deploy proxy</p>
-        <h2>HTTP API를 프록시로 잇다</h2>
+        <h2>Serverless 프록시로 Mixed Content 해결</h2>
       </header>
       <div className="project-detail-prose">
         <p>Vercel의 HTTPS 페이지에서 HTTP 백엔드를 직접 호출하자 브라우저가 Mixed Content 요청을 막았습니다.</p>
@@ -81,7 +81,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="image-upload" className="project-detail-chapter">
       <header>
         <p>03 / Image upload</p>
-        <h2>multipart 요청을 그대로 전달하다</h2>
+        <h2>원본 요청 스트림으로 multipart 500 해결</h2>
       </header>
       <div className="project-detail-prose">
         <p>프록시가 multipart 요청을 req.body로 다시 만들면서 boundary와 실제 본문이 어긋났습니다. 형식이 깨진 요청을 받은 백엔드는 파일을 읽지 못하고 500을 반환했습니다.</p>
@@ -101,7 +101,7 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     <section id="language-state" className="project-detail-chapter">
       <header>
         <p>04 / Language state</p>
-        <h2>언어 변경에 맞춰 다시 요청하다</h2>
+        <h2>Zustand·queryKey로 다국어 상태 동기화</h2>
       </header>
       <div className="project-detail-prose">
         <p>UI 언어를 바꿔도 서버 데이터는 이전 언어로 남을 수 있었습니다. 화면과 축제 정보가 서로 다른 언어를 쓰는 문제였습니다.</p>
