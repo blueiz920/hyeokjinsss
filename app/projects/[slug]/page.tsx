@@ -1,16 +1,26 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { KFestivalDetail } from "@/components/sections/KFestivalDetail";
 import { MoumDetail } from "@/components/sections/MoumDetail";
 import { YajobaDetail } from "@/components/sections/YajobaDetail";
 import { portfolio } from "@/data/portfolio";
 import { siteConfig } from "@/data/site";
+import type { Project } from "@/data/types";
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+type DetailRenderer = (project: Project) => ReactNode;
+
 export const dynamicParams = false;
+
+const detailBySlug = new Map<string, DetailRenderer>([
+  ["moum-zip", (project) => <MoumDetail project={project} />],
+  ["k-festival", (project) => <KFestivalDetail project={project} />],
+  ["yajoba", (project) => <YajobaDetail project={project} />],
+]);
 
 function findProject(slug: string) {
   return portfolio.projects.find((project) => project.slug === slug);
@@ -63,13 +73,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  if (project.slug === "moum-zip") {
-    return <MoumDetail project={project} />;
+  const renderDetail = detailBySlug.get(project.slug);
+
+  if (!renderDetail) {
+    notFound();
   }
 
-  if (project.slug === "k-festival") {
-    return <KFestivalDetail project={project} />;
-  }
-
-  return <YajobaDetail project={project} />;
+  return renderDetail(project);
 }

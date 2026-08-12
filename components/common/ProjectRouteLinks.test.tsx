@@ -224,4 +224,23 @@ describe("project route links", () => {
       ).toContain(next);
     },
   );
+
+  it("returns 404 instead of falling back to Yajoba for an unmapped project", async () => {
+    const unmappedProject: Project = {
+      ...project,
+      slug: "unmapped-project",
+      title: "Unmapped project",
+    };
+    portfolio.projects.push(unmappedProject);
+
+    try {
+      await expect(
+        ProjectPage({
+          params: Promise.resolve({ slug: unmappedProject.slug }),
+        }),
+      ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    } finally {
+      portfolio.projects.pop();
+    }
+  });
 });
