@@ -138,7 +138,9 @@ describe("initSkillsVisual", () => {
     expect(harness.timeline.reverse).toHaveBeenCalledOnce();
     options.onRefresh?.({ scroll: () => 120, start: 100 });
     expect(harness.timeline.progress).toHaveBeenCalledWith(1);
-    expect(harness.timeline.pause).toHaveBeenCalledOnce();
+    options.onRefresh?.({ scroll: () => 80, start: 100 });
+    expect(harness.timeline.progress).toHaveBeenLastCalledWith(0);
+    expect(harness.timeline.pause).toHaveBeenCalledTimes(2);
 
     cleanup();
     expect(harness.triggers).toHaveLength(6);
