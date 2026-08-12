@@ -19,6 +19,7 @@ const CUE_END_DELAY = 1350;
 const CUE_PULL = 10;
 const CUE_REPEAT_DELAY = 4150;
 const CUE_RETURN_DELAY = 520;
+const CUE_WINDOW = 60_000;
 const CUE_X_RATIO = 0.62;
 const HINT_DISTANCE = 90;
 const HOVER_DISTANCE = 38;
@@ -52,7 +53,7 @@ export const initIntroPull = async ({
   const point: PullPoint = { x: initialWidth / 2, y: 0 };
   let active = false;
   let aware = false;
-  let cueCount = 0;
+  let cueDeadline = 0;
   let cueEndTimer = 0;
   let cueReturnTimer = 0;
   let cueTimer = 0;
@@ -214,9 +215,15 @@ export const initIntroPull = async ({
 
   const runCue = () => {
     cueTimer = 0;
-    if (hasInteracted || active || !isCueVisible()) return;
+    if (
+      hasInteracted ||
+      active ||
+      Date.now() > cueDeadline ||
+      !isCueVisible()
+    ) {
+      return;
+    }
 
-    cueCount += 1;
     const width = root.getBoundingClientRect().width || 600;
     root.dataset.pullDemo = "true";
     setState("pull");
@@ -238,7 +245,8 @@ export const initIntroPull = async ({
     cueEndTimer = window.setTimeout(() => {
       cueEndTimer = 0;
       delete root.dataset.pullDemo;
-      if (cueCount < 2 && !hasInteracted) {
+      const nextCueAt = Date.now() + CUE_REPEAT_DELAY;
+      if (!hasInteracted && nextCueAt <= cueDeadline) {
         cueTimer = window.setTimeout(runCue, CUE_REPEAT_DELAY);
       }
     }, CUE_END_DELAY);
@@ -248,6 +256,7 @@ export const initIntroPull = async ({
     if (cueStarted || hasInteracted) return;
 
     cueStarted = true;
+    cueDeadline = Date.now() + CUE_WINDOW;
     introObserver?.disconnect();
     introObserver = null;
 

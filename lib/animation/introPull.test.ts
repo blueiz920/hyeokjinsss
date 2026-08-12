@@ -152,7 +152,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("Intro 진입 완료 뒤 당김선을 두 번 이하로 스스로 시연한다", async () => {
+  it("Intro 진입 완료 뒤 당김선을 같은 간격으로 1분 동안 시연한다", async () => {
     vi.useFakeTimers();
     document.documentElement.dataset.introReady = "true";
     const root = createPull();
@@ -181,10 +181,18 @@ describe("initIntroPull", () => {
     expect(root.style.getPropertyValue("--intro-pull-x")).toBe("372px");
     expect(root.style.getPropertyValue("--intro-pull-y")).toBe("82px");
 
-    vi.advanceTimersByTime(5500);
-    expect(pullMocks.to).toHaveBeenCalledTimes(3);
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(10_999);
     expect(pullMocks.to).toHaveBeenCalledTimes(4);
+
+    vi.advanceTimersByTime(1);
+    expect(pullMocks.to).toHaveBeenCalledTimes(5);
+
+    vi.advanceTimersByTime(48_200);
+    expect(root.dataset.pullDemo).toBeUndefined();
+    expect(pullMocks.to).toHaveBeenCalledTimes(22);
+
+    vi.advanceTimersByTime(60_000);
+    expect(pullMocks.to).toHaveBeenCalledTimes(22);
 
     cleanup();
   });
