@@ -10,9 +10,15 @@ export type DetailChapter = {
   label: string;
 };
 
+export type DetailOrder = {
+  index: number;
+  total: number;
+  nextProject: Pick<Project, "slug" | "title">;
+};
+
 type ProjectDetailProps = {
   project: Project;
-  caseIndex: string;
+  order: DetailOrder;
   eyebrow: string;
   summary: string;
   context: string;
@@ -25,13 +31,11 @@ type ProjectDetailProps = {
   children: ReactNode;
   outcomeTitle: ReactNode;
   outcomeBody: string;
-  nextHref: string;
-  nextTitle: string;
 };
 
 export const ProjectDetail = ({
   project,
-  caseIndex,
+  order,
   eyebrow,
   summary,
   context,
@@ -44,11 +48,11 @@ export const ProjectDetail = ({
   children,
   outcomeTitle,
   outcomeBody,
-  nextHref,
-  nextTitle,
 }: ProjectDetailProps) => {
   const liveLink = project.links.find(({ label }) => label === "Live");
   const githubLink = project.links.find(({ label }) => label === "GitHub");
+  const caseIndex = String(order.index).padStart(2, "0");
+  const caseTotal = String(order.total).padStart(2, "0");
 
   return (
     <>
@@ -64,7 +68,7 @@ export const ProjectDetail = ({
                 <span aria-hidden="true">←</span>
                 Projects
               </TransitionLink>
-              <p>Case {caseIndex} / 03</p>
+              <p>Case {caseIndex} / {caseTotal}</p>
             </div>
 
             <div className="project-detail-heading">
@@ -149,7 +153,10 @@ export const ProjectDetail = ({
         </section>
       </main>
 
-      <ProjectNext href={nextHref} title={nextTitle} />
+      <ProjectNext
+        href={`/projects/${order.nextProject.slug}`}
+        title={order.nextProject.title}
+      />
     </>
   );
 };

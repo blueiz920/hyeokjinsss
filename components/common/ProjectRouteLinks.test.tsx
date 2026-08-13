@@ -198,17 +198,15 @@ describe("project route links", () => {
       slug: "k-festival",
       chapters: 4,
       evidence: ["8 → 0", 'duplex: "half"', "Zustand language"],
-      next: "Yajoba",
     },
     {
       slug: "yajoba",
       chapters: 3,
       evidence: ["2 → 1", "productId", "html2canvas"],
-      next: "모음.zip",
     },
   ])(
-    "renders the $slug evidence and next project",
-    async ({ slug, chapters, evidence, next }) => {
+    "renders the $slug evidence",
+    async ({ slug, chapters, evidence }) => {
       const page = await ProjectPage({ params: Promise.resolve({ slug }) });
       const container = await mountProject(page);
 
@@ -219,9 +217,37 @@ describe("project route links", () => {
         chapters,
       );
       evidence.forEach((item) => expect(container.textContent).toContain(item));
+    },
+  );
+
+  it.each(
+    portfolio.projects.map((orderedProject, index) => ({
+      orderedProject,
+      index,
+    })),
+  )(
+    "derives the case position and next link for $orderedProject.slug",
+    async ({ orderedProject, index }) => {
+      const page = await ProjectPage({
+        params: Promise.resolve({ slug: orderedProject.slug }),
+      });
+      const container = await mountProject(page);
+      const nextProject =
+        portfolio.projects[(index + 1) % portfolio.projects.length];
+
       expect(
-        container.querySelector(".project-detail-next")?.textContent,
-      ).toContain(next);
+        container.querySelector(".project-detail-topline > p")?.textContent,
+      ).toBe(
+        `Case ${String(index + 1).padStart(2, "0")} / ${String(portfolio.projects.length).padStart(2, "0")}`,
+      );
+      expect(
+        container
+          .querySelector<HTMLAnchorElement>(".project-detail-next-link")
+          ?.getAttribute("href"),
+      ).toBe(`/projects/${nextProject.slug}`);
+      expect(
+        container.querySelector("#next-project-title")?.textContent,
+      ).toBe(nextProject.title);
     },
   );
 

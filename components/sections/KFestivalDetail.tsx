@@ -1,8 +1,13 @@
-import { ProjectDetail, type DetailChapter } from "@/components/sections/ProjectDetail";
+import {
+  ProjectDetail,
+  type DetailChapter,
+  type DetailOrder,
+} from "@/components/sections/ProjectDetail";
 import type { Project } from "@/data/types";
 
 type KFestivalDetailProps = {
   project: Project;
+  order: DetailOrder;
 };
 
 const chapters: DetailChapter[] = [
@@ -12,10 +17,10 @@ const chapters: DetailChapter[] = [
   { id: "language-state", index: "04", label: "다국어 상태" },
 ];
 
-export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
+export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
   <ProjectDetail
     project={project}
-    caseIndex="02"
+    order={order}
     eyebrow="Travel platform"
     summary="온보딩 · 축제 탐색 UI · API 연동 · Vercel 배포"
     context="외국인 관광객을 위한 한국 축제 탐색·커뮤니티 플랫폼입니다. 온보딩과 축제 탐색 화면, 배포 환경을 맡았습니다."
@@ -27,8 +32,6 @@ export const KFestivalDetail = ({ project }: KFestivalDetailProps) => (
     lead="축제 화면과 Vercel 배포를 맡고 API 응답 구조까지 조정했습니다."
     outcomeTitle={<>상세 요청 8건 제거와<br />배포 경로 복구.</>}
     outcomeBody="카드에 필요한 기간은 목록 응답에서 받고, 배포 환경의 API와 이미지 업로드는 Serverless 프록시로 중계했습니다."
-    nextHref="/projects/yajoba"
-    nextTitle="Yajoba"
   >
     <section id="festival-data" className="project-detail-chapter">
       <header>

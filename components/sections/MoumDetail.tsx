@@ -1,8 +1,13 @@
-import { ProjectDetail, type DetailChapter } from "@/components/sections/ProjectDetail";
+import {
+  ProjectDetail,
+  type DetailChapter,
+  type DetailOrder,
+} from "@/components/sections/ProjectDetail";
 import type { Project } from "@/data/types";
 
 type MoumDetailProps = {
   project: Project;
+  order: DetailOrder;
 };
 
 const chapters: DetailChapter[] = [
@@ -12,10 +17,10 @@ const chapters: DetailChapter[] = [
   { id: "activity", index: "04", label: "활동 시각화" },
 ];
 
-export const MoumDetail = ({ project }: MoumDetailProps) => (
+export const MoumDetail = ({ project, order }: MoumDetailProps) => (
   <ProjectDetail
     project={project}
-    caseIndex="01"
+    order={order}
     eyebrow="Community platform"
     summary="검색 페이지 · SSR 렌더링 최적화 · SEO · 활동 시각화"
     context="스터디·프로젝트 모임을 검색하고 운영하는 플랫폼입니다. 검색 상태, SEO, 활동 시각화 흐름을 맡았습니다."
@@ -27,8 +32,6 @@ export const MoumDetail = ({ project }: MoumDetailProps) => (
     lead="검색 페이지를 전담해 렌더링, 상태 복원, SEO를 함께 개선했습니다."
     outcomeTitle={<>LCP 47% 개선과<br />검색 조건 복원.</>}
     outcomeBody="히어로 렌더링을 분리해 LCP를 낮췄습니다. 검색 조건은 URL에, 새 모임 URL은 sitemap에 남겼습니다."
-    nextHref="/projects/k-festival"
-    nextTitle="K-Festival"
   >
     <section id="rendering" className="project-detail-chapter">
       <header><p>01 / Rendering</p><h2>렌더 경로 분리·Suspense 스트리밍으로 LCP 47% 개선</h2></header>

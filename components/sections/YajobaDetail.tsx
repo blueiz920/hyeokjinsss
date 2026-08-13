@@ -1,8 +1,13 @@
-import { ProjectDetail, type DetailChapter } from "@/components/sections/ProjectDetail";
+import {
+  ProjectDetail,
+  type DetailChapter,
+  type DetailOrder,
+} from "@/components/sections/ProjectDetail";
 import type { Project } from "@/data/types";
 
 type YajobaDetailProps = {
   project: Project;
+  order: DetailOrder;
 };
 
 const chapters: DetailChapter[] = [
@@ -11,10 +16,10 @@ const chapters: DetailChapter[] = [
   { id: "contract-file", index: "03", label: "계약서 파일" },
 ];
 
-export const YajobaDetail = ({ project }: YajobaDetailProps) => (
+export const YajobaDetail = ({ project, order }: YajobaDetailProps) => (
   <ProjectDetail
     project={project}
-    caseIndex="03"
+    order={order}
     eyebrow="Rental service"
     summary="전자계약 · 인증 상태 · WebSocket 채팅 · 계약서 파일 처리"
     context="교내 물품 대여·전자계약 서비스입니다. 계약서 작성과 인증 상태, WebSocket 채팅을 맡았습니다."
@@ -26,8 +31,6 @@ export const YajobaDetail = ({ project }: YajobaDetailProps) => (
     lead="계약서 페이지와 WebSocket 채팅의 데이터 기준을 정리했습니다."
     outcomeTitle={<>메시지 중복 방지와<br />계약 데이터 연결.</>}
     outcomeBody="pending 메시지는 서버 응답과 합쳤습니다. 물품과 대여 시간은 계약서 파일, 신청, 승인 API까지 같은 예약 정보로 이어집니다."
-    nextHref="/projects/moum-zip"
-    nextTitle="모음.zip"
   >
     <section id="chat-message" className="project-detail-chapter">
       <header>
