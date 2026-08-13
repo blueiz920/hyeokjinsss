@@ -47,7 +47,7 @@ afterEach(() => {
 });
 
 describe("initIntroAnimation", () => {
-  it("두 역할 줄을 함께 시작하고 name과 pull CTA를 뒤이어 reveal한다", async () => {
+  it("두 역할 줄을 함께 시작하고 이름과 당김 동작 요소를 뒤이어 드러낸다", async () => {
     const root = createEntryDom();
     const { CustomEase, entryEase, gsap, timeline } = createHarness();
     const onComplete = vi.fn();
@@ -97,7 +97,7 @@ describe("initIntroAnimation", () => {
     expect(timeline.kill).toHaveBeenCalledOnce();
   });
 
-  it("일반 모션 cleanup 뒤 reduced motion으로 재진입해도 글자 inline transform을 남기지 않는다", async () => {
+  it("일반 모션 정리 뒤 모션 축소로 재진입해도 글자 인라인 변형을 남기지 않는다", async () => {
     const root = createEntryDom();
     const char = root.querySelector<HTMLElement>("[data-intro-char]")!;
     char.style.transform = "translate(0%, 80%)";
@@ -114,7 +114,7 @@ describe("initIntroAnimation", () => {
     expect(char.style.transform).toBe("");
   });
 
-  it("showIntro는 실패 뒤 모든 Intro 요소를 최종 가시 상태로 복원한다", () => {
+  it("인트로 표시 함수는 실패 뒤 모든 인트로 요소를 최종 가시 상태로 복원한다", () => {
     const root = createEntryDom();
     const char = root.querySelector<HTMLElement>("[data-intro-char]")!;
     const pull = root.querySelector<HTMLElement>(".intro-pull-stage")!;
@@ -136,7 +136,7 @@ describe("initIntroAnimation", () => {
     expect(pull.style.willChange).toBe("auto");
   });
 
-  it("reduced motion에서는 GSAP을 시작하지 않고 즉시 완료한다", async () => {
+  it("모션 축소 환경에서는 GSAP을 시작하지 않고 즉시 완료한다", async () => {
     const onComplete = vi.fn();
 
     const cleanup = await initIntroAnimation(createEntryDom(), true, onComplete);

@@ -88,7 +88,7 @@ afterEach(async () => {
 });
 
 describe("project route links", () => {
-  it("makes each desktop row an internal transition link without losing its row ref", async () => {
+  it("각 데스크톱 행을 행 참조를 유지한 내부 전환 링크로 만든다", async () => {
     const setRowRef = vi.fn();
     const container = await mountProject(
       <ProjectDesktopList
@@ -108,7 +108,7 @@ describe("project route links", () => {
     expect(setRowRef).toHaveBeenCalledWith(0, link.closest("li"));
   });
 
-  it("keeps mobile external links outside the internal project route link", async () => {
+  it("모바일 외부 링크를 내부 프로젝트 경로 링크 밖에 둔다", async () => {
     const container = await mountProject(
       <ProjectRevealCard
         project={project}
@@ -133,14 +133,14 @@ describe("project route links", () => {
     expect(externalLinks[0].getAttribute("target")).toBe("_blank");
   });
 
-  it("generates static detail params from portfolio data", () => {
+  it("포트폴리오 데이터에서 정적 상세 경로 매개변수를 만든다", () => {
     expect(generateStaticParams()).toEqual(
       portfolio.projects.map(({ slug }) => ({ slug })),
     );
   });
 
   it.each(portfolio.projects)(
-    "generates canonical and Open Graph metadata for $slug",
+    "각 프로젝트의 대표 주소와 공유 메타데이터를 만든다",
     async (metadataProject) => {
       await expect(
         generateMetadata({
@@ -168,7 +168,7 @@ describe("project route links", () => {
     },
   );
 
-  it("renders the Moum case study with its four evidence-backed chapters", async () => {
+  it("모음.zip 사례에 근거가 담긴 네 개 장을 렌더링한다", async () => {
     const page = await ProjectPage({
       params: Promise.resolve({ slug: "moum-zip" }),
     });
@@ -205,7 +205,7 @@ describe("project route links", () => {
       evidence: ["2 → 1", "productId", "html2canvas"],
     },
   ])(
-    "renders the $slug evidence",
+    "각 프로젝트의 근거를 렌더링한다",
     async ({ slug, chapters, evidence }) => {
       const page = await ProjectPage({ params: Promise.resolve({ slug }) });
       const container = await mountProject(page);
@@ -226,7 +226,7 @@ describe("project route links", () => {
       index,
     })),
   )(
-    "derives the case position and next link for $orderedProject.slug",
+    "각 프로젝트의 사례 순서와 다음 링크를 계산한다",
     async ({ orderedProject, index }) => {
       const page = await ProjectPage({
         params: Promise.resolve({ slug: orderedProject.slug }),
@@ -251,7 +251,7 @@ describe("project route links", () => {
     },
   );
 
-  it("returns 404 instead of falling back to Yajoba for an unmapped project", async () => {
+  it("매핑되지 않은 프로젝트를 Yajoba로 대체하지 않고 404를 반환한다", async () => {
     const unmappedProject: Project = {
       ...project,
       slug: "unmapped-project",

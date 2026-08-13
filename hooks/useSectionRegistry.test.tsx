@@ -101,7 +101,7 @@ afterEach(async () => {
 });
 
 describe("SectionRegistryProvider", () => {
-  it("등록된 section으로 부드럽게 이동한 뒤 포커스를 넘긴다", async () => {
+  it("등록된 섹션으로 부드럽게 이동한 뒤 포커스를 넘긴다", async () => {
     const container = await mountRegistry(true);
     const button = container.querySelector("button")!;
     const section = container.querySelector("section")!;
@@ -115,7 +115,7 @@ describe("SectionRegistryProvider", () => {
     expect(document.activeElement).toBe(section);
   });
 
-  it("section 이동의 시작과 종료 목적지를 문서에 알린다", async () => {
+  it("섹션 이동의 시작과 종료 목적지를 문서에 알린다", async () => {
     const intents: SectionIntentDetail[] = [];
     const handleIntent = (event: Event) => {
       intents.push((event as CustomEvent<SectionIntentDetail>).detail);
@@ -137,7 +137,7 @@ describe("SectionRegistryProvider", () => {
     document.removeEventListener(SECTION_INTENT_EVENT, handleIntent);
   });
 
-  it("reduced motion에서는 DOM fallback section으로 즉시 이동한다", async () => {
+  it("모션 축소 환경에서는 DOM 대체 섹션으로 즉시 이동한다", async () => {
     registryMocks.prefersReducedMotion = true;
     const container = await mountRegistry(false);
     const button = container.querySelector("button")!;

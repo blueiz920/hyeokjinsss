@@ -182,7 +182,7 @@ afterEach(async () => {
 });
 
 describe("Skills Snap Tabs", () => {
-  it("인트로, 기술 보드, 다섯 개 Snap Tabs와 하나의 활성 서사를 렌더링한다", async () => {
+  it("인트로, 기술 보드, 다섯 개 스냅 탭과 하나의 활성 서사를 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
     const grid = container.querySelector(".skills-expertise-grid");
@@ -431,7 +431,7 @@ describe("Skills Snap Tabs", () => {
     expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
   });
 
-  it("reduced motion에서는 탭 선택 시 보드를 즉시 이동한다", async () => {
+  it("모션 축소 환경에서는 탭 선택 시 보드를 즉시 이동한다", async () => {
     skillsMocks.prefersReducedMotion = true;
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
@@ -461,7 +461,7 @@ describe("Skills Snap Tabs", () => {
     expect(panelScrollTo).toHaveBeenCalledWith({ behavior: "auto", left: 1080 });
   });
 
-  it("키보드로 탭을 선택하고 roving focus를 이동한다", async () => {
+  it("키보드로 탭을 선택하고 순환 포커스를 이동한다", async () => {
     const { container } = await mountSkills();
     const deck = container.querySelector<HTMLDivElement>("[data-skill-deck]");
     const tabs = container.querySelectorAll<HTMLButtonElement>(
@@ -511,7 +511,7 @@ describe("Skills Snap Tabs", () => {
     expect(tabs[0]?.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("desktop 전환은 모든 서사를 목록으로 복원하고 모바일 탭 의미를 비활성화한다", async () => {
+  it("데스크톱 전환은 모든 서사를 목록으로 복원하고 모바일 탭 의미를 비활성화한다", async () => {
     const { container } = await mountSkills();
     const tablist = container.querySelector(".skills-mobile-tabs");
     const tabs = container.querySelectorAll<HTMLButtonElement>(
@@ -589,7 +589,7 @@ describe("Skills Snap Tabs", () => {
     ).toEqual([panels[2]]);
   });
 
-  it("section registry를 등록하고 언마운트에서 해제한다", async () => {
+  it("섹션 레지스트리를 등록하고 언마운트에서 해제한다", async () => {
     const { root } = await mountSkills();
 
     expect(skillsMocks.register).toHaveBeenCalledOnce();
@@ -600,7 +600,7 @@ describe("Skills Snap Tabs", () => {
     expect(skillsMocks.unregister).toHaveBeenCalledWith("skills");
   });
 
-  it("intro와 visual motion을 현재 section에 연결한다", async () => {
+  it("인트로와 시각 모션을 현재 섹션에 연결한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
 
@@ -616,7 +616,7 @@ describe("Skills Snap Tabs", () => {
     });
   });
 
-  it("intro motion 실패 시 정적 패널을 표시한다", async () => {
+  it("인트로 모션 실패 시 정적 패널을 표시한다", async () => {
     const motionError = new Error("motion failed");
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     skillsMocks.initSkillsIntro.mockRejectedValue(motionError);

@@ -219,7 +219,7 @@ describe("ScrollRuntimeProvider", () => {
     );
   });
 
-  it("reduced motion에서는 Lenis와 RAF 없이 네이티브 스크롤 상태를 사용한다", async () => {
+  it("모션 축소 환경에서는 Lenis와 RAF 없이 네이티브 스크롤 상태를 사용한다", async () => {
     runtimeMocks.prefersReducedMotion = true;
     const root = await mountProvider();
     const proxy = scrollTrigger.scrollerProxy.mock.calls[0][1] as {
@@ -239,7 +239,7 @@ describe("ScrollRuntimeProvider", () => {
     expect(runtimeMocks.lenisDestroy).not.toHaveBeenCalled();
   });
 
-  it("Lenis 이벤트와 scroller proxy를 양방향으로 연결한다", async () => {
+  it("Lenis 이벤트와 스크롤러 프록시를 양방향으로 연결한다", async () => {
     const root = await mountProvider();
     const scrollListener = runtimeMocks.lenisOn.mock.calls[0][1] as () => void;
     const refreshListener = scrollTrigger.addEventListener.mock.calls[0][1] as () => void;
@@ -293,7 +293,7 @@ describe("ScrollRuntimeProvider", () => {
     expect(requestAnimationFrame).not.toHaveBeenCalled();
   });
 
-  it("Provider 안에서는 현재 모션 정책을 반환한다", () => {
+  it("제공자 안에서는 현재 모션 정책을 반환한다", () => {
     runtimeMocks.prefersReducedMotion = true;
 
     const html = renderToString(
@@ -305,7 +305,7 @@ describe("ScrollRuntimeProvider", () => {
     expect(html).toContain("true");
   });
 
-  it("Provider 제어 함수를 활성 runtime에 전달한다", async () => {
+  it("제공자 제어 함수를 활성 런타임에 전달한다", async () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -330,7 +330,7 @@ describe("ScrollRuntimeProvider", () => {
     expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
   });
 
-  it("Provider 밖에서 사용하면 명확한 오류를 던진다", () => {
+  it("제공자 밖에서 사용하면 명확한 오류를 던진다", () => {
     expect(() => renderToString(<RuntimeProbe />)).toThrow(
       "useScrollRuntime must be used within ScrollRuntimeProvider",
     );
@@ -338,7 +338,7 @@ describe("ScrollRuntimeProvider", () => {
 });
 
 describe("startScrollRuntime", () => {
-  it("lock과 unlock을 활성 Lenis 인스턴스에 전달한다", async () => {
+  it("잠금과 잠금 해제를 활성 Lenis 인스턴스에 전달한다", async () => {
     const runtime = startScrollRuntime({ prefersReducedMotion: false });
     await act(async () => {
       await Promise.resolve();
@@ -370,7 +370,7 @@ describe("startScrollRuntime", () => {
     runtime.dispose();
   });
 
-  it("dispose를 여러 번 호출해도 runtime 자원을 한 번만 정리한다", async () => {
+  it("정리 함수를 여러 번 호출해도 런타임 자원을 한 번만 정리한다", async () => {
     const runtime = startScrollRuntime({ prefersReducedMotion: false });
     await act(async () => {
       await Promise.resolve();

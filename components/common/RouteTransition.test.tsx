@@ -87,7 +87,7 @@ afterEach(async () => {
 });
 
 describe("RouteTransition", () => {
-  it("covers, navigates, then reveals and releases its scroll lock", async () => {
+  it("화면을 덮고 이동한 뒤 다시 드러내며 스크롤 잠금을 해제한다", async () => {
     const { button, render } = await mountTransition();
 
     await act(async () => button.click());
@@ -104,7 +104,7 @@ describe("RouteTransition", () => {
     expect(document.documentElement.dataset.routeLocked).toBeUndefined();
   });
 
-  it("releases a stalled cover and ignores its late completion", async () => {
+  it("중단된 덮기 작업을 해제하고 뒤늦은 완료를 무시한다", async () => {
     vi.useFakeTimers();
     let finishCover!: () => void;
     routeMocks.coverRoute.mockReturnValue(
@@ -124,7 +124,7 @@ describe("RouteTransition", () => {
     expect(routeMocks.push).not.toHaveBeenCalled();
   });
 
-  it("uses direct navigation for same-path query changes", async () => {
+  it("같은 경로의 쿼리 변경에는 직접 이동을 사용한다", async () => {
     const { button } = await mountTransition("/?filter=frontend");
 
     await act(async () => button.click());
@@ -134,7 +134,7 @@ describe("RouteTransition", () => {
     expect(routeMocks.lockScroll).not.toHaveBeenCalled();
   });
 
-  it("ignores a stale reveal completion after timeout cleanup", async () => {
+  it("시간 초과 정리 후 뒤늦은 화면 드러내기 완료를 무시한다", async () => {
     vi.useFakeTimers();
     let finishReveal!: () => void;
     routeMocks.revealRoute.mockReturnValue(
@@ -155,7 +155,7 @@ describe("RouteTransition", () => {
     expect(routeMocks.unlockScroll).toHaveBeenCalledOnce();
   });
 
-  it("skips motion and locking when reduced motion is preferred", async () => {
+  it("모션 축소를 선호하면 애니메이션과 잠금을 생략한다", async () => {
     routeMocks.prefersReducedMotion = true;
     const { button } = await mountTransition();
 

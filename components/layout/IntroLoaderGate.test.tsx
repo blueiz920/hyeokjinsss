@@ -51,7 +51,7 @@ const mountGate = async () => {
 };
 
 describe("IntroLoaderGate", () => {
-  it("keeps the loader limited to a document that entered through home", async () => {
+  it("홈으로 시작한 문서에서만 로더를 허용한다", async () => {
     const { container, render } = await mountGate();
 
     expect(container.querySelector("[data-intro-loader]")).not.toBeNull();
@@ -62,7 +62,7 @@ describe("IntroLoaderGate", () => {
     expect(container.querySelector("[data-intro-loader]")).not.toBeNull();
   });
 
-  it("does not start the loader after entering through a project route", async () => {
+  it("프로젝트 경로로 시작한 뒤 홈으로 이동해도 로더를 시작하지 않는다", async () => {
     gateMocks.pathname = "/projects/moum-zip";
     const { container, render } = await mountGate();
 

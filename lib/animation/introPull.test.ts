@@ -75,7 +75,7 @@ afterEach(() => {
 });
 
 describe("initIntroPull", () => {
-  it("pointer hover만으로 가까운 x에서 선과 PULL 안내를 반응시킨다", async () => {
+  it("포인터를 올리기만 해도 가까운 가로 위치에서 선과 당기기 안내를 반응시킨다", async () => {
     const root = createPull();
     const onDrop = vi.fn();
     pullMocks.to.mockImplementation((target, options) => {
@@ -152,7 +152,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("Intro 진입 완료 뒤 당김선을 같은 간격으로 1분 동안 시연한다", async () => {
+  it("인트로 진입 완료 뒤 당김선을 같은 간격으로 1분 동안 시연한다", async () => {
     vi.useFakeTimers();
     document.documentElement.dataset.introReady = "true";
     const root = createPull();
@@ -197,7 +197,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("Intro 진입 중에는 자가 시연을 시작하지 않는다", async () => {
+  it("인트로 진입 중에는 자가 시연을 시작하지 않는다", async () => {
     vi.useFakeTimers();
     document.documentElement.dataset.introReady = "true";
     document.documentElement.dataset.introEntering = "true";
@@ -262,7 +262,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("오른쪽 아래 drag는 실제 오른쪽 접점을 따르고 release에서 한 번 이동한다", async () => {
+  it("오른쪽 아래로 드래그하면 실제 오른쪽 접점을 따르고 놓을 때 한 번 이동한다", async () => {
     const root = createPull();
     const onDrop = vi.fn();
     pullMocks.to.mockImplementation((target, options) => {
@@ -326,7 +326,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("touch drag 시작은 브라우저 스크롤 제스처로 넘어가지 않는다", async () => {
+  it("터치 드래그 시작은 브라우저 스크롤 제스처로 넘어가지 않는다", async () => {
     const root = createPull();
     pullMocks.loadGsap.mockResolvedValue({
       gsap: {
@@ -359,7 +359,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("임계점 전 release와 pointer cancel은 이동하지 않고 원위치로 돌아간다", async () => {
+  it("임계점 전에 놓거나 포인터가 취소되면 이동하지 않고 원위치로 돌아간다", async () => {
     const root = createPull();
     const onDrop = vi.fn();
     pullMocks.loadGsap.mockResolvedValue({
@@ -396,7 +396,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("reduced motion은 GSAP 없이 같은 임계점 동작을 제공한다", async () => {
+  it("모션 축소 환경은 GSAP 없이 같은 임계점 동작을 제공한다", async () => {
     const root = createPull();
     const onDrop = vi.fn();
     const cleanup = await initIntroPull({
@@ -417,7 +417,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("reduced motion은 선을 움직이지 않고 정적인 PULL 안내만 제공한다", async () => {
+  it("모션 축소 환경은 선을 움직이지 않고 정적인 당기기 안내만 제공한다", async () => {
     document.documentElement.dataset.introReady = "true";
     const root = createPull();
     const cleanup = await initIntroPull({
@@ -439,7 +439,7 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("오래된 cleanup이 최신 당김선 상태를 지우지 않는다", async () => {
+  it("오래된 정리 작업이 최신 당김선 상태를 지우지 않는다", async () => {
     document.documentElement.dataset.introReady = "true";
     const root = createPull();
     const firstCleanup = await initIntroPull({

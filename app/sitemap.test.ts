@@ -4,7 +4,7 @@ import { siteConfig } from "@/data/site";
 import sitemap from "./sitemap";
 
 describe("sitemap", () => {
-  it("includes the homepage and every project detail route", () => {
+  it("홈과 모든 프로젝트 상세 경로를 포함한다", () => {
     const entries = sitemap();
 
     expect(entries.map(({ url }) => url)).toEqual([

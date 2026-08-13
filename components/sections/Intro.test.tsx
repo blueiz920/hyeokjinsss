@@ -104,7 +104,7 @@ afterEach(async () => {
 });
 
 describe("Intro readiness", () => {
-  it("완성 텍스트는 한 번만 노출하고 시각 글자는 mask 안에 둔다", async () => {
+  it("완성 텍스트는 한 번만 노출하고 시각 글자는 마스크 안에 둔다", async () => {
     const section = await mountIntro();
     const role = section.querySelector(".intro-role");
     const name = section.querySelector(".intro-name");
@@ -137,7 +137,7 @@ describe("Intro readiness", () => {
     });
   });
 
-  it("당김 CTA는 pointer click을 무시하고 drag·키보드로만 Projects 이동한다", async () => {
+  it("당김 동작 요소는 포인터 클릭을 무시하고 드래그·키보드로만 프로젝트로 이동한다", async () => {
     const section = await mountIntro();
     const pull = section.querySelector<HTMLButtonElement>(".intro-pull")!;
 
@@ -216,7 +216,7 @@ describe("Intro readiness", () => {
     expect(introMocks.initIntroScroll).not.toHaveBeenCalled();
   });
 
-  it("entry animation 실패 시 Intro를 최종 가시 상태로 복원한다", async () => {
+  it("진입 애니메이션 실패 시 인트로를 최종 가시 상태로 복원한다", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     introMocks.initIntroAnimation.mockRejectedValueOnce(new Error("GSAP failed"));
     markIntroReady();
@@ -234,7 +234,7 @@ describe("Intro readiness", () => {
     errorSpy.mockRestore();
   });
 
-  it("fallback은 실행 중인 entry timeline을 중단하고 한 번만 최종 상태를 복원한다", async () => {
+  it("대체 처리는 실행 중인 진입 타임라인을 중단하고 한 번만 최종 상태를 복원한다", async () => {
     vi.useFakeTimers();
     const dispose = vi.fn();
     introMocks.initIntroAnimation.mockResolvedValue(dispose);
@@ -257,7 +257,7 @@ describe("Intro readiness", () => {
     vi.useRealTimers();
   });
 
-  it("진입 중 다른 section 이동은 잠금을 즉시 풀고 Intro를 숨긴다", async () => {
+  it("진입 중 다른 섹션으로 이동하면 잠금을 즉시 풀고 인트로를 숨긴다", async () => {
     markIntroReady();
     const section = await mountIntro();
     const startDetail: SectionIntentDetail = {
@@ -290,7 +290,7 @@ describe("Intro readiness", () => {
     expect(section.dataset.introEntryMuted).toBeUndefined();
   });
 
-  it("reduced motion에서는 진입 중 스크롤을 잠그지 않는다", async () => {
+  it("모션 축소 환경에서는 진입 중 스크롤을 잠그지 않는다", async () => {
     introState.prefersReducedMotion = true;
     delete document.documentElement.dataset.introLocked;
     markIntroReady();

@@ -43,7 +43,7 @@ afterEach(() => {
 });
 
 describe("route transition animation", () => {
-  it("covers with the screen and mirrored top curve before navigation", async () => {
+  it("이동 전에 화면과 반전된 위쪽 곡면으로 덮는다", async () => {
     const { gsap, timeline } = createGsap();
     const root = createRoot();
 
@@ -65,7 +65,7 @@ describe("route transition animation", () => {
     );
   });
 
-  it("keeps the mobile leading curve deep while shortening the trailing curve", async () => {
+  it("모바일의 앞쪽 곡면은 깊게 유지하고 뒤쪽 곡면은 짧게 만든다", async () => {
     Object.defineProperty(window, "innerWidth", {
       configurable: true,
       value: 390,
@@ -86,7 +86,7 @@ describe("route transition animation", () => {
     );
   });
 
-  it("holds the covered screen while the destination label becomes readable", async () => {
+  it("이동 목적지 문구가 읽힐 때까지 덮인 화면을 유지한다", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     const { gsap, timeline } = createGsap();
     const root = createRoot();
@@ -123,7 +123,7 @@ describe("route transition animation", () => {
     );
   });
 
-  it("restores CSS-owned starting values after an interrupted route", () => {
+  it("경로 전환이 중단되면 CSS가 소유한 초기값을 복원한다", () => {
     const root = createRoot();
     const screen = root.querySelector<HTMLElement>("[data-route-screen]")!;
     const topCurve = root.querySelector<HTMLElement>("[data-route-top-curve]")!;
@@ -146,7 +146,7 @@ describe("route transition animation", () => {
     expect(label.style.visibility).toBe("");
   });
 
-  it("kills an active timeline before restoring the CSS start state", async () => {
+  it("CSS 초기 상태를 복원하기 전에 실행 중인 타임라인을 종료한다", async () => {
     let timelineOptions!: { onComplete: () => void; onInterrupt: () => void };
     const timeline = { kill: vi.fn(), to: vi.fn() };
     routeMocks.loadGsap.mockResolvedValue({

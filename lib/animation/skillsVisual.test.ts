@@ -192,7 +192,7 @@ describe("initSkillsVisual", () => {
     );
   });
 
-  it("예약된 refresh를 실행하고 필수 DOM이 없으면 정적 상태를 유지한다", async () => {
+  it("예약된 새로 고침을 실행하고 필수 DOM이 없으면 정적 상태를 유지한다", async () => {
     vi.stubGlobal(
       "requestAnimationFrame",
       vi.fn((callback: FrameRequestCallback) => {
@@ -220,7 +220,7 @@ describe("initSkillsVisual", () => {
     expect(() => staticCleanup()).not.toThrow();
   });
 
-  it("모바일 전환 시 inline 상태를 정리하고 정적 보드로 복귀한다", async () => {
+  it("모바일 전환 시 인라인 상태를 정리하고 정적 보드로 복귀한다", async () => {
     const root = createVisualDom();
     const media = createMedia();
     const harness = createMotionHarness();
@@ -245,7 +245,7 @@ describe("initSkillsVisual", () => {
     cleanup();
   });
 
-  it("reduced motion에서는 GSAP을 로드하지 않는다", async () => {
+  it("모션 축소 환경에서는 GSAP을 로드하지 않는다", async () => {
     const cleanup = await initSkillsVisual({
       prefersReducedMotion: true,
       root: createVisualDom(),

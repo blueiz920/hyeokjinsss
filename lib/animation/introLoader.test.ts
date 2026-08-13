@@ -41,7 +41,7 @@ afterEach(() => {
 });
 
 describe("initIntroLoader", () => {
-  it("로더 퇴장 시작과 동시에 Intro reveal을 예약한다", async () => {
+  it("로더 퇴장 시작과 동시에 인트로 드러내기를 예약한다", async () => {
     const { gsap, timeline } = createHarness();
     const onReveal = vi.fn();
     const onComplete = vi.fn();
@@ -59,7 +59,7 @@ describe("initIntroLoader", () => {
     expect(timeline.kill).toHaveBeenCalledOnce();
   });
 
-  it("로더 DOM이 불완전해도 Intro와 로더를 모두 완료한다", async () => {
+  it("로더 DOM이 불완전해도 인트로와 로더를 모두 완료한다", async () => {
     createHarness();
     const onReveal = vi.fn();
     const onComplete = vi.fn();

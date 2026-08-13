@@ -53,7 +53,7 @@ afterEach(async () => {
 });
 
 describe("IntroLoader", () => {
-  it("claims the initial scroll lock before its animation starts", async () => {
+  it("애니메이션 시작 전에 초기 스크롤 잠금을 소유한다", async () => {
     loaderMocks.initIntroLoader.mockImplementation(() => new Promise(() => {}));
     const container = document.createElement("div");
     const root = createRoot(container);
@@ -67,7 +67,7 @@ describe("IntroLoader", () => {
     expect(loaderMocks.initIntroLoader).toHaveBeenCalledOnce();
   });
 
-  it("hands its lock to the Intro entry when loading completes", async () => {
+  it("로딩이 끝나면 잠금을 인트로 진입 과정에 넘긴다", async () => {
     const intro = document.createElement("section");
     intro.id = "intro";
     document.body.appendChild(intro);
@@ -85,7 +85,7 @@ describe("IntroLoader", () => {
     expect(container.querySelector("[data-intro-loader]")).toBeNull();
   });
 
-  it("skips animation and releases the lock for reduced motion", async () => {
+  it("모션 축소 환경에서는 애니메이션을 생략하고 잠금을 해제한다", async () => {
     vi.mocked(window.matchMedia).mockReturnValue({
       matches: true,
     } as MediaQueryList);

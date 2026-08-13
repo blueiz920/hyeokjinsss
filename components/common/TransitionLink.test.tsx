@@ -49,7 +49,7 @@ const mountLink = async (props: Partial<React.ComponentProps<typeof TransitionLi
 };
 
 describe("TransitionLink", () => {
-  it("intercepts an unmodified primary internal click", async () => {
+  it("수정 키가 없는 기본 내부 링크 클릭을 가로챈다", async () => {
     const link = await mountLink();
 
     await act(async () => link.click());
@@ -57,7 +57,7 @@ describe("TransitionLink", () => {
     expect(linkMocks.navigate).toHaveBeenCalledWith("/projects/moum-zip", "모음집");
   });
 
-  it("preserves modified, external, download, and target link behavior", async () => {
+  it("수정 키·외부·다운로드·대상 속성이 있는 링크 동작은 유지한다", async () => {
     const cases = [
       { props: {}, event: new MouseEvent("click", { bubbles: true, button: 0, metaKey: true }) },
       { props: { href: "https://example.com" }, event: new MouseEvent("click", { bubbles: true, button: 0 }) },

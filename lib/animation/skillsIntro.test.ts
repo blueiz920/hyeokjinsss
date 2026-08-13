@@ -123,7 +123,7 @@ afterEach(() => {
 });
 
 describe("initSkillsIntro", () => {
-  it("데스크톱에서 시간 기반 글자·사진·최종 배치 timeline을 연결한다", async () => {
+  it("데스크톱에서 시간 기반 글자·사진·최종 배치 타임라인을 연결한다", async () => {
     const root = createIntroDom();
     const media = createMedia();
     const harness = createHarness();
@@ -247,7 +247,7 @@ describe("initSkillsIntro", () => {
     cleanup();
   });
 
-  it("reduced motion과 필수 DOM 누락에서는 정적 상태를 유지한다", async () => {
+  it("모션 축소 환경과 필수 DOM 누락에서는 정적 상태를 유지한다", async () => {
     const reducedCleanup = await initSkillsIntro({
       lockScroll: introMocks.lockScroll,
       prefersReducedMotion: true,
@@ -270,7 +270,7 @@ describe("initSkillsIntro", () => {
     expect(staticRoot.dataset.skillPanelReady).toBeUndefined();
   });
 
-  it("같은 문서에서 다시 마운트되면 intro trigger를 재생성하지 않는다", async () => {
+  it("같은 문서에서 다시 마운트되면 인트로 트리거를 재생성하지 않는다", async () => {
     const firstRoot = createIntroDom();
     const media = createMedia();
     const harness = createHarness();
@@ -306,7 +306,7 @@ describe("initSkillsIntro", () => {
     expect(secondRoot.dataset.skillPanelReady).toBeUndefined();
   });
 
-  it("복원된 스크롤이 이미 section을 지난 경우 정적 완료 상태로 고정한다", async () => {
+  it("복원된 스크롤이 이미 섹션을 지난 경우 정적 완료 상태로 고정한다", async () => {
     const root = createIntroDom();
     vi.spyOn(root, "getBoundingClientRect").mockReturnValue({
       bottom: 800,
@@ -339,7 +339,7 @@ describe("initSkillsIntro", () => {
     cleanup();
   });
 
-  it("다른 section 목적지로 통과할 때 장면과 잠금을 시작하지 않는다", async () => {
+  it("다른 섹션 목적지로 통과할 때 장면과 잠금을 시작하지 않는다", async () => {
     const root = createIntroDom();
     const media = createMedia();
     const harness = createHarness();
@@ -370,7 +370,7 @@ describe("initSkillsIntro", () => {
     cleanup();
   });
 
-  it("재생 중 다른 section 이동은 잠금과 장면만 숨기고 timeline은 유지한다", async () => {
+  it("재생 중 다른 섹션으로 이동하면 잠금과 장면만 숨기고 타임라인은 유지한다", async () => {
     const root = createIntroDom();
     const media = createMedia();
     const harness = createHarness();

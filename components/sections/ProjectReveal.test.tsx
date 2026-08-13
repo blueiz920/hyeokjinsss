@@ -199,7 +199,7 @@ afterEach(async () => {
 });
 
 describe("ProjectReveal indicator", () => {
-  it("breakpoint가 바뀌면 현재 레이아웃의 프로젝트 목록으로 단계를 다시 계산한다", async () => {
+  it("중단점이 바뀌면 현재 레이아웃의 프로젝트 목록으로 단계를 다시 계산한다", async () => {
     const { container, root } = await mountProjects();
     const section = container.querySelector<HTMLElement>("#projects");
     const curve = container.querySelector<HTMLElement>(".project-entry-curve");

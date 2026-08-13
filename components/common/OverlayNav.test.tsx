@@ -90,7 +90,7 @@ afterEach(async () => {
 });
 
 describe("OverlayNav", () => {
-  it("Escape로 닫을 때 body와 이전 포커스를 복원한다", async () => {
+  it("Escape 키로 닫을 때 문서 본문과 이전 포커스를 복원한다", async () => {
     document.body.style.overflow = "clip";
     const { container, opener } = await mountOverlay();
     const overlay = container.querySelector<HTMLElement>("[data-open]")!;
@@ -109,7 +109,7 @@ describe("OverlayNav", () => {
     expect(document.activeElement).toBe(opener);
   });
 
-  it("내비게이션 항목을 선택하면 닫힌 다음 프레임에 section을 이동한다", async () => {
+  it("내비게이션 항목을 선택하면 닫힌 다음 프레임에 섹션을 이동한다", async () => {
     let frameCallback: FrameRequestCallback | null = null;
     vi.stubGlobal(
       "requestAnimationFrame",

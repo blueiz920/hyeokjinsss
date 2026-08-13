@@ -139,7 +139,7 @@ describe("initMagneticMotion", () => {
     });
   });
 
-  it("미세 포인터 미디어가 바뀌면 listener와 inline transform을 정리한다", async () => {
+  it("미세 포인터 미디어가 바뀌면 이벤트 수신기와 인라인 변형을 정리한다", async () => {
     const { element, root } = createMagnet();
     const media = createMedia(false);
     const gsap = createHarness();
@@ -166,7 +166,7 @@ describe("initMagneticMotion", () => {
     expect(media.media.removeEventListener).toHaveBeenCalledOnce();
   });
 
-  it("reduced motion에서는 GSAP과 포인터 listener를 사용하지 않는다", async () => {
+  it("모션 축소 환경에서는 GSAP과 포인터 이벤트 수신기를 사용하지 않는다", async () => {
     const cleanup = await initMagneticMotion({
       prefersReducedMotion: true,
       root: createMagnet().root,

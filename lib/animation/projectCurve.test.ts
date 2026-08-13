@@ -25,7 +25,7 @@ afterEach(() => {
 });
 
 describe("initProjectCurve", () => {
-  it("Projects 진입 구간에서 Intro 곡면을 0까지 평탄화한다", async () => {
+  it("프로젝트 진입 구간에서 인트로 곡면을 0까지 평탄화한다", async () => {
     const section = document.createElement("section");
     const curve = document.createElement("div");
     const trigger = { kill: vi.fn() };
