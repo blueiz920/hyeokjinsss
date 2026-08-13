@@ -1,4 +1,12 @@
 @layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    html:has([data-intro-loader]),
+    html:has([data-intro-loader]) body {
+      overflow: hidden;
+      cursor: wait;
+    }
+  }
+
   html[data-intro-locked="true"],
   html[data-intro-locked="true"] body {
     overflow: hidden;

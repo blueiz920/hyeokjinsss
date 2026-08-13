@@ -48,6 +48,7 @@ export const IntroLoader = () => {
     }
 
     delete document.documentElement.dataset.introReady;
+    document.documentElement.dataset.introLocked = "true";
     document.documentElement.dataset.introLoading = "true";
     shouldAnimateRef.current = true;
 

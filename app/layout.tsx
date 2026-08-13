@@ -8,7 +8,7 @@ import { PointerGlow } from "@/components/common/PointerGlow";
 import { MagneticLayer } from "@/components/common/MagneticLayer";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
 import { RouteTransition } from "@/components/common/RouteTransition";
-import { IntroLoader } from "@/components/layout/IntroLoader";
+import { IntroLoaderGate } from "@/components/layout/IntroLoaderGate";
 import { siteConfig } from "@/data/site";
 
 const pretendard = localFont({
@@ -38,18 +38,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="ko"
-      className={pretendard.variable}
-      data-intro-locked="true"
-      data-intro-loading="true"
-    >
+    <html lang="ko" className={pretendard.variable}>
       <body className="bg-neutral-950 font-sans text-white antialiased">
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
             <ScrollIndicatorsProvider>
               <RouteTransition>
-                <IntroLoader />
+                <IntroLoaderGate />
                 <PointerGlow />
                 <MagneticLayer />
                 <ScrollProgress />
