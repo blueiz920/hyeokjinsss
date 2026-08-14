@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import type { ComponentPropsWithoutRef, MouseEvent } from "react";
 import { useRouteTransition } from "./RouteTransition";
 
@@ -25,7 +25,11 @@ const canTransition = (event: MouseEvent<HTMLAnchorElement>) => {
 
 export const TransitionLink = forwardRef<HTMLAnchorElement, TransitionLinkProps>(
   ({ href, label, onClick, ...props }, ref) => {
-    const { navigate } = useRouteTransition();
+    const { navigate, preload } = useRouteTransition();
+
+    useEffect(() => {
+      preload(href);
+    }, [href, preload]);
 
     const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);

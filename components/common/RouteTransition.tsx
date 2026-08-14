@@ -7,6 +7,7 @@ import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 
 type RouteTransitionValue = {
   navigate: (href: string, label: string) => void;
+  preload: (href: string) => void;
 };
 
 type PendingRoute = {
@@ -38,10 +39,29 @@ export const RouteTransition = ({ children }: { children: React.ReactNode }) => 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef(pathname);
   const pendingRef = useRef<PendingRoute | null>(null);
+  const preloadedRef = useRef(new Set<string>());
   const ownsLockRef = useRef(false);
   const timerRef = useRef<number | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [label, setLabel] = useState("");
+
+  const preload = useCallback(
+    (href: string) => {
+      const target = new URL(href, window.location.href);
+      const preloadPath = `${target.pathname}${target.search}`;
+      if (target.origin !== window.location.origin || target.pathname === pathRef.current) return;
+      if (preloadedRef.current.has(preloadPath)) return;
+
+      preloadedRef.current.add(preloadPath);
+      if (process.env.NODE_ENV === "development") {
+        void fetch(preloadPath).catch(() => preloadedRef.current.delete(preloadPath));
+        return;
+      }
+
+      router.prefetch(href);
+    },
+    [router],
+  );
 
   const clearTimer = useCallback(() => {
     if (timerRef.current === null) return;
@@ -70,6 +90,7 @@ export const RouteTransition = ({ children }: { children: React.ReactNode }) => 
       if (pendingRef.current || !rootRef.current) return;
 
       const pending = { href, label: nextLabel };
+      preload(href);
       pendingRef.current = pending;
       setLabel(nextLabel);
       setIsActive(true);
@@ -89,7 +110,7 @@ export const RouteTransition = ({ children }: { children: React.ReactNode }) => 
         pushRoute(router, href);
       }
     },
-    [lockScroll, prefersReducedMotion, releaseRoute, router],
+    [lockScroll, prefersReducedMotion, preload, releaseRoute, router],
   );
 
   useEffect(() => {
@@ -129,7 +150,7 @@ export const RouteTransition = ({ children }: { children: React.ReactNode }) => 
   );
 
   return (
-    <RouteTransitionContext.Provider value={{ navigate }}>
+    <RouteTransitionContext.Provider value={{ navigate, preload }}>
       {children}
       <div
         ref={rootRef}

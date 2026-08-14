@@ -5,10 +5,11 @@ import { TransitionLink } from "./TransitionLink";
 
 const linkMocks = vi.hoisted(() => ({
   navigate: vi.fn(),
+  preload: vi.fn(),
 }));
 
 vi.mock("./RouteTransition", () => ({
-  useRouteTransition: () => ({ navigate: linkMocks.navigate }),
+  useRouteTransition: () => ({ navigate: linkMocks.navigate, preload: linkMocks.preload }),
 }));
 
 let mountedRoots: Root[] = [];
@@ -29,6 +30,7 @@ afterEach(async () => {
   document.body.replaceChildren();
   window.history.replaceState({}, "", "/");
   linkMocks.navigate.mockReset();
+  linkMocks.preload.mockReset();
 });
 
 const mountLink = async (props: Partial<React.ComponentProps<typeof TransitionLink>> = {}) => {
@@ -51,6 +53,8 @@ const mountLink = async (props: Partial<React.ComponentProps<typeof TransitionLi
 describe("TransitionLink", () => {
   it("수정 키가 없는 기본 내부 링크 클릭을 가로챈다", async () => {
     const link = await mountLink();
+
+    expect(linkMocks.preload).toHaveBeenCalledWith("/projects/moum-zip");
 
     await act(async () => link.click());
 
