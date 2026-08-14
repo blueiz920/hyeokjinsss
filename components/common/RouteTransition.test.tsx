@@ -7,7 +7,6 @@ const routeMocks = vi.hoisted(() => ({
   coverRoute: vi.fn(),
   lockScroll: vi.fn(),
   pathname: "/",
-  prefetch: vi.fn(),
   prefersReducedMotion: false,
   push: vi.fn(),
   resetRoute: vi.fn(),
@@ -17,7 +16,7 @@ const routeMocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => routeMocks.pathname,
-  useRouter: () => ({ prefetch: routeMocks.prefetch, push: routeMocks.push }),
+  useRouter: () => ({ push: routeMocks.push }),
 }));
 
 vi.mock("@/hooks/useScrollRuntime", () => ({
@@ -94,11 +93,7 @@ describe("RouteTransition", () => {
     await act(async () => button.click());
 
     expect(routeMocks.lockScroll).toHaveBeenCalledOnce();
-    expect(routeMocks.prefetch).toHaveBeenCalledWith("/projects/moum-zip");
     expect(routeMocks.coverRoute).toHaveBeenCalledOnce();
-    expect(routeMocks.prefetch.mock.invocationCallOrder[0]).toBeLessThan(
-      routeMocks.coverRoute.mock.invocationCallOrder[0],
-    );
     expect(routeMocks.push).toHaveBeenCalledWith("/projects/moum-zip");
 
     routeMocks.pathname = "/projects/moum-zip";
