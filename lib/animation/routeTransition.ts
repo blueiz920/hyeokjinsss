@@ -83,7 +83,7 @@ const playRouteTimeline = (
   timeline.to(
     parts.bottomCurve,
     { height: 0, duration: 0.85, ease: "power3.inOut" },
-    0.85,
+    0.65,
   );
 };
 

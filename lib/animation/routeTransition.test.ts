@@ -115,7 +115,7 @@ describe("route transition animation", () => {
     expect(timeline.to).toHaveBeenCalledWith(
       root.querySelector("[data-route-bottom-curve]"),
       { height: 0, duration: 0.85, ease: "power3.inOut" },
-      0.85,
+      0.65,
     );
     expect(gsap.set).toHaveBeenCalledWith(
       root.querySelector("[data-route-bottom-curve]"),
