@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { initMagneticMotion } from "@/lib/animation/magnetic";
 
 export const MagneticLayer = () => {
+  const pathname = usePathname();
   const { prefersReducedMotion } = useScrollRuntime();
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export const MagneticLayer = () => {
       isActive = false;
       disposeMotion?.();
     };
-  }, [prefersReducedMotion]);
+  }, [pathname, prefersReducedMotion]);
 
   return null;
 };
