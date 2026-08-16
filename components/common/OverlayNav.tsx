@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
+import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import type { NavItem } from "@/data/types";
 
 type NavSocial = {
@@ -44,18 +45,18 @@ export const OverlayNav = ({
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }) => {
   const { scrollTo } = useSectionRegistry();
+  const { lockScroll, unlockScroll } = useScrollRuntime();
   const dialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
-    const previousOverflow = document.body.style.overflow;
     const restoreFocusElement =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
 
-    document.body.style.overflow = "hidden";
+    lockScroll();
     triggerRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -101,11 +102,11 @@ export const OverlayNav = ({
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
       document.removeEventListener("keydown", handleKeyDown);
       if (restoreFocusElement?.isConnected) restoreFocusElement.focus();
     };
-  }, [open, onClose, triggerRef]);
+  }, [lockScroll, onClose, open, triggerRef, unlockScroll]);
 
   const handleClick = (id: string) => {
     onClose();

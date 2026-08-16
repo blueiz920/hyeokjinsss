@@ -36,9 +36,7 @@ export const ScrollRuntimeProvider = ({ children }: { children: React.ReactNode 
     if (typeof window === "undefined") return;
 
     const runtime = startScrollRuntime({
-      initiallyLocked:
-        !prefersReducedMotion &&
-        document.documentElement.dataset.introLocked === "true",
+      initiallyLocked: document.documentElement.dataset.introLocked === "true",
       prefersReducedMotion,
     });
     runtimeRef.current = runtime;

@@ -14,6 +14,11 @@ type ScrollRuntime = {
 
 type LenisInstance = InstanceType<typeof Lenis>;
 
+type OverflowState = {
+  html: { value: string; priority: string };
+  body: { value: string; priority: string };
+};
+
 // Lenis와 ScrollTrigger의 생성·연결·정리를 한 생명주기로 묶어 시작한다.
 // React 밖에서도 즉시 dispose할 수 있어 비동기 로딩 경합을 안전하게 처리한다.
 export const startScrollRuntime = ({
@@ -24,17 +29,79 @@ export const startScrollRuntime = ({
   let lenis: LenisInstance | null = null;
   let rafId: number | null = null;
   let removeRefreshListener: (() => void) | null = null;
-  let isLocked = initiallyLocked;
+  let lockCount = initiallyLocked ? 1 : 0;
+  let overflowState: OverflowState | null = null;
+
+  // 런타임이 덮어쓴 html·body의 인라인 overflow 값을 한 번만 기억한다.
+  const lockNative = () => {
+    if (overflowState || typeof document === "undefined" || !document.body) {
+      return;
+    }
+
+    const htmlStyle = document.documentElement.style;
+    const bodyStyle = document.body.style;
+    overflowState = {
+      html: {
+        value: htmlStyle.getPropertyValue("overflow"),
+        priority: htmlStyle.getPropertyPriority("overflow"),
+      },
+      body: {
+        value: bodyStyle.getPropertyValue("overflow"),
+        priority: bodyStyle.getPropertyPriority("overflow"),
+      },
+    };
+
+    htmlStyle.setProperty("overflow", "hidden");
+    bodyStyle.setProperty("overflow", "hidden");
+  };
+
+  // 잠금이 끝나거나 런타임이 폐기될 때 원래 인라인 스타일을 되돌린다.
+  const restoreNative = () => {
+    if (!overflowState || typeof document === "undefined" || !document.body) {
+      return;
+    }
+
+    const htmlStyle = document.documentElement.style;
+    const bodyStyle = document.body.style;
+    const { html, body } = overflowState;
+
+    if (html.value) {
+      htmlStyle.setProperty("overflow", html.value, html.priority);
+    } else {
+      htmlStyle.removeProperty("overflow");
+    }
+
+    if (body.value) {
+      bodyStyle.setProperty("overflow", body.value, body.priority);
+    } else {
+      bodyStyle.removeProperty("overflow");
+    }
+
+    overflowState = null;
+  };
 
   const lockScroll = () => {
-    isLocked = true;
+    if (disposed) return;
+
+    const wasUnlocked = lockCount === 0;
+    lockCount += 1;
+    if (!wasUnlocked) return;
+
+    lockNative();
     lenis?.stop();
   };
 
   const unlockScroll = () => {
-    isLocked = false;
+    if (disposed || lockCount === 0) return;
+
+    lockCount -= 1;
+    if (lockCount > 0) return;
+
+    restoreNative();
     lenis?.start();
   };
+
+  if (lockCount > 0) lockNative();
 
   // Lenis를 사용할 수 없는 경로에서 문서 상태를 네이티브 스크롤로 명시한다.
   const enableNativeScroll = () => {
@@ -59,6 +126,8 @@ export const startScrollRuntime = ({
   const setupRuntime = async () => {
     const { ScrollTrigger } = await loadGsap();
     if (disposed) return;
+
+    if (lockCount > 0) lockNative();
 
     const scroller = document.documentElement;
     const shouldUseLenis = !prefersReducedMotion;
@@ -100,7 +169,7 @@ export const startScrollRuntime = ({
       wheelMultiplier: 0.6,
       smoothWheel: true,
     });
-    if (isLocked) lenis.stop();
+    if (lockCount > 0) lenis.stop();
 
     // Lenis의 스크롤 변화를 ScrollTrigger 계산에 즉시 반영한다.
     const syncScroll = () => {
@@ -154,6 +223,8 @@ export const startScrollRuntime = ({
 
     disposed = true;
     clearRuntime();
+    lockCount = 0;
+    restoreNative();
   };
 
   void setupSafely();

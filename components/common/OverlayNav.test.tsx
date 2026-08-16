@@ -13,11 +13,20 @@ import {
 import { OverlayNav } from "./OverlayNav";
 
 const navMocks = vi.hoisted(() => ({
+  lockScroll: vi.fn(),
   scrollTo: vi.fn(),
+  unlockScroll: vi.fn(),
 }));
 
 vi.mock("@/hooks/useSectionRegistry", () => ({
   useSectionRegistry: () => ({ scrollTo: navMocks.scrollTo }),
+}));
+
+vi.mock("@/hooks/useScrollRuntime", () => ({
+  useScrollRuntime: () => ({
+    lockScroll: navMocks.lockScroll,
+    unlockScroll: navMocks.unlockScroll,
+  }),
 }));
 
 const navItems = [
@@ -76,7 +85,9 @@ const mountOverlay = async () => {
 };
 
 beforeEach(() => {
+  navMocks.lockScroll.mockReset();
   navMocks.scrollTo.mockReset();
+  navMocks.unlockScroll.mockReset();
 });
 
 afterEach(async () => {
@@ -90,15 +101,16 @@ afterEach(async () => {
 });
 
 describe("OverlayNav", () => {
-  it("Escape 키로 닫을 때 문서 본문과 이전 포커스를 복원한다", async () => {
+  it("Escape 키로 닫을 때 런타임 잠금을 해제하고 이전 포커스를 복원한다", async () => {
     document.body.style.overflow = "clip";
     const { container, opener } = await mountOverlay();
     const overlay = container.querySelector<HTMLElement>("[data-open]")!;
     const trigger = container.querySelector<HTMLButtonElement>("[data-trigger]")!;
 
     expect(overlay.dataset.open).toBe("true");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("clip");
     expect(document.activeElement).toBe(trigger);
+    expect(navMocks.lockScroll).toHaveBeenCalledOnce();
 
     await act(async () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -107,6 +119,7 @@ describe("OverlayNav", () => {
     expect(overlay.dataset.open).toBe("false");
     expect(document.body.style.overflow).toBe("clip");
     expect(document.activeElement).toBe(opener);
+    expect(navMocks.unlockScroll).toHaveBeenCalledOnce();
   });
 
   it("내비게이션 항목을 선택하면 닫힌 다음 프레임에 섹션을 이동한다", async () => {

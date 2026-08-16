@@ -172,6 +172,9 @@ beforeEach(() => {
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   document.documentElement.removeAttribute("data-lenis");
+  delete document.documentElement.dataset.introLocked;
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
 });
 
 afterEach(async () => {
@@ -182,6 +185,9 @@ afterEach(async () => {
   }
   mountedRoots = [];
   document.body.replaceChildren();
+  delete document.documentElement.dataset.introLocked;
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
   vi.unstubAllGlobals();
 });
 
@@ -330,6 +336,39 @@ describe("ScrollRuntimeProvider", () => {
     expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
   });
 
+  it("인트로의 초기 잠금을 소유하고 해제 시 네이티브 스크롤을 복원한다", async () => {
+    runtimeMocks.prefersReducedMotion = true;
+    document.documentElement.dataset.introLocked = "true";
+    document.documentElement.style.overflow = "scroll";
+    document.body.style.overflow = "clip";
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    mountedRoots.push(root);
+
+    await act(async () => {
+      root.render(
+        <ScrollRuntimeProvider>
+          <RuntimeControlProbe />
+        </ScrollRuntimeProvider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+
+    const [, unlockButton] = container.querySelectorAll("button");
+    await act(async () => {
+      unlockButton.click();
+    });
+
+    expect(document.documentElement.style.overflow).toBe("scroll");
+    expect(document.body.style.overflow).toBe("clip");
+    await unmountProvider(root);
+  });
+
   it("제공자 밖에서 사용하면 명확한 오류를 던진다", () => {
     expect(() => renderToString(<RuntimeProbe />)).toThrow(
       "useScrollRuntime must be used within ScrollRuntimeProvider",
@@ -352,11 +391,68 @@ describe("startScrollRuntime", () => {
     runtime.dispose();
   });
 
+  it("중첩 잠금은 마지막 소유자가 해제할 때까지 Lenis와 네이티브 스크롤을 잠근다", async () => {
+    document.documentElement.style.overflow = "scroll";
+    document.body.style.overflow = "clip";
+    const runtime = startScrollRuntime({ prefersReducedMotion: false });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    runtime.lockScroll();
+    runtime.lockScroll();
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
+
+    runtime.unlockScroll();
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(runtimeMocks.lenisStart).not.toHaveBeenCalled();
+
+    runtime.unlockScroll();
+
+    expect(document.documentElement.style.overflow).toBe("scroll");
+    expect(document.body.style.overflow).toBe("clip");
+    expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
+    runtime.dispose();
+  });
+
+  it("Lenis가 없는 축소 모션 환경에서도 네이티브 스크롤 잠금을 적용한다", async () => {
+    runtimeMocks.prefersReducedMotion = true;
+    document.documentElement.style.overflow = "auto";
+    document.body.style.overflow = "visible";
+    const runtime = startScrollRuntime({ prefersReducedMotion: true });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    runtime.lockScroll();
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
+
+    runtime.unlockScroll();
+
+    expect(document.documentElement.style.overflow).toBe("auto");
+    expect(document.body.style.overflow).toBe("visible");
+    runtime.dispose();
+  });
+
   it("초기 잠금 상태로 생성하면 Lenis를 멈춘 채 시작한다", async () => {
+    document.documentElement.style.overflow = "scroll";
+    document.body.style.overflow = "clip";
     const runtime = startScrollRuntime({
       initiallyLocked: true,
       prefersReducedMotion: false,
     });
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+
     await act(async () => {
       await Promise.resolve();
     });
@@ -367,7 +463,25 @@ describe("startScrollRuntime", () => {
     runtime.unlockScroll();
 
     expect(runtimeMocks.lenisStart).toHaveBeenCalledOnce();
+    expect(document.documentElement.style.overflow).toBe("scroll");
+    expect(document.body.style.overflow).toBe("clip");
     runtime.dispose();
+  });
+
+  it("잠긴 상태에서 폐기해도 기존 인라인 overflow를 복원한다", async () => {
+    document.documentElement.style.overflow = "scroll";
+    document.body.style.overflow = "clip";
+    const runtime = startScrollRuntime({ prefersReducedMotion: false });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    runtime.lockScroll();
+    runtime.dispose();
+
+    expect(document.documentElement.style.overflow).toBe("scroll");
+    expect(document.body.style.overflow).toBe("clip");
+    expect(runtimeMocks.lenisDestroy).toHaveBeenCalledOnce();
   });
 
   it("정리 함수를 여러 번 호출해도 런타임 자원을 한 번만 정리한다", async () => {
