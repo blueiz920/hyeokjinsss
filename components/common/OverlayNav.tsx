@@ -133,7 +133,7 @@ export const OverlayNav = ({
         aria-labelledby="site-nav-title"
         tabIndex={-1}
         data-nav-drawer
-        className="fixed right-0 top-0 z-[51] h-[100svh] w-full bg-[#181715] text-[#f3ede3] [transform:translate(calc(100%+var(--nav-curve-width)),0)_rotate(0.001deg)] transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:transform] group-data-[open=true]/nav:[transform:translate(0,0)_rotate(0.001deg)] md:w-[min(42rem,44vw)] motion-reduce:duration-0"
+        className="nav-drawer fixed right-0 top-0 z-[51] w-full bg-[#181715] text-[#f3ede3] [transform:translate(calc(100%+var(--nav-curve-width)),0)_rotate(0.001deg)] transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.7,0,0.2,1)] [will-change:transform] group-data-[open=true]/nav:[transform:translate(0,0)_rotate(0.001deg)] md:w-[min(42rem,44vw)] motion-reduce:duration-0"
       >
         <div
           aria-hidden="true"
