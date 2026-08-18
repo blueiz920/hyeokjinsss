@@ -356,8 +356,8 @@ describe("ScrollRuntimeProvider", () => {
       await Promise.resolve();
     });
 
-    expect(document.documentElement.style.overflow).toBe("hidden");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("clip");
+    expect(document.body.style.overflow).toBe("clip");
 
     const [, unlockButton] = container.querySelectorAll("button");
     await act(async () => {
@@ -402,14 +402,14 @@ describe("startScrollRuntime", () => {
     runtime.lockScroll();
     runtime.lockScroll();
 
-    expect(document.documentElement.style.overflow).toBe("hidden");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("clip");
+    expect(document.body.style.overflow).toBe("clip");
     expect(runtimeMocks.lenisStop).toHaveBeenCalledOnce();
 
     runtime.unlockScroll();
 
-    expect(document.documentElement.style.overflow).toBe("hidden");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("clip");
+    expect(document.body.style.overflow).toBe("clip");
     expect(runtimeMocks.lenisStart).not.toHaveBeenCalled();
 
     runtime.unlockScroll();
@@ -431,8 +431,8 @@ describe("startScrollRuntime", () => {
 
     runtime.lockScroll();
 
-    expect(document.documentElement.style.overflow).toBe("hidden");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("clip");
+    expect(document.body.style.overflow).toBe("clip");
     expect(runtimeMocks.lenisCreate).not.toHaveBeenCalled();
 
     runtime.unlockScroll();
@@ -450,8 +450,8 @@ describe("startScrollRuntime", () => {
       prefersReducedMotion: false,
     });
 
-    expect(document.documentElement.style.overflow).toBe("hidden");
-    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("clip");
+    expect(document.body.style.overflow).toBe("clip");
 
     await act(async () => {
       await Promise.resolve();
@@ -469,8 +469,8 @@ describe("startScrollRuntime", () => {
   });
 
   it("잠긴 상태에서 폐기해도 기존 인라인 overflow를 복원한다", async () => {
-    document.documentElement.style.overflow = "scroll";
-    document.body.style.overflow = "clip";
+    document.documentElement.style.setProperty("overflow", "scroll", "important");
+    document.body.style.setProperty("overflow", "clip", "important");
     const runtime = startScrollRuntime({ prefersReducedMotion: false });
     await act(async () => {
       await Promise.resolve();
@@ -481,6 +481,10 @@ describe("startScrollRuntime", () => {
 
     expect(document.documentElement.style.overflow).toBe("scroll");
     expect(document.body.style.overflow).toBe("clip");
+    expect(document.documentElement.style.getPropertyPriority("overflow")).toBe(
+      "important",
+    );
+    expect(document.body.style.getPropertyPriority("overflow")).toBe("important");
     expect(runtimeMocks.lenisDestroy).toHaveBeenCalledOnce();
   });
 

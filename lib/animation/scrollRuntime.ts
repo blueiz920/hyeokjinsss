@@ -51,8 +51,8 @@ export const startScrollRuntime = ({
       },
     };
 
-    htmlStyle.setProperty("overflow", "hidden");
-    bodyStyle.setProperty("overflow", "hidden");
+    htmlStyle.setProperty("overflow", "clip");
+    bodyStyle.setProperty("overflow", "clip");
   };
 
   // 잠금이 끝나거나 런타임이 폐기될 때 원래 인라인 스타일을 되돌린다.
