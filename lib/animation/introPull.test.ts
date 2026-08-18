@@ -233,10 +233,15 @@ describe("initIntroPull", () => {
     cleanup();
   });
 
-  it("사용자가 먼저 반응하면 예정된 자가 시연을 취소한다", async () => {
+  it("호버로 진행 중인 자가 시연을 중단해도 다음 간격에 재개한다", async () => {
     vi.useFakeTimers();
     document.documentElement.dataset.introReady = "true";
     const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
     pullMocks.loadGsap.mockResolvedValue({
       gsap: {
         killTweensOf: pullMocks.killTweensOf,
@@ -249,15 +254,115 @@ describe("initIntroPull", () => {
       prefersReducedMotion: false,
     });
 
+    vi.advanceTimersByTime(800);
+    expect(root.dataset.pullDemo).toBe("true");
+
     sendPointer(root, "pointermove", {
       clientX: 120,
       clientY: 80,
       pointerType: "mouse",
     });
-    vi.advanceTimersByTime(8000);
-
     expect(root.dataset.pullDemo).toBeUndefined();
-    expect(pullMocks.to).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(4149);
+    expect(root.dataset.pullDemo).toBeUndefined();
+    vi.advanceTimersByTime(1);
+    expect(root.dataset.pullDemo).toBeUndefined();
+
+    const leave = new Event("pointerout");
+    Object.defineProperty(leave, "relatedTarget", { value: null });
+    window.dispatchEvent(leave);
+
+    vi.advanceTimersByTime(4149);
+    expect(root.dataset.pullDemo).toBeUndefined();
+    vi.advanceTimersByTime(1);
+
+    expect(root.dataset.pullDemo).toBe("true");
+
+    cleanup();
+  });
+
+  it("짧은 포인터 누름과 놓기 뒤 다음 간격에 자가 시연을 재개한다", async () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    sendPointer(root, "pointerdown", {
+      clientY: 72,
+      pointerType: "touch",
+    });
+    sendPointer(root, "pointerup", {
+      clientY: 120,
+      pointerType: "touch",
+    });
+
+    expect(root.dataset.pullActive).toBeUndefined();
+    vi.advanceTimersByTime(4149);
+    expect(root.dataset.pullDemo).toBeUndefined();
+    vi.advanceTimersByTime(1);
+
+    expect(root.dataset.pullDemo).toBe("true");
+
+    cleanup();
+  });
+
+  it("활성 드래그 중에는 자가 시연을 시작하지 않고 놓은 뒤 재개한다", async () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.introReady = "true";
+    const root = createPull();
+    pullMocks.to.mockImplementation((target, options) => {
+      if (typeof options.x === "number") target.x = options.x;
+      if (typeof options.y === "number") target.y = options.y;
+      options.onUpdate?.();
+    });
+    pullMocks.loadGsap.mockResolvedValue({
+      gsap: {
+        killTweensOf: pullMocks.killTweensOf,
+        to: pullMocks.to,
+      },
+    });
+    const cleanup = await initIntroPull({
+      root,
+      onDrop: vi.fn(),
+      prefersReducedMotion: false,
+    });
+
+    sendPointer(root, "pointerdown", {
+      clientY: 72,
+      pointerType: "touch",
+    });
+    expect(root.dataset.pullActive).toBe("true");
+
+    vi.advanceTimersByTime(4150);
+    expect(root.dataset.pullDemo).toBeUndefined();
+
+    sendPointer(root, "pointerup", {
+      clientY: 120,
+      pointerType: "touch",
+    });
+    expect(root.dataset.pullActive).toBeUndefined();
+
+    vi.advanceTimersByTime(4149);
+    expect(root.dataset.pullDemo).toBeUndefined();
+    vi.advanceTimersByTime(1);
+
+    expect(root.dataset.pullDemo).toBe("true");
 
     cleanup();
   });

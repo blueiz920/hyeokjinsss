@@ -58,7 +58,6 @@ export const initIntroPull = async ({
   let cueReturnTimer = 0;
   let cueTimer = 0;
   let cueStarted = false;
-  let hasInteracted = false;
   let hovering = false;
   let introObserver: MutationObserver | null = null;
   let lastScrollY = window.scrollY;
@@ -195,11 +194,41 @@ export const initIntroPull = async ({
     cueEndTimer = 0;
   };
 
+  const scheduleCue = (delay: number, replace = false) => {
+    if (cueTimer && !replace) return;
+
+    if (replace) {
+      window.clearTimeout(cueTimer);
+      cueTimer = 0;
+    }
+
+    cueTimer = window.setTimeout(() => {
+      cueTimer = 0;
+      runCue();
+    }, delay);
+  };
+
+  const resumeCue = () => {
+    if (
+      !cueStarted ||
+      prefersReducedMotion ||
+      Date.now() + CUE_REPEAT_DELAY > cueDeadline
+    ) {
+      return;
+    }
+
+    scheduleCue(CUE_REPEAT_DELAY, true);
+  };
+
   const stopCue = (resetPoint = false) => {
-    hasInteracted = true;
-    clearCueTimers();
     const wasRunning = root.dataset.pullDemo === "true";
+    window.clearTimeout(cueReturnTimer);
+    window.clearTimeout(cueEndTimer);
+    cueReturnTimer = 0;
+    cueEndTimer = 0;
     delete root.dataset.pullDemo;
+
+    resumeCue();
 
     if (wasRunning && resetPoint && !active) resetPull();
   };
@@ -216,11 +245,17 @@ export const initIntroPull = async ({
   const runCue = () => {
     cueTimer = 0;
     if (
-      hasInteracted ||
-      active ||
       Date.now() > cueDeadline ||
       !isCueVisible()
     ) {
+      return;
+    }
+
+    if (active || hovering) {
+      const nextCueAt = Date.now() + CUE_REPEAT_DELAY;
+      if (nextCueAt <= cueDeadline) {
+        scheduleCue(CUE_REPEAT_DELAY);
+      }
       return;
     }
 
@@ -246,14 +281,14 @@ export const initIntroPull = async ({
       cueEndTimer = 0;
       delete root.dataset.pullDemo;
       const nextCueAt = Date.now() + CUE_REPEAT_DELAY;
-      if (!hasInteracted && nextCueAt <= cueDeadline) {
-        cueTimer = window.setTimeout(runCue, CUE_REPEAT_DELAY);
+      if (nextCueAt <= cueDeadline) {
+        scheduleCue(CUE_REPEAT_DELAY);
       }
     }, CUE_END_DELAY);
   };
 
   const startCue = () => {
-    if (cueStarted || hasInteracted) return;
+    if (cueStarted) return;
 
     cueStarted = true;
     cueDeadline = Date.now() + CUE_WINDOW;
@@ -269,7 +304,7 @@ export const initIntroPull = async ({
       return;
     }
 
-    cueTimer = window.setTimeout(runCue, CUE_DELAY);
+    scheduleCue(CUE_DELAY);
   };
 
   const isIntroReady = () =>
@@ -381,6 +416,7 @@ export const initIntroPull = async ({
     setAwareness(staysNear ? 1 : 0);
     setHover(staysNear);
     resetPull(staysNear ? pointer : undefined);
+    resumeCue();
   };
 
   const onPointerUp = (event: PointerEvent) => finishPointer(event, true);
@@ -390,6 +426,7 @@ export const initIntroPull = async ({
     setAwareness(0);
     setHover(false);
     resetPull();
+    resumeCue();
   };
   const onFocus = () => stopCue(true);
   const onScroll = () => {
