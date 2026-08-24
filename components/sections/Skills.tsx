@@ -11,6 +11,7 @@ import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { SkillMark } from "./SkillMark";
 
 const skillTitleLines = ["구현부터 배포까지,", "프론트엔드 역량"] as const;
+type SkillsViewport = "unknown" | "mobile" | "desktop";
 
 export const Skills = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -21,7 +22,9 @@ export const Skills = () => {
   const panelTargetRef = useRef<number | null>(null);
   const activePageRef = useRef(0);
   const [activePage, setActivePage] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [viewport, setViewport] = useState<SkillsViewport>("unknown");
+  const isMobile = viewport === "mobile";
+  const isDesktop = viewport === "desktop";
   const { lockScroll, prefersReducedMotion, unlockScroll } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
   const pageTotal = portfolio.skills.length;
@@ -31,7 +34,7 @@ export const Skills = () => {
     targetRef: { current: number | null },
     page: number,
   ) => {
-    if (!surface || isDesktop) return;
+    if (!surface || !isMobile) return;
 
     targetRef.current = prefersReducedMotion ? null : page;
     surface.scrollTo?.({
@@ -55,6 +58,8 @@ export const Skills = () => {
   };
 
   const syncSurface = (source: "deck" | "panel") => {
+    if (!isMobile) return;
+
     const surface = source === "deck" ? deckRef.current : panelsRef.current;
     const targetRef = source === "deck" ? deckTargetRef : panelTargetRef;
     if (!surface || surface.clientWidth === 0) return;
@@ -72,7 +77,7 @@ export const Skills = () => {
   };
 
   const selectTab = (page: number, shouldFocus = false) => {
-    if (isDesktop) return;
+    if (!isMobile) return;
 
     const nextPage = Math.min(Math.max(page, 0), pageTotal - 1);
 
@@ -84,7 +89,7 @@ export const Skills = () => {
   };
 
   const handleTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (isDesktop) return;
+    if (!isMobile) return;
 
     let nextPage: number | null = null;
 
@@ -109,17 +114,17 @@ export const Skills = () => {
     const query = window.matchMedia?.("(min-width: 1024px)");
     if (!query) return;
 
-    const updateDesktop = () => {
+    const updateViewport = () => {
       if (query.matches) {
         deckTargetRef.current = null;
         panelTargetRef.current = null;
       }
-      setIsDesktop(query.matches);
+      setViewport(query.matches ? "desktop" : "mobile");
     };
-    updateDesktop();
-    query.addEventListener("change", updateDesktop);
+    updateViewport();
+    query.addEventListener("change", updateViewport);
 
-    return () => query.removeEventListener("change", updateDesktop);
+    return () => query.removeEventListener("change", updateViewport);
   }, []);
 
   useEffect(() => {
@@ -269,9 +274,11 @@ export const Skills = () => {
                   aria-label="역량별 기술 스택"
                   onScroll={() => syncSurface("deck")}
                   onPointerDown={() => {
+                    if (!isMobile) return;
                     deckTargetRef.current = null;
                   }}
                   onWheel={() => {
+                    if (!isMobile) return;
                     deckTargetRef.current = null;
                   }}
                 >
@@ -323,9 +330,9 @@ export const Skills = () => {
 
                 <div
                   className="skills-mobile-tabs"
-                  role={isDesktop ? undefined : "tablist"}
-                  aria-label={isDesktop ? undefined : "역량 선택"}
-                  aria-hidden={isDesktop ? true : undefined}
+                  role={isMobile ? "tablist" : undefined}
+                  aria-label={isMobile ? "역량 선택" : undefined}
+                  aria-hidden={isMobile ? undefined : true}
                 >
                   {portfolio.skills.map((skill, index) => {
                     const isActive = activePage === index;
@@ -339,14 +346,15 @@ export const Skills = () => {
                         }}
                         className="skills-mobile-tab"
                         type="button"
-                        role={isDesktop ? undefined : "tab"}
+                        role={isMobile ? "tab" : undefined}
                         aria-controls={
-                          isDesktop ? undefined : `skill-panel-${index}`
+                          isMobile ? `skill-panel-${index}` : undefined
                         }
-                        aria-label={isDesktop ? undefined : skill.title}
-                        aria-selected={isDesktop ? undefined : isActive}
-                        disabled={isDesktop}
-                        tabIndex={isDesktop ? -1 : isActive ? 0 : -1}
+                        aria-label={isMobile ? skill.title : undefined}
+                        aria-selected={isMobile ? isActive : undefined}
+                        aria-hidden={isMobile ? undefined : true}
+                        disabled={!isMobile}
+                        tabIndex={isMobile && isActive ? 0 : -1}
                         onClick={() => selectTab(index)}
                         onKeyDown={handleTabKey}
                       >
@@ -370,9 +378,11 @@ export const Skills = () => {
           role={isDesktop ? "list" : undefined}
           onScroll={() => syncSurface("panel")}
           onPointerDown={() => {
+            if (!isMobile) return;
             panelTargetRef.current = null;
           }}
           onWheel={() => {
+            if (!isMobile) return;
             panelTargetRef.current = null;
           }}
         >
@@ -388,11 +398,19 @@ export const Skills = () => {
                 data-skill-panel
                 data-open={isExpanded ? "true" : "false"}
                 id={panelId}
-                role={isDesktop ? "listitem" : "tabpanel"}
-                aria-labelledby={
-                  isDesktop ? `skill-title-${index}` : `skill-tab-${index}`
+                role={
+                  isMobile ? "tabpanel" : isDesktop ? "listitem" : undefined
                 }
-                aria-hidden={!isExpanded}
+                aria-labelledby={
+                  isMobile
+                    ? `skill-tab-${index}`
+                    : isDesktop
+                      ? `skill-title-${index}`
+                      : undefined
+                }
+                aria-hidden={
+                  isMobile ? !isExpanded : isDesktop ? false : undefined
+                }
               >
                 <p className="skills-capability-label">
                   {String(index + 1).padStart(2, "0")} /{" "}

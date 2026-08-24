@@ -1,5 +1,6 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import type { ComponentPropsWithoutRef } from "react";
 import {
   afterAll,
@@ -182,6 +183,34 @@ afterEach(async () => {
 });
 
 describe("Skills Snap Tabs", () => {
+  it("SSR와 매치미디어 효과 전에는 탭과 서사를 중립적으로 렌더링한다", () => {
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(<Skills />);
+
+    const tablist = container.querySelector(".skills-mobile-tabs");
+    const tabs = container.querySelectorAll<HTMLButtonElement>(
+      ".skills-mobile-tab",
+    );
+    const panels = container.querySelectorAll<HTMLElement>("[data-skill-panel]");
+
+    expect(tablist?.getAttribute("role")).toBeNull();
+    expect(tablist?.getAttribute("aria-label")).toBeNull();
+    expect(tablist?.getAttribute("aria-hidden")).toBe("true");
+    for (const tab of tabs) {
+      expect(tab.disabled).toBe(true);
+      expect(tab.tabIndex).toBe(-1);
+      expect(tab.getAttribute("role")).toBeNull();
+      expect(tab.getAttribute("aria-controls")).toBeNull();
+      expect(tab.getAttribute("aria-selected")).toBeNull();
+      expect(tab.getAttribute("aria-hidden")).toBe("true");
+    }
+    for (const panel of panels) {
+      expect(panel.getAttribute("role")).toBeNull();
+      expect(panel.getAttribute("aria-labelledby")).toBeNull();
+      expect(panel.getAttribute("aria-hidden")).toBeNull();
+    }
+  });
+
   it("인트로, 기술 보드, 다섯 개 스냅 탭과 하나의 활성 서사를 렌더링한다", async () => {
     const { container } = await mountSkills();
     const section = container.querySelector("#skills");
@@ -573,20 +602,20 @@ describe("Skills Snap Tabs", () => {
       deck?.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
 
-    expect(status?.textContent).toBe("03 / 05");
+    expect(status?.textContent).toBe("04 / 05");
 
     mediaMatches = false;
     await act(async () => {
       mediaListener?.();
     });
 
-    expect(tabs[2]?.getAttribute("aria-selected")).toBe("true");
-    expect(panels[2]?.getAttribute("aria-hidden")).toBe("false");
+    expect(tabs[3]?.getAttribute("aria-selected")).toBe("true");
+    expect(panels[3]?.getAttribute("aria-hidden")).toBe("false");
     expect(
       Array.from(panels).filter(
         (panel) => panel.getAttribute("data-open") === "true",
       ),
-    ).toEqual([panels[2]]);
+    ).toEqual([panels[3]]);
   });
 
   it("섹션 레지스트리를 등록하고 언마운트에서 해제한다", async () => {
