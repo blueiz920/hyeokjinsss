@@ -54,12 +54,24 @@ vi.mock("@/lib/animation/footerCurve", () => ({
 const project: Project = portfolio.projects[0];
 let mountedRoots: Root[] = [];
 
+const createPointerMedia = (matches: boolean) => ({
+  matches,
+  media: "(hover: hover) and (pointer: fine)",
+  onchange: null,
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+});
+
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 });
 
 beforeEach(() => {
   nextMocks.initFooterCurve.mockResolvedValue(vi.fn());
+  vi.stubGlobal("matchMedia", vi.fn(() => createPointerMedia(false)));
 });
 
 afterAll(() => {
@@ -107,6 +119,108 @@ describe("project route links", () => {
     expect(link.dataset.transitionLabel).toBe(project.title);
     expect(setRowRef).toHaveBeenCalledWith(0, link.closest("li"));
   });
+
+  it("fine pointer가 행에 들어오면 미리보기 RAF를 시작하고 나가면 취소한다", async () => {
+    const requestFrame = vi.fn(() => 17);
+    const cancelFrame = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
+    vi.stubGlobal("cancelAnimationFrame", cancelFrame);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => createPointerMedia(true)),
+    );
+
+    const container = await mountProject(
+      <ProjectDesktopList
+        projects={[project]}
+        prefersReducedMotion={false}
+        setRowRef={vi.fn()}
+      />,
+    );
+    const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+
+    const enter = new Event("pointerover", { bubbles: true });
+    Object.defineProperties(enter, {
+      clientX: { value: 120 },
+      clientY: { value: 80 },
+      pointerType: { value: "mouse" },
+    });
+    item.dispatchEvent(enter);
+
+    expect(requestFrame).toHaveBeenCalledOnce();
+
+    item.dispatchEvent(new Event("pointerout", { bubbles: true }));
+    expect(cancelFrame).toHaveBeenCalledWith(17);
+  });
+
+  it("미리보기 RAF가 남아 있으면 언마운트 시 취소한다", async () => {
+    const requestFrame = vi.fn(() => 23);
+    const cancelFrame = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
+    vi.stubGlobal("cancelAnimationFrame", cancelFrame);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => createPointerMedia(true)),
+    );
+
+    const { root, container } = await mountProject(
+      <ProjectDesktopList
+        projects={[project]}
+        prefersReducedMotion={false}
+        setRowRef={vi.fn()}
+      />,
+    ).then((mountedContainer) => ({
+      container: mountedContainer,
+      root: mountedRoots[mountedRoots.length - 1]!,
+    }));
+    const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+    const enter = new Event("pointerover", { bubbles: true });
+    Object.defineProperties(enter, {
+      clientX: { value: 120 },
+      clientY: { value: 80 },
+      pointerType: { value: "mouse" },
+    });
+    item.dispatchEvent(enter);
+
+    await act(async () => root.unmount());
+    mountedRoots = mountedRoots.filter((mountedRoot) => mountedRoot !== root);
+
+    expect(cancelFrame).toHaveBeenCalledWith(23);
+  });
+
+  it.each([
+    { label: "reduced motion", prefersReducedMotion: true, pointerType: "mouse", fine: true },
+    { label: "coarse pointer", prefersReducedMotion: false, pointerType: "mouse", fine: false },
+    { label: "touch pointer", prefersReducedMotion: false, pointerType: "touch", fine: true },
+  ])(
+    "$label에서는 미리보기 RAF를 시작하지 않는다",
+    async ({ prefersReducedMotion, pointerType, fine }) => {
+      const requestFrame = vi.fn(() => 29);
+      vi.stubGlobal("requestAnimationFrame", requestFrame);
+      vi.stubGlobal(
+        "matchMedia",
+        vi.fn(() => createPointerMedia(fine)),
+      );
+
+      const container = await mountProject(
+        <ProjectDesktopList
+          projects={[project]}
+          prefersReducedMotion={prefersReducedMotion}
+          setRowRef={vi.fn()}
+        />,
+      );
+      const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+      const enter = new Event("pointerover", { bubbles: true });
+      Object.defineProperties(enter, {
+        clientX: { value: 120 },
+        clientY: { value: 80 },
+        pointerType: { value: pointerType },
+      });
+      item.dispatchEvent(enter);
+
+      expect(requestFrame).not.toHaveBeenCalled();
+    },
+  );
 
   it("모바일 외부 링크를 내부 프로젝트 경로 링크 밖에 둔다", async () => {
     const container = await mountProject(

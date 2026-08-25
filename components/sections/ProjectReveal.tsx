@@ -11,6 +11,8 @@ import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
 import { initProjectCurve } from "@/lib/animation/projectCurve";
 import { getProjectCardIndex } from "@/lib/animation/projectReveal";
 
+type ProjectsViewport = "unknown" | "mobile" | "desktop";
+
 // 프로젝트 카드와 배경 reveal을 렌더링하고 전역 진행 indicator를 동기화한다.
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -19,6 +21,7 @@ export const ProjectReveal = () => {
   const mobileCardsRef = useRef<Array<HTMLElement | null>>([]);
   const desktopRowsRef = useRef<Array<HTMLElement | null>>([]);
   const [bgActive, setBgActive] = useState(false);
+  const [viewport, setViewport] = useState<ProjectsViewport>("unknown");
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -36,6 +39,28 @@ export const ProjectReveal = () => {
     register("projects", sectionRef);
     return () => unregister("projects");
   }, [register, unregister]);
+
+  // SSR과 hydration 직후에는 두 레이아웃을 유지하고, viewport가 확인된 뒤 활성 트리만 남긴다.
+  useEffect(() => {
+    const query = window.matchMedia?.("(min-width: 1024px)");
+    const updateViewport = (matches: boolean) => {
+      setViewport(matches ? "desktop" : "mobile");
+    };
+
+    if (!query) {
+      updateViewport(false);
+      return;
+    }
+
+    const handleViewportChange = () => {
+      updateViewport(query.matches);
+    };
+
+    handleViewportChange();
+    query.addEventListener("change", handleViewportChange);
+
+    return () => query.removeEventListener("change", handleViewportChange);
+  }, []);
 
   // Intro의 밝은 면을 Projects 위로 이어 붙인 뒤 진입 스크롤에서 평탄화한다.
   useEffect(() => {
@@ -112,15 +137,23 @@ export const ProjectReveal = () => {
   useEffect(() => {
     const section = sectionRef.current;
 
-    if (!section) return;
+    if (!section || viewport === "unknown") return;
 
-    const desktopQuery = window.matchMedia("(min-width: 1024px)");
-    const getProjectCards = () =>
-      (
-        desktopQuery.matches
-          ? desktopRowsRef.current
-          : mobileCardsRef.current
-      ).filter((card): card is HTMLElement => Boolean(card));
+    const getProjectCards = () => {
+      if (viewport === "desktop") {
+        return desktopRowsRef.current.filter(
+          (card): card is HTMLElement => Boolean(card),
+        );
+      }
+
+      if (viewport === "mobile") {
+        return mobileCardsRef.current.filter(
+          (card): card is HTMLElement => Boolean(card),
+        );
+      }
+
+      return [];
+    };
 
     // 현재 DOM 위치를 다시 읽어 section 활성 상태와 가장 가까운 카드를 계산한다.
     const syncProjectIndicator = () => {
@@ -151,18 +184,21 @@ export const ProjectReveal = () => {
     );
 
     indicatorObserver.observe(section);
-    [...mobileCardsRef.current, ...desktopRowsRef.current].forEach((card) => {
-      if (card) indicatorObserver.observe(card);
-    });
-    desktopQuery.addEventListener("change", syncProjectIndicator);
+    getProjectCards().forEach((card) => indicatorObserver.observe(card));
     syncProjectIndicator();
 
     return () => {
       indicatorObserver.disconnect();
-      desktopQuery.removeEventListener("change", syncProjectIndicator);
-      setProjectsActive(false);
     };
-  }, [setProjectsActive, setProjectsStep]);
+  }, [setProjectsActive, setProjectsStep, viewport]);
+
+  // breakpoint 재연결 중에는 활성 상태를 유지하고 실제 언마운트에서만 indicator를 끈다.
+  useEffect(
+    () => () => {
+      setProjectsActive(false);
+    },
+    [setProjectsActive],
+  );
 
   return (
     <section
@@ -207,30 +243,34 @@ export const ProjectReveal = () => {
             </h2>
           </header>
 
-          <div className="-mx-1 grid gap-y-12 md:mx-0 md:grid-cols-2 md:items-start md:gap-x-6 md:gap-y-14 lg:hidden">
-            {portfolio.projects.map((project, index) => (
-              <ProjectRevealCard
-                key={project.slug}
-                ref={(cardNode) => {
-                  mobileCardsRef.current[index] = cardNode;
-                }}
-                project={project}
-                index={index}
-                total={portfolio.projects.length}
-                prefersReducedMotion={prefersReducedMotion}
-              />
-            ))}
-          </div>
+          {viewport !== "desktop" ? (
+            <div className="-mx-1 grid gap-y-12 md:mx-0 md:grid-cols-2 md:items-start md:gap-x-6 md:gap-y-14 lg:hidden">
+              {portfolio.projects.map((project, index) => (
+                <ProjectRevealCard
+                  key={project.slug}
+                  ref={(cardNode) => {
+                    mobileCardsRef.current[index] = cardNode;
+                  }}
+                  project={project}
+                  index={index}
+                  total={portfolio.projects.length}
+                  prefersReducedMotion={prefersReducedMotion}
+                />
+              ))}
+            </div>
+          ) : null}
 
-          <div className="hidden lg:block lg:pl-16 xl:pl-0">
-            <ProjectDesktopList
-              projects={portfolio.projects}
-              prefersReducedMotion={prefersReducedMotion}
-              setRowRef={(index, rowNode) => {
-                desktopRowsRef.current[index] = rowNode;
-              }}
-            />
-          </div>
+          {viewport !== "mobile" ? (
+            <div className="hidden lg:block lg:pl-16 xl:pl-0">
+              <ProjectDesktopList
+                projects={portfolio.projects}
+                prefersReducedMotion={prefersReducedMotion}
+                setRowRef={(index, rowNode) => {
+                  desktopRowsRef.current[index] = rowNode;
+                }}
+              />
+            </div>
+          ) : null}
         </div>
       </Container>
     </section>
