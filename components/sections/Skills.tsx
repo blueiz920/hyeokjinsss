@@ -258,7 +258,9 @@ export const Skills = () => {
                     className="skills-board-desktop-status"
                     aria-live="polite"
                   >
-                    <span data-skill-active-number>01 / 05</span>
+                    <span data-skill-active-number>
+                      01 / {String(pageTotal).padStart(2, "0")}
+                    </span>
                     <span data-skill-active-name>
                       {portfolio.skills[0]?.title}
                     </span>

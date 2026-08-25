@@ -12,6 +12,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { portfolio } from "@/data/portfolio";
 import { Skills } from "./Skills";
 
 const skillsMocks = vi.hoisted(() => ({
@@ -208,6 +209,21 @@ describe("Skills Snap Tabs", () => {
       expect(panel.getAttribute("role")).toBeNull();
       expect(panel.getAttribute("aria-labelledby")).toBeNull();
       expect(panel.getAttribute("aria-hidden")).toBeNull();
+    }
+  });
+
+  it("기술 보드의 전체 개수를 현재 데이터에서 계산한다", async () => {
+    const originalSkills = portfolio.skills;
+    portfolio.skills = originalSkills.slice(0, 3);
+
+    try {
+      const { container } = await mountSkills();
+
+      expect(container.querySelector("[data-skill-active-number]")?.textContent).toBe(
+        "01 / 03",
+      );
+    } finally {
+      portfolio.skills = originalSkills;
     }
   });
 
