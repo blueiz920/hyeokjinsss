@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ScrollRuntimeProvider } from "@/hooks/useScrollRuntime";
 import { SectionRegistryProvider } from "@/hooks/useSectionRegistry";
-import { ScrollIndicatorsProvider } from "@/hooks/useScrollIndicators";
 import { PointerGlow } from "@/components/common/PointerGlow";
 import { MagneticLayer } from "@/components/common/MagneticLayer";
 import { ScrollProgress } from "@/components/common/ScrollProgress";
@@ -42,15 +41,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-neutral-950 font-sans text-white antialiased">
         <ScrollRuntimeProvider>
           <SectionRegistryProvider>
-            <ScrollIndicatorsProvider>
-              <RouteTransition>
-                <IntroLoaderGate />
-                <PointerGlow />
-                <MagneticLayer />
-                <ScrollProgress />
-                {children}
-              </RouteTransition>
-            </ScrollIndicatorsProvider>
+            <RouteTransition>
+              <IntroLoaderGate />
+              <PointerGlow />
+              <MagneticLayer />
+              <ScrollProgress />
+              {children}
+            </RouteTransition>
           </SectionRegistryProvider>
         </ScrollRuntimeProvider>
       </body>
