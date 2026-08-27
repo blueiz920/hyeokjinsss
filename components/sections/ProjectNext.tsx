@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { TransitionLink } from "@/components/common/TransitionLink";
+import { portfolio } from "@/data/portfolio";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { initFooterCurve } from "@/lib/animation/footerCurve";
 
@@ -14,6 +15,13 @@ export const ProjectNext = ({ href, title }: ProjectNextProps) => {
   const footerRef = useRef<HTMLElement | null>(null);
   const curveRef = useRef<HTMLDivElement | null>(null);
   const { prefersReducedMotion } = useScrollRuntime();
+  const githubHref = portfolio.socials.find(
+    ({ label, href: socialHref }) =>
+      label === "GitHub" && socialHref.startsWith("http"),
+  )?.href;
+  const contactHref = portfolio.contactEmail
+    ? `mailto:${portfolio.contactEmail}`
+    : undefined;
 
   useEffect(() => {
     const footer = footerRef.current;
@@ -60,15 +68,85 @@ export const ProjectNext = ({ href, title }: ProjectNextProps) => {
         <div />
       </div>
       <div className="project-detail-shell">
-        <p>Next project</p>
-        <TransitionLink
-          href={href}
-          label={title}
-          className="project-detail-next-link"
-        >
-          <span id="next-project-title">{title}</span>
-          <span aria-hidden="true">↗</span>
-        </TransitionLink>
+        <div className="project-detail-next-project">
+          <p className="project-detail-next-eyebrow">Next project</p>
+          <div className="project-detail-next-row">
+            <TransitionLink
+              href={href}
+              label={title}
+              className="project-detail-next-link"
+            >
+              <span id="next-project-title">{title}</span>
+              <span aria-hidden="true">↗</span>
+            </TransitionLink>
+            <TransitionLink
+              href="/#projects"
+              label="project"
+              className="project-detail-next-all"
+            >
+              전체 프로젝트
+            </TransitionLink>
+          </div>
+        </div>
+
+        <div className="project-detail-next-divider" aria-hidden="true" />
+
+        <div className="project-detail-close-grid">
+          <div className="project-detail-close-copy">
+            <p className="project-detail-close-eyebrow">Contact</p>
+            <h2>
+              <span>다음 경험을</span>
+              <span>함께 만들어요.</span>
+            </h2>
+          </div>
+
+          <nav
+            className="project-detail-close-nav project-detail-navigate"
+            aria-label="사이트 섹션 바로가기"
+          >
+            <p className="project-detail-close-eyebrow">Navigate</p>
+            <ul className="project-detail-navigate-links">
+              {portfolio.nav
+                .filter(({ id }) => id !== "intro")
+                .map((item) => (
+                  <li key={item.id}>
+                    <TransitionLink
+                      href={`/#${item.id}`}
+                      label={item.label}
+                    >
+                      {item.label}
+                    </TransitionLink>
+                  </li>
+                ))}
+            </ul>
+          </nav>
+
+          <nav
+            className="project-detail-close-nav project-detail-elsewhere"
+            aria-label="프로젝트 상세 외부 링크"
+          >
+            <p className="project-detail-close-eyebrow">Elsewhere</p>
+            <ul className="project-detail-close-links">
+              {contactHref ? (
+                <li>
+                  <a href={contactHref}>연락하기</a>
+                </li>
+              ) : null}
+              {githubHref ? (
+                <li>
+                  <a
+                    href={githubHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub 새 탭에서 열기"
+                  >
+                    GitHub <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          </nav>
+        </div>
       </div>
     </footer>
   );

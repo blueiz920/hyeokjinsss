@@ -307,6 +307,61 @@ describe("project route links", () => {
     await vi.waitFor(() => expect(nextMocks.initFooterCurve).toHaveBeenCalledOnce());
   });
 
+  it("프로젝트 상세 종료 동선에 탐색·연락·GitHub 링크를 담는다", async () => {
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug: "moum-zip" }),
+    });
+    const container = await mountProject(page);
+    const footer = container.querySelector<HTMLElement>(
+      ".project-detail-next",
+    )!;
+    const navigateNav = footer.querySelector<HTMLElement>(
+      'nav[aria-label="사이트 섹션 바로가기"]',
+    )!;
+    const elsewhereNav = footer.querySelector<HTMLElement>(
+      'nav[aria-label="프로젝트 상세 외부 링크"]',
+    )!;
+    const allProjectsCta = footer.querySelectorAll(
+      ".project-detail-next-all",
+    );
+    const contactLink = elsewhereNav.querySelector<HTMLAnchorElement>(
+      'a[href^="mailto:"]',
+    );
+    const githubLink = elsewhereNav.querySelector<HTMLAnchorElement>(
+      'a[href^="https://github.com/"]',
+    );
+
+    expect(allProjectsCta).toHaveLength(1);
+    expect(
+      footer.querySelector<HTMLAnchorElement>(
+        ".project-detail-next-all",
+      )?.dataset.transitionLabel,
+    ).toBe("project");
+    expect(footer.querySelector(".project-detail-section-nav")).toBeNull();
+    expect(elsewhereNav.querySelector(".project-detail-next-all")).toBeNull();
+    expect(navigateNav.querySelector(".project-detail-close-eyebrow")?.textContent).toBe(
+      "Navigate",
+    );
+    expect(elsewhereNav.querySelector(".project-detail-close-eyebrow")?.textContent).toBe(
+      "Elsewhere",
+    );
+    expect(
+      Array.from(navigateNav.querySelectorAll<HTMLAnchorElement>("a")).map(
+        (link) => link.getAttribute("href"),
+      ),
+    ).toEqual(["/#projects", "/#skills", "/#contact"]);
+    expect(
+      Array.from(navigateNav.querySelectorAll<HTMLAnchorElement>("a")).map(
+        (link) => link.dataset.transitionLabel,
+      ),
+    ).toEqual(["Projects", "Skills", "Contact"]);
+    expect(contactLink?.getAttribute("href")).toBe(
+      `mailto:${portfolio.contactEmail}`,
+    );
+    expect(githubLink?.getAttribute("target")).toBe("_blank");
+    expect(githubLink?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
   it.each([
     {
       slug: "k-festival",
