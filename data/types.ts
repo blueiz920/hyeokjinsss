@@ -10,8 +10,10 @@ type SocialLink = {
   href: string;
 };
 
+export type ProjectSlug = "moum-zip" | "k-festival" | "yajoba";
+
 export type Project = {
-  slug: string;
+  slug: ProjectSlug;
   title: string;
   summary: string;
   role: string;
@@ -28,7 +30,7 @@ export type SkillCapability = {
   summary: string;
   projects: Array<{
     label: string;
-    slug?: string;
+    slug?: ProjectSlug;
   }>;
   evidence: string;
 };

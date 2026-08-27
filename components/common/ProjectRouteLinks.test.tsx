@@ -288,9 +288,6 @@ describe("project route links", () => {
     });
     const container = await mountProject(page);
 
-    expect(
-      container.querySelector('[data-project-detail="moum-zip"]'),
-    ).not.toBeNull();
     expect(container.querySelector("h1")?.textContent).toBe("모음.zip");
     expect(container.querySelectorAll(".project-detail-chapter")).toHaveLength(
       4,
@@ -432,13 +429,22 @@ describe("project route links", () => {
       const page = await ProjectPage({ params: Promise.resolve({ slug }) });
       const container = await mountProject(page);
 
-      expect(
-        container.querySelector(`[data-project-detail="${slug}"]`),
-      ).not.toBeNull();
       expect(container.querySelectorAll(".project-detail-chapter")).toHaveLength(
         chapters,
       );
       evidence.forEach((item) => expect(container.textContent).toContain(item));
+    },
+  );
+
+  it.each(portfolio.projects)(
+    "각 프로젝트 slug에 대응하는 상세 renderer를 렌더링한다",
+    async ({ slug }) => {
+      const page = await ProjectPage({ params: Promise.resolve({ slug }) });
+      const container = await mountProject(page);
+
+      expect(
+        container.querySelector(`[data-project-detail="${slug}"]`),
+      ).not.toBeNull();
     },
   );
 
@@ -473,22 +479,11 @@ describe("project route links", () => {
     },
   );
 
-  it("매핑되지 않은 프로젝트를 Yajoba로 대체하지 않고 404를 반환한다", async () => {
-    const unmappedProject: Project = {
-      ...project,
-      slug: "unmapped-project",
-      title: "Unmapped project",
-    };
-    portfolio.projects.push(unmappedProject);
-
-    try {
-      await expect(
-        ProjectPage({
-          params: Promise.resolve({ slug: unmappedProject.slug }),
-        }),
-      ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
-    } finally {
-      portfolio.projects.pop();
-    }
+  it("등록되지 않은 slug는 404를 반환한다", async () => {
+    await expect(
+      ProjectPage({
+        params: Promise.resolve({ slug: "unmapped-project" }),
+      }),
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
   });
 });

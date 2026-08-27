@@ -7,7 +7,7 @@ import type { DetailOrder } from "@/components/sections/ProjectDetail";
 import { YajobaDetail } from "@/components/sections/YajobaDetail";
 import { portfolio } from "@/data/portfolio";
 import { siteConfig } from "@/data/site";
-import type { Project } from "@/data/types";
+import type { Project, ProjectSlug } from "@/data/types";
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -17,20 +17,15 @@ type DetailRenderer = (project: Project, order: DetailOrder) => ReactNode;
 
 export const dynamicParams = false;
 
-const detailBySlug = new Map<string, DetailRenderer>([
-  [
-    "moum-zip",
-    (project, order) => <MoumDetail project={project} order={order} />,
-  ],
-  [
-    "k-festival",
-    (project, order) => <KFestivalDetail project={project} order={order} />,
-  ],
-  [
-    "yajoba",
-    (project, order) => <YajobaDetail project={project} order={order} />,
-  ],
-]);
+const detailBySlug = {
+  "moum-zip": (project, order) => (
+    <MoumDetail project={project} order={order} />
+  ),
+  "k-festival": (project, order) => (
+    <KFestivalDetail project={project} order={order} />
+  ),
+  yajoba: (project, order) => <YajobaDetail project={project} order={order} />,
+} satisfies Record<ProjectSlug, DetailRenderer>;
 
 function findProject(slug: string) {
   return portfolio.projects.find((project) => project.slug === slug);
@@ -83,14 +78,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  const renderDetail = detailBySlug.get(project.slug);
+  const renderDetail = detailBySlug[project.slug];
   const projectIndex = portfolio.projects.findIndex(
     ({ slug: projectSlug }) => projectSlug === project.slug,
   );
   const nextProject =
     portfolio.projects[(projectIndex + 1) % portfolio.projects.length];
 
-  if (!renderDetail || projectIndex < 0 || !nextProject) {
+  if (projectIndex < 0 || !nextProject) {
     notFound();
   }
 
