@@ -307,6 +307,59 @@ describe("project route links", () => {
     await vi.waitFor(() => expect(nextMocks.initFooterCurve).toHaveBeenCalledOnce());
   });
 
+  it("프로젝트 링크의 표시 문구가 바뀌어도 kind로 주소를 선택한다", async () => {
+    const originalLinks = project.links;
+    project.links = originalLinks.map((link) =>
+      link.kind === "live"
+        ? { ...link, label: "서비스 열기" }
+        : { ...link, label: "Source Code" },
+    );
+
+    try {
+      const page = await ProjectPage({
+        params: Promise.resolve({ slug: project.slug }),
+      });
+      const container = await mountProject(page);
+      const links = Array.from(
+        container.querySelectorAll<HTMLAnchorElement>(".project-detail-links a"),
+      );
+
+      expect(links.map((link) => link.getAttribute("href"))).toEqual(
+        originalLinks.map(({ href }) => href),
+      );
+      expect(links.map((link) => link.textContent)).toEqual([
+        "서비스 열기 ↗",
+        "Source Code ↗",
+      ]);
+    } finally {
+      project.links = originalLinks;
+    }
+  });
+
+  it("소셜 링크의 표시 문구가 바뀌어도 github kind로 주소와 문구를 선택한다", async () => {
+    const originalSocials = portfolio.socials;
+    portfolio.socials = originalSocials.map((social) =>
+      social.kind === "github" ? { ...social, label: "Source Code" } : social,
+    );
+
+    try {
+      const page = await ProjectPage({
+        params: Promise.resolve({ slug: project.slug }),
+      });
+      const container = await mountProject(page);
+      const githubLink = container.querySelector<HTMLAnchorElement>(
+        'nav[aria-label="프로젝트 상세 외부 링크"] a[href^="https://github.com/"]',
+      );
+
+      expect(githubLink?.getAttribute("href")).toBe(
+        "https://github.com/blueiz920",
+      );
+      expect(githubLink?.textContent).toContain("Source Code");
+    } finally {
+      portfolio.socials = originalSocials;
+    }
+  });
+
   it("프로젝트 상세 종료 동선에 탐색·연락·GitHub 링크를 담는다", async () => {
     const page = await ProjectPage({
       params: Promise.resolve({ slug: "moum-zip" }),

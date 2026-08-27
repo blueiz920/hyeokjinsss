@@ -15,10 +15,10 @@ export const ProjectNext = ({ href, title }: ProjectNextProps) => {
   const footerRef = useRef<HTMLElement | null>(null);
   const curveRef = useRef<HTMLDivElement | null>(null);
   const { prefersReducedMotion } = useScrollRuntime();
-  const githubHref = portfolio.socials.find(
-    ({ label, href: socialHref }) =>
-      label === "GitHub" && socialHref.startsWith("http"),
-  )?.href;
+  const githubLink = portfolio.socials.find(
+    ({ kind, href: socialHref }) =>
+      kind === "github" && socialHref.startsWith("http"),
+  );
   const contactHref = portfolio.contactEmail
     ? `mailto:${portfolio.contactEmail}`
     : undefined;
@@ -132,15 +132,15 @@ export const ProjectNext = ({ href, title }: ProjectNextProps) => {
                   <a href={contactHref}>연락하기</a>
                 </li>
               ) : null}
-              {githubHref ? (
+              {githubLink ? (
                 <li>
                   <a
-                    href={githubHref}
+                    href={githubLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="GitHub 새 탭에서 열기"
+                    aria-label={`${githubLink.label} 새 탭에서 열기`}
                   >
-                    GitHub <span aria-hidden="true">↗</span>
+                    {githubLink.label} <span aria-hidden="true">↗</span>
                   </a>
                 </li>
               ) : null}

@@ -49,8 +49,8 @@ export const ProjectDetail = ({
   outcomeTitle,
   outcomeBody,
 }: ProjectDetailProps) => {
-  const liveLink = project.links.find(({ label }) => label === "Live");
-  const githubLink = project.links.find(({ label }) => label === "GitHub");
+  const liveLink = project.links.find(({ kind }) => kind === "live");
+  const githubLink = project.links.find(({ kind }) => kind === "github");
   const caseIndex = String(order.index).padStart(2, "0");
   const caseTotal = String(order.total).padStart(2, "0");
 
@@ -99,12 +99,12 @@ export const ProjectDetail = ({
                 <dd className="project-detail-links">
                   {liveLink ? (
                     <a href={liveLink.href} target="_blank" rel="noopener noreferrer">
-                      Live ↗
+                      {liveLink.label} ↗
                     </a>
                   ) : null}
                   {githubLink ? (
                     <a href={githubLink.href} target="_blank" rel="noopener noreferrer">
-                      GitHub ↗
+                      {githubLink.label} ↗
                     </a>
                   ) : null}
                 </dd>

@@ -36,8 +36,16 @@ export const portfolio: PortfolioData = {
       thumbnail: "/moum.zip.svg",
       ogImage: "/og/projects/moum-zip.png",
       links: [
-        { label: "Live", href: "https://moum-zip-web.vercel.app/" },
-        { label: "GitHub", href: "https://github.com/sprint-13/moum-zip" },
+        {
+          kind: "live",
+          label: "Live",
+          href: "https://moum-zip-web.vercel.app/",
+        },
+        {
+          kind: "github",
+          label: "GitHub",
+          href: "https://github.com/sprint-13/moum-zip",
+        },
       ],
     },
     {
@@ -63,8 +71,13 @@ export const portfolio: PortfolioData = {
       thumbnail: "/k-festival.svg",
       ogImage: "/og/projects/k-festival.png",
       links: [
-        { label: "Live", href: "https://2025-unithon-team-4-fe.vercel.app/" },
         {
+          kind: "live",
+          label: "Live",
+          href: "https://2025-unithon-team-4-fe.vercel.app/",
+        },
+        {
+          kind: "github",
           label: "GitHub",
           href: "https://github.com/Unithon-INU/2025_UNITHON_TEAM_4_FE",
         },
@@ -92,8 +105,16 @@ export const portfolio: PortfolioData = {
       thumbnail: "/yajoba.svg",
       ogImage: "/og/projects/yajoba.png",
       links: [
-        { label: "Live", href: "https://yajoba-frontend.vercel.app/" },
-        { label: "GitHub", href: "https://github.com/Team-GulBi/Frontend" },
+        {
+          kind: "live",
+          label: "Live",
+          href: "https://yajoba-frontend.vercel.app/",
+        },
+        {
+          kind: "github",
+          label: "GitHub",
+          href: "https://github.com/Team-GulBi/Frontend",
+        },
       ],
     },
   ],
@@ -155,7 +176,15 @@ export const portfolio: PortfolioData = {
   ],
   contactEmail: "rnjsgurwls123@naver.com",
   socials: [
-    { label: "GitHub", href: "https://github.com/blueiz920" },
-    { label: "Email", href: "mailto:rnjsgurwls123@naver.com" },
+    {
+      kind: "github",
+      label: "GitHub",
+      href: "https://github.com/blueiz920",
+    },
+    {
+      kind: "email",
+      label: "Email",
+      href: "mailto:rnjsgurwls123@naver.com",
+    },
   ],
 };

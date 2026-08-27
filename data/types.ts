@@ -1,4 +1,11 @@
 type ProjectLink = {
+  kind: "live" | "github";
+  label: string;
+  href: string;
+};
+
+type SocialLink = {
+  kind: "github" | "email";
   label: string;
   href: string;
 };
@@ -44,6 +51,6 @@ export type PortfolioData = {
   projects: Project[];
   skills: SkillCapability[];
   contactEmail: string;
-  socials: ProjectLink[];
+  socials: SocialLink[];
   nav: NavItem[];
 };
