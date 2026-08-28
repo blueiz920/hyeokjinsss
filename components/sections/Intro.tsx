@@ -18,6 +18,7 @@ import { IntroPull } from "./IntroPull";
 
 // 정상 sequence(약 2.6초)는 유지하고 cold import 실패 경계만 여유 있게 둔다.
 const INTRO_ENTRY_FALLBACK_MS = 4000;
+type IntroPhase = "waiting" | "entering" | "ready";
 
 const IntroChars = ({ text }: { text: string }) => (
   <>
@@ -54,11 +55,9 @@ export const Intro = () => {
     let introDestroy: (() => void) | null = null;
     let scrollDestroy: (() => void) | null = null;
     let entryTimer = 0;
-    let isEntering = false;
+    let phase: IntroPhase = "waiting";
     let isLeaving = false;
     let ownsLock = false;
-    let scrollStarted = false;
-    let hasFinished = false;
 
     const releaseIntro = () => {
       if (entryTimer) {
@@ -74,9 +73,8 @@ export const Intro = () => {
     };
 
     const startScroll = () => {
-      if (!alive || scrollStarted) return;
+      if (!alive || phase !== "ready") return;
 
-      scrollStarted = true;
       void (async () => {
         try {
           const dispose = await initIntroScroll({
@@ -95,10 +93,9 @@ export const Intro = () => {
     };
 
     const finishIntro = (cancelEntry = false) => {
-      if (hasFinished) return;
+      if (!alive || phase !== "entering") return;
 
-      hasFinished = true;
-      isEntering = false;
+      phase = "ready";
       if (cancelEntry) {
         introDestroy?.();
         introDestroy = null;
@@ -110,7 +107,9 @@ export const Intro = () => {
     };
 
     const startIntro = () => {
-      isEntering = true;
+      if (!alive || phase !== "waiting") return;
+
+      phase = "entering";
       if (!prefersReducedMotion) {
         ownsLock =
           document.documentElement.dataset.introLocked === "true";
@@ -127,7 +126,7 @@ export const Intro = () => {
             prefersReducedMotion,
             finishIntro,
           );
-          if (!alive || !isEntering) {
+          if (!alive || phase !== "entering") {
             dispose();
             showIntro(root);
             return;
@@ -142,23 +141,25 @@ export const Intro = () => {
     };
 
     const handleIntent = (event: Event) => {
-      const { id, phase } = (event as CustomEvent<SectionIntentDetail>).detail;
+      const { id, phase: intentPhase } = (
+        event as CustomEvent<SectionIntentDetail>
+      ).detail;
 
-      if (phase === "end" && id !== "intro" && isLeaving) {
+      if (intentPhase === "end" && id !== "intro" && isLeaving) {
         isLeaving = false;
         delete root.dataset.introEntryMuted;
         return;
       }
 
-      if (phase === "start" && id === "intro") {
+      if (intentPhase === "start" && id === "intro") {
         isLeaving = false;
         delete root.dataset.introEntryMuted;
         return;
       }
 
-      if (id === "intro" || !isEntering) return;
+      if (id === "intro" || phase !== "entering") return;
 
-      if (phase === "start") {
+      if (intentPhase === "start") {
         isLeaving = true;
         root.dataset.introEntryMuted = "true";
         releaseIntro();
