@@ -1,6 +1,9 @@
 import {
-  ProjectDetail,
+  ProjectChapter,
   type DetailChapter,
+} from "@/components/sections/ProjectChapter";
+import {
+  ProjectDetail,
   type DetailOrder,
 } from "@/components/sections/ProjectDetail";
 import type { Project } from "@/data/types";
@@ -10,12 +13,14 @@ type KFestivalDetailProps = {
   order: DetailOrder;
 };
 
-const chapters: DetailChapter[] = [
-  { id: "festival-data", index: "01", label: "목록 데이터" },
-  { id: "deploy-proxy", index: "02", label: "배포 프록시" },
-  { id: "image-upload", index: "03", label: "이미지 업로드" },
-  { id: "language-state", index: "04", label: "다국어 상태" },
-];
+const chapterByKey = {
+  festivalData: { id: "festival-data", index: "01", label: "목록 데이터" },
+  deployProxy: { id: "deploy-proxy", index: "02", label: "배포 프록시" },
+  imageUpload: { id: "image-upload", index: "03", label: "이미지 업로드" },
+  languageState: { id: "language-state", index: "04", label: "다국어 상태" },
+} satisfies Record<string, DetailChapter>;
+
+const chapters = Object.values(chapterByKey);
 
 export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
   <ProjectDetail
@@ -33,11 +38,11 @@ export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
     outcomeTitle={<>상세 요청 8건 제거와<br />배포 경로 복구.</>}
     outcomeBody="카드에 필요한 기간은 목록 응답에서 받고, 배포 환경의 API와 이미지 업로드는 Serverless 프록시로 중계했습니다."
   >
-    <section id="festival-data" className="project-detail-chapter">
-      <header>
-        <p>01 / Festival data</p>
-        <h2>목록 응답 확장으로 상세 요청 8→0</h2>
-      </header>
+    <ProjectChapter
+      chapter={chapterByKey.festivalData}
+      kicker="Festival data"
+      title="목록 응답 확장으로 상세 요청 8→0"
+    >
       <div className="project-detail-prose">
         <p>축제 기간이 목록·검색 응답에 없어서 카드마다 상세 API를 다시 호출했습니다. 한 페이지에서 최대 8번의 요청이 추가되는 구조였습니다.</p>
         <p>카드 렌더링에서 호출을 우회하지 않고 백엔드에 시작일과 종료일 필드 추가를 제안했습니다. 목록 응답만으로 기간을 그리게 바꿔 추가 요청을 8회에서 0회로 줄였습니다.</p>
@@ -59,13 +64,13 @@ export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
         </div>
         <figcaption>목록 응답 계약을 바꿔 카드별 상세 요청을 없앴습니다.</figcaption>
       </figure>
-    </section>
+    </ProjectChapter>
 
-    <section id="deploy-proxy" className="project-detail-chapter">
-      <header>
-        <p>02 / Deploy proxy</p>
-        <h2>Serverless 프록시로 Mixed Content 해결</h2>
-      </header>
+    <ProjectChapter
+      chapter={chapterByKey.deployProxy}
+      kicker="Deploy proxy"
+      title="Serverless 프록시로 Mixed Content 해결"
+    >
       <div className="project-detail-prose">
         <p>Vercel의 HTTPS 페이지에서 HTTP 백엔드를 직접 호출하자 브라우저가 Mixed Content 요청을 막았습니다.</p>
         <p>백엔드가 HTTPS로 전환되기 전까지 Serverless 프록시를 통신 경계로 두었습니다. 브라우저는 HTTPS만 호출하고, 서버가 HTTP API를 중계하도록 나눠 운영 환경을 복구했습니다.</p>
@@ -79,13 +84,13 @@ export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
         </ol>
         <figcaption>브라우저에는 HTTPS 경로만 노출하고 HTTP 연결은 프록시 안으로 옮겼습니다.</figcaption>
       </figure>
-    </section>
+    </ProjectChapter>
 
-    <section id="image-upload" className="project-detail-chapter">
-      <header>
-        <p>03 / Image upload</p>
-        <h2>원본 요청 스트림으로 multipart 500 해결</h2>
-      </header>
+    <ProjectChapter
+      chapter={chapterByKey.imageUpload}
+      kicker="Image upload"
+      title="원본 요청 스트림으로 multipart 500 해결"
+    >
       <div className="project-detail-prose">
         <p>프록시가 multipart 요청을 req.body로 다시 만들면서 boundary와 실제 본문이 어긋났습니다. 형식이 깨진 요청을 받은 백엔드는 파일을 읽지 못하고 500을 반환했습니다.</p>
         <p>원본 요청 스트림을 fetch body로 직접 전달하고 duplex 옵션을 적용했습니다. 프록시가 multipart 본문을 다시 해석하지 않게 해 이미지 데이터를 보존했습니다.</p>
@@ -99,13 +104,13 @@ export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
         <code>fetch(apiUrl, &#123; body: req, duplex: &quot;half&quot; &#125;)</code>
         <figcaption>프록시 구간에서 깨지던 커뮤니티 이미지 업로드를 복구했습니다.</figcaption>
       </figure>
-    </section>
+    </ProjectChapter>
 
-    <section id="language-state" className="project-detail-chapter">
-      <header>
-        <p>04 / Language state</p>
-        <h2>Zustand·queryKey로 다국어 상태 동기화</h2>
-      </header>
+    <ProjectChapter
+      chapter={chapterByKey.languageState}
+      kicker="Language state"
+      title="Zustand·queryKey로 다국어 상태 동기화"
+    >
       <div className="project-detail-prose">
         <p>UI 언어를 바꿔도 서버 데이터는 이전 언어로 남을 수 있었습니다. 화면과 축제 정보가 서로 다른 언어를 쓰는 문제였습니다.</p>
         <p>Zustand의 언어 상태를 기준으로 i18next와 API lang 파라미터, queryKey를 연결했습니다. 언어가 바뀌면 기존 캐시를 구분하고 해당 언어의 데이터를 다시 요청합니다.</p>
@@ -119,6 +124,6 @@ export const KFestivalDetail = ({ project, order }: KFestivalDetailProps) => (
         <code>[&quot;festivals&quot;, language, filters]</code>
         <figcaption>목록·검색·상세 화면의 문구와 서버 데이터가 같은 언어를 따릅니다.</figcaption>
       </figure>
-    </section>
+    </ProjectChapter>
   </ProjectDetail>
 );

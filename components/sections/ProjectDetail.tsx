@@ -1,14 +1,9 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { TransitionLink } from "@/components/common/TransitionLink";
+import type { DetailChapter } from "@/components/sections/ProjectChapter";
 import { ProjectNext } from "@/components/sections/ProjectNext";
 import type { Project } from "@/data/types";
-
-export type DetailChapter = {
-  id: string;
-  index: string;
-  label: string;
-};
 
 export type DetailOrder = {
   index: number;

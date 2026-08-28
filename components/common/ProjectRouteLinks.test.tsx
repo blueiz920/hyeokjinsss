@@ -437,7 +437,7 @@ describe("project route links", () => {
   );
 
   it.each(portfolio.projects)(
-    "각 프로젝트 slug에 대응하는 상세 renderer를 렌더링한다",
+    "각 프로젝트의 상세 renderer와 chapter anchor를 연결한다",
     async ({ slug }) => {
       const page = await ProjectPage({ params: Promise.resolve({ slug }) });
       const container = await mountProject(page);
@@ -445,6 +445,17 @@ describe("project route links", () => {
       expect(
         container.querySelector(`[data-project-detail="${slug}"]`),
       ).not.toBeNull();
+
+      const tocHrefs = Array.from(
+        container.querySelectorAll<HTMLAnchorElement>(
+          'nav[aria-label="프로젝트 상세 목차"] a',
+        ),
+      ).map((link) => link.getAttribute("href"));
+      const chapterIds = Array.from(
+        container.querySelectorAll<HTMLElement>(".project-detail-chapter"),
+      ).map((chapter) => chapter.id);
+
+      expect(tocHrefs).toEqual(chapterIds.map((id) => `#${id}`));
     },
   );
 
