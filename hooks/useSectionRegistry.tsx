@@ -12,12 +12,13 @@ import {
   SECTION_INTENT_EVENT,
   type SectionIntentDetail,
 } from "@/lib/navigation/sectionIntent";
+import type { SectionId } from "@/data/types";
 import { useScrollRuntime } from "./useScrollRuntime";
 
 type SectionRegistryValue = {
-  register: (id: string, ref: React.RefObject<HTMLElement | null>) => void;
-  unregister: (id: string) => void;
-  scrollTo: (id: string) => void;
+  register: (id: SectionId, ref: React.RefObject<HTMLElement | null>) => void;
+  unregister: (id: SectionId) => void;
+  scrollTo: (id: SectionId) => void;
 };
 
 const SectionRegistryContext = createContext<SectionRegistryValue | null>(null);
@@ -27,8 +28,10 @@ export const SectionRegistryProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const registry = useRef(new Map<string, React.RefObject<HTMLElement | null>>());
-  const intentTarget = useRef<string | null>(null);
+  const registry = useRef(
+    new Map<SectionId, React.RefObject<HTMLElement | null>>(),
+  );
+  const intentTarget = useRef<SectionId | null>(null);
   const intentTimer = useRef<number | null>(null);
   const { prefersReducedMotion } = useScrollRuntime();
 
@@ -67,18 +70,18 @@ export const SectionRegistryProvider = ({
   }, [finishIntent]);
 
   const register = useCallback(
-    (id: string, ref: React.RefObject<HTMLElement | null>) => {
+    (id: SectionId, ref: React.RefObject<HTMLElement | null>) => {
       registry.current.set(id, ref);
     },
     [],
   );
 
-  const unregister = useCallback((id: string) => {
+  const unregister = useCallback((id: SectionId) => {
     registry.current.delete(id);
   }, []);
 
   const scrollTo = useCallback(
-    (id: string) => {
+    (id: SectionId) => {
       const entry = registry.current.get(id);
       const node = entry?.current ?? document.getElementById(id);
       if (!node) return;

@@ -12,6 +12,8 @@ type SocialLink = {
 
 export type ProjectSlug = "moum-zip" | "k-festival" | "yajoba";
 
+export type SectionId = "intro" | "projects" | "skills" | "contact";
+
 export type Project = {
   slug: ProjectSlug;
   title: string;
@@ -41,7 +43,7 @@ export type SkillCapability = {
 };
 
 export type NavItem = {
-  id: string;
+  id: SectionId;
   label: string;
 };
 

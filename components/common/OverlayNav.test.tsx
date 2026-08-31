@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from "vitest";
+import type { NavItem } from "@/data/types";
 import { OverlayNav } from "./OverlayNav";
 
 const navMocks = vi.hoisted(() => ({
@@ -29,7 +30,7 @@ vi.mock("@/hooks/useScrollRuntime", () => ({
   }),
 }));
 
-const navItems = [
+const navItems: NavItem[] = [
   { id: "intro", label: "Intro" },
   { id: "projects", label: "Projects" },
 ];

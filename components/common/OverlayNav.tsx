@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
-import type { NavItem } from "@/data/types";
+import type { NavItem, SectionId } from "@/data/types";
 
 type NavSocial = {
   label: string;
@@ -108,7 +108,7 @@ export const OverlayNav = ({
     };
   }, [lockScroll, onClose, open, triggerRef, unlockScroll]);
 
-  const handleClick = (id: string) => {
+  const handleClick = (id: SectionId) => {
     onClose();
     requestAnimationFrame(() => scrollTo(id));
   };
