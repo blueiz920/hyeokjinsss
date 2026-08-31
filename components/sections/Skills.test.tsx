@@ -27,12 +27,17 @@ const skillsMocks = vi.hoisted(() => ({
 
 vi.mock("@/data/portfolio", () => ({
   portfolio: {
+    projects: [
+      { slug: "moum-zip", title: "모음.zip" },
+      { slug: "k-festival", title: "K-Festival" },
+      { slug: "yajoba", title: "Yajoba" },
+    ],
     skills: [
       {
         title: "Product UI",
         tools: ["React", "TypeScript"],
         summary: "사용자 흐름을 화면 구조로 만듭니다.",
-        projects: [{ label: "모음.zip", slug: "moum-zip" }],
+        projects: [{ slug: "moum-zip" }],
         evidence: "컴포넌트를 기능별로 나눴습니다.",
       },
       {
@@ -40,8 +45,8 @@ vi.mock("@/data/portfolio", () => ({
         tools: ["TanStack Query", "Zustand"],
         summary: "데이터와 상태 기준을 나눕니다.",
         projects: [
-          { label: "모음.zip", slug: "moum-zip" },
-          { label: "K-Festival", slug: "k-festival" },
+          { slug: "moum-zip" },
+          { slug: "k-festival" },
         ],
         evidence: "중복 요청을 줄였습니다.",
       },
@@ -49,7 +54,7 @@ vi.mock("@/data/portfolio", () => ({
         title: "Performance & SEO",
         tools: ["Next.js", "Sitemap"],
         summary: "속도와 검색 경로를 점검합니다.",
-        projects: [{ label: "모음.zip", slug: "moum-zip" }],
+        projects: [{ slug: "moum-zip" }],
         evidence: "LCP를 개선했습니다.",
       },
       {
@@ -58,7 +63,7 @@ vi.mock("@/data/portfolio", () => ({
         summary: "읽기 흐름을 보조하는 전환을 설계합니다.",
         projects: [
           { label: "개인 포트폴리오" },
-          { label: "K-Festival", slug: "k-festival" },
+          { slug: "k-festival" },
         ],
         evidence: "가독성을 유지했습니다.",
       },
@@ -66,7 +71,7 @@ vi.mock("@/data/portfolio", () => ({
         title: "Delivery & Reliability",
         tools: ["Vitest", "Vercel"],
         summary: "검증과 배포 흐름을 지킵니다.",
-        projects: [{ label: "Yajoba", slug: "yajoba" }],
+        projects: [{ slug: "yajoba" }],
         evidence: "배포 이슈를 안정화했습니다.",
       },
     ],
@@ -321,6 +326,29 @@ describe("Skills Snap Tabs", () => {
     expect(panels[0]?.textContent).toContain("사용자 흐름을 화면 구조로 만듭니다.");
     expect(panels[2]?.textContent).toContain("LCP를 개선했습니다.");
     expect(panels[4]?.textContent).toContain("배포 이슈를 안정화했습니다.");
+  });
+
+  it("상세 프로젝트 원본 제목을 링크와 접근성 이름에 반영한다", async () => {
+    const project = portfolio.projects[0];
+    const originalTitle = project.title;
+    project.title = "모음집 새 제목";
+
+    try {
+      const { container } = await mountSkills();
+      const link = container.querySelector<HTMLAnchorElement>(
+        'a[href="/projects/moum-zip"]',
+      );
+
+      expect(link?.textContent).toBe("모음집 새 제목");
+      expect(link?.getAttribute("data-transition-label")).toBe(
+        "모음집 새 제목",
+      );
+      expect(link?.getAttribute("aria-label")).toBe(
+        "모음집 새 제목 프로젝트 자세히 보기",
+      );
+    } finally {
+      project.title = originalTitle;
+    }
   });
 
   it("탭 클릭은 문서를 스크롤하지 않고 기술 보드와 활성 서사를 함께 선택한다", async () => {

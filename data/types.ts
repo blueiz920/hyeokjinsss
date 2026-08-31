@@ -24,14 +24,19 @@ export type Project = {
   links: ProjectLink[];
 };
 
+export type SkillProjectReference =
+  | {
+      slug: ProjectSlug;
+    }
+  | {
+      label: string;
+    };
+
 export type SkillCapability = {
   title: string;
   tools: string[];
   summary: string;
-  projects: Array<{
-    label: string;
-    slug?: ProjectSlug;
-  }>;
+  projects: SkillProjectReference[];
   evidence: string;
 };
 

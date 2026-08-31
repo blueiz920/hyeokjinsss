@@ -438,21 +438,36 @@ export const Skills = () => {
                         <dt>적용 프로젝트</dt>
                         <dd>
                           <ul className="skills-project-list">
-                            {skill.projects.map((project) => (
-                              <li key={project.label}>
-                                {project.slug ? (
-                                  <TransitionLink
-                                    href={`/projects/${project.slug}`}
-                                    label={project.label}
-                                    aria-label={`${project.label} 프로젝트 자세히 보기`}
-                                  >
-                                    {project.label}
-                                  </TransitionLink>
-                                ) : (
-                                  <span>{project.label}</span>
-                                )}
-                              </li>
-                            ))}
+                            {skill.projects.map((project) => {
+                              const projectLabel =
+                                "slug" in project
+                                  ? portfolio.projects.find(
+                                      ({ slug }) => slug === project.slug,
+                                    )?.title ?? project.slug
+                                  : project.label;
+
+                              return (
+                                <li
+                                  key={
+                                    "slug" in project
+                                      ? project.slug
+                                      : project.label
+                                  }
+                                >
+                                  {"slug" in project ? (
+                                    <TransitionLink
+                                      href={`/projects/${project.slug}`}
+                                      label={projectLabel}
+                                      aria-label={`${projectLabel} 프로젝트 자세히 보기`}
+                                    >
+                                      {projectLabel}
+                                    </TransitionLink>
+                                  ) : (
+                                    <span>{projectLabel}</span>
+                                  )}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </dd>
                       </div>
