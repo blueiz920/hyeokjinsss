@@ -261,14 +261,14 @@ describe("project route links", () => {
           params: Promise.resolve({ slug: metadataProject.slug }),
         }),
       ).resolves.toMatchObject({
-        title: metadataProject.title,
-        description: metadataProject.summary,
+        title: metadataProject.seoTitle,
+        description: metadataProject.seoDescription,
         alternates: {
           canonical: `/projects/${metadataProject.slug}`,
         },
         openGraph: {
-          title: metadataProject.title,
-          description: metadataProject.summary,
+          title: metadataProject.seoTitle,
+          description: metadataProject.seoDescription,
           url: `/projects/${metadataProject.slug}`,
           images: [
             {

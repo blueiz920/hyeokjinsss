@@ -18,6 +18,9 @@ export const portfolio: PortfolioData = {
     {
       slug: "moum-zip",
       title: "모음.zip",
+      seoTitle: "모음.zip — SSR 렌더링·검색 SEO",
+      seoDescription:
+        "Next.js SSR 렌더링 경로를 조정해 검색 페이지 LCP를 1.5초에서 0.8초로 낮췄습니다. 검색 조건을 URL에 남기고 동적 sitemap도 구현했습니다.",
       summary:
         "스터디·프로젝트 모임을 검색하고 운영하는 플랫폼. 검색 상태, SEO, 활동 시각화 흐름을 맡았습니다.",
       role: "Frontend 25%",
@@ -51,6 +54,9 @@ export const portfolio: PortfolioData = {
     {
       slug: "k-festival",
       title: "K-Festival",
+      seoTitle: "K-Festival — API 요청·배포 안정화",
+      seoDescription:
+        "축제 탐색 서비스의 N+1 요청을 제거하고 HTTPS 프록시와 multipart 업로드 오류를 해결했습니다.",
       summary:
         "외국인 관광객을 위한 한국 축제 탐색·커뮤니티 플랫폼. 온보딩과 전국/기간별 축제 화면, 배포 이슈를 맡았습니다.",
       role: "Frontend 80%",
@@ -86,6 +92,9 @@ export const portfolio: PortfolioData = {
     {
       slug: "yajoba",
       title: "Yajoba",
+      seoTitle: "Yajoba — WebSocket 채팅·전자계약",
+      seoDescription:
+        "STOMP WebSocket 채팅과 전자계약 흐름을 구현했습니다. Optimistic UI에서 발생한 메시지 중복도 해결했습니다.",
       summary:
         "교내 물품 대여·전자계약 서비스. 계약서 작성 흐름과 WebSocket 채팅 기능을 맡았습니다.",
       role: "Frontend 50%",

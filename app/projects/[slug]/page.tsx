@@ -46,14 +46,14 @@ export async function generateMetadata({
   }
 
   return {
-    title: project.title,
-    description: project.summary,
+    title: project.seoTitle,
+    description: project.seoDescription,
     alternates: {
       canonical: `/projects/${project.slug}`,
     },
     openGraph: {
-      title: project.title,
-      description: project.summary,
+      title: project.seoTitle,
+      description: project.seoDescription,
       url: `/projects/${project.slug}`,
       siteName: siteConfig.name,
       locale: siteConfig.locale,

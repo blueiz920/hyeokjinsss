@@ -34,6 +34,8 @@ export type SkillTool =
 export type Project = {
   slug: ProjectSlug;
   title: string;
+  seoTitle: string;
+  seoDescription: string;
   summary: string;
   role: string;
   impact: string;

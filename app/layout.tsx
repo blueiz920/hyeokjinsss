@@ -19,7 +19,10 @@ const pretendard = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: siteConfig.title,
+  title: {
+    default: siteConfig.title,
+    template: "%s | 권혁진",
+  },
   description: siteConfig.description,
   alternates: {
     canonical: "/",
