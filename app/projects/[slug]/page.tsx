@@ -31,6 +31,37 @@ function findProject(slug: string) {
   return portfolio.projects.find((project) => project.slug === slug);
 }
 
+function buildProjectSchema(project: Project) {
+  const liveLink = project.links.find(({ kind }) => kind === "live");
+  const githubLink = project.links.find(({ kind }) => kind === "github");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.seoDescription,
+    url: new URL(`/projects/${project.slug}`, siteConfig.url).toString(),
+    image: new URL(project.ogImage, siteConfig.url).toString(),
+    inLanguage: "ko-KR",
+    author: {
+      "@type": "Person",
+      name: siteConfig.author.name,
+      alternateName: siteConfig.author.alternateName,
+      url: siteConfig.url,
+    },
+    keywords: project.stack,
+    about: {
+      "@type": "SoftwareApplication",
+      name: project.title,
+      description: project.summary,
+      applicationCategory: "WebApplication",
+      operatingSystem: "Web",
+      ...(liveLink ? { url: liveLink.href } : {}),
+      ...(githubLink ? { sameAs: githubLink.href } : {}),
+    },
+  };
+}
+
 export function generateStaticParams() {
   return portfolio.projects.map(({ slug }) => ({ slug }));
 }
@@ -89,9 +120,22 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  return renderDetail(project, {
-    index: projectIndex + 1,
-    total: portfolio.projects.length,
-    nextProject,
-  });
+  const projectSchema = buildProjectSchema(project);
+
+  return (
+    <>
+      <script
+        id={`project-schema-${project.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(projectSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      {renderDetail(project, {
+        index: projectIndex + 1,
+        total: portfolio.projects.length,
+        nextProject,
+      })}
+    </>
+  );
 }

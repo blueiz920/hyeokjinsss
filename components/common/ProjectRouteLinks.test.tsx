@@ -15,6 +15,7 @@ import ProjectPage, {
   generateStaticParams,
 } from "@/app/projects/[slug]/page";
 import { portfolio } from "@/data/portfolio";
+import { siteConfig } from "@/data/site";
 import type { Project } from "@/data/types";
 import { ProjectDesktopList } from "./ProjectDesktopList";
 import { ProjectRevealCard } from "./ProjectRevealCard";
@@ -456,6 +457,52 @@ describe("project route links", () => {
       ).map((chapter) => chapter.id);
 
       expect(tocHrefs).toEqual(chapterIds.map((id) => `#${id}`));
+    },
+  );
+
+  it.each(portfolio.projects)(
+    "각 프로젝트의 구조화 데이터가 상세 페이지 정보와 일치한다",
+    async (schemaProject) => {
+      const page = await ProjectPage({
+        params: Promise.resolve({ slug: schemaProject.slug }),
+      });
+      const container = await mountProject(page);
+      const schemaScripts = container.querySelectorAll<HTMLScriptElement>(
+        'script[type="application/ld+json"]',
+      );
+      const schema = JSON.parse(schemaScripts[0]?.textContent ?? "{}");
+      const liveLink = schemaProject.links.find(({ kind }) => kind === "live");
+      const githubLink = schemaProject.links.find(
+        ({ kind }) => kind === "github",
+      );
+
+      expect(schemaScripts).toHaveLength(1);
+      expect(schemaScripts[0]?.id).toBe(`project-schema-${schemaProject.slug}`);
+      expect(schema).toMatchObject({
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: schemaProject.title,
+        description: schemaProject.seoDescription,
+        url: `${siteConfig.url}/projects/${schemaProject.slug}`,
+        image: `${siteConfig.url}${schemaProject.ogImage}`,
+        inLanguage: "ko-KR",
+        author: {
+          "@type": "Person",
+          name: siteConfig.author.name,
+          alternateName: siteConfig.author.alternateName,
+          url: siteConfig.url,
+        },
+        keywords: schemaProject.stack,
+        about: {
+          "@type": "SoftwareApplication",
+          name: schemaProject.title,
+          description: schemaProject.summary,
+          applicationCategory: "WebApplication",
+          operatingSystem: "Web",
+          url: liveLink?.href,
+          sameAs: githubLink?.href,
+        },
+      });
     },
   );
 
