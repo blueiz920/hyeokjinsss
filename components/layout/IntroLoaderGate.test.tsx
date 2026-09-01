@@ -33,6 +33,7 @@ afterEach(async () => {
   }
   mountedRoots = [];
   document.body.replaceChildren();
+  delete document.documentElement.dataset.introReady;
   vi.clearAllMocks();
 });
 
@@ -72,5 +73,6 @@ describe("IntroLoaderGate", () => {
     await render();
 
     expect(container.querySelector("[data-intro-loader]")).toBeNull();
+    expect(document.documentElement.dataset.introReady).toBe("true");
   });
 });

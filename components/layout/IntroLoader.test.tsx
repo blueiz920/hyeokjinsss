@@ -2,6 +2,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { IntroLoader } from "./IntroLoader";
+import { INTRO_SESSION_KEY } from "@/lib/animation/introSession";
 
 const loaderMocks = vi.hoisted(() => ({
   initIntroLoader: vi.fn(),
@@ -41,6 +42,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  vi.useRealTimers();
   for (const root of mountedRoots) {
     await act(async () => root.unmount());
   }
@@ -49,6 +51,8 @@ afterEach(async () => {
   delete document.documentElement.dataset.introLocked;
   delete document.documentElement.dataset.introLoading;
   delete document.documentElement.dataset.introReady;
+  delete document.documentElement.dataset.introSeen;
+  window.sessionStorage.clear();
   vi.clearAllMocks();
 });
 
@@ -81,6 +85,8 @@ describe("IntroLoader", () => {
     expect(loaderMocks.markIntroReady).toHaveBeenCalledOnce();
     expect(document.documentElement.dataset.introLocked).toBe("true");
     expect(document.documentElement.dataset.introLoading).toBeUndefined();
+    expect(document.documentElement.dataset.introSeen).toBe("true");
+    expect(window.sessionStorage.getItem(INTRO_SESSION_KEY)).toBe("true");
     expect(loaderMocks.unlockScroll).not.toHaveBeenCalled();
     expect(container.querySelector("[data-intro-loader]")).toBeNull();
   });
@@ -101,5 +107,59 @@ describe("IntroLoader", () => {
     expect(document.documentElement.dataset.introLocked).toBeUndefined();
     expect(document.documentElement.dataset.introLoading).toBeUndefined();
     expect(loaderMocks.unlockScroll).toHaveBeenCalledOnce();
+  });
+
+  it("같은 탭에서 완료한 로더는 잠금과 애니메이션을 다시 시작하지 않는다", async () => {
+    window.sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    document.body.appendChild(container);
+    mountedRoots.push(root);
+
+    await act(async () => root.render(<IntroLoader />));
+
+    expect(loaderMocks.initIntroLoader).not.toHaveBeenCalled();
+    expect(loaderMocks.markIntroReady).toHaveBeenCalledOnce();
+    expect(document.documentElement.dataset.introLocked).toBeUndefined();
+    expect(document.documentElement.dataset.introSeen).toBe("true");
+  });
+
+  it("로더 초기화가 멈추면 안전장치가 인트로와 스크롤을 완료한다", async () => {
+    vi.useFakeTimers();
+    loaderMocks.initIntroLoader.mockImplementation(() => new Promise(() => {}));
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    document.body.appendChild(container);
+    mountedRoots.push(root);
+
+    await act(async () => root.render(<IntroLoader />));
+    expect(container.querySelector("[data-intro-loader]")).not.toBeNull();
+
+    await act(async () => {
+      vi.advanceTimersByTime(8000);
+    });
+
+    expect(loaderMocks.markIntroReady).toHaveBeenCalledOnce();
+    expect(loaderMocks.unlockScroll).toHaveBeenCalledOnce();
+    expect(document.documentElement.dataset.introLocked).toBeUndefined();
+    expect(document.documentElement.dataset.introLoading).toBeUndefined();
+    expect(container.querySelector("[data-intro-loader]")).toBeNull();
+    expect(window.sessionStorage.getItem(INTRO_SESSION_KEY)).toBe("true");
+  });
+
+  it("로더 초기화가 실패해도 인트로와 스크롤을 완료한다", async () => {
+    loaderMocks.initIntroLoader.mockRejectedValueOnce(new Error("load failed"));
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    document.body.appendChild(container);
+    mountedRoots.push(root);
+
+    await act(async () => root.render(<IntroLoader />));
+
+    expect(loaderMocks.markIntroReady).toHaveBeenCalledOnce();
+    expect(loaderMocks.unlockScroll).toHaveBeenCalledOnce();
+    expect(document.documentElement.dataset.introLocked).toBeUndefined();
+    expect(document.documentElement.dataset.introLoading).toBeUndefined();
+    expect(container.querySelector("[data-intro-loader]")).toBeNull();
   });
 });

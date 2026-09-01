@@ -5,7 +5,13 @@ import {
   initIntroLoader,
   markIntroReady,
 } from "@/lib/animation/introLoader";
+import {
+  isIntroSeen,
+  saveIntroSeen,
+} from "@/lib/animation/introSession";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
+
+const LOADER_FAILSAFE_MS = 8000;
 
 const LOADER_WORDS = [
   "문제를 이해하고",
@@ -17,6 +23,7 @@ const LOADER_WORDS = [
 export const IntroLoader = () => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const shouldAnimateRef = useRef(false);
+  const finishedRef = useRef(false);
   const [isVisible, setIsVisible] = useState(true);
   const { unlockScroll } = useScrollRuntime();
 
@@ -25,6 +32,11 @@ export const IntroLoader = () => {
   }, []);
 
   const finishLoader = useCallback(() => {
+    if (finishedRef.current) return;
+
+    finishedRef.current = true;
+    saveIntroSeen();
+    document.documentElement.dataset.introSeen = "true";
     delete document.documentElement.dataset.introLoading;
     if (!document.getElementById("intro")) {
       delete document.documentElement.dataset.introLocked;
@@ -34,6 +46,18 @@ export const IntroLoader = () => {
   }, [unlockScroll]);
 
   useLayoutEffect(() => {
+    // pre-hydration marker를 우선 사용하고, 부트스트랩이 실행되지 않은 경우 세션 저장소를 보완 확인한다.
+    if (
+      document.documentElement.dataset.introSeen === "true" ||
+      isIntroSeen()
+    ) {
+      document.documentElement.dataset.introSeen = "true";
+      delete document.documentElement.dataset.introLoading;
+      markIntroReady();
+      const skipFrame = window.requestAnimationFrame(() => setIsVisible(false));
+      return () => window.cancelAnimationFrame(skipFrame);
+    }
+
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -62,6 +86,12 @@ export const IntroLoader = () => {
 
     let alive = true;
     let destroy: (() => void) | null = null;
+    const failsafeId = window.setTimeout(() => {
+      if (!alive || finishedRef.current) return;
+
+      revealIntro();
+      finishLoader();
+    }, LOADER_FAILSAFE_MS);
 
     (async () => {
       try {
@@ -87,6 +117,7 @@ export const IntroLoader = () => {
 
     return () => {
       alive = false;
+      window.clearTimeout(failsafeId);
       destroy?.();
     };
   }, [finishLoader, isVisible, revealIntro]);

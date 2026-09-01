@@ -46,7 +46,9 @@ export const initIntroLoader = async ({
     return () => {};
   }
 
-  gsap.set(words, { autoAlpha: 0, y: 16 });
+  const [firstWord, ...remainingWords] = Array.from(words);
+  gsap.set(firstWord, { autoAlpha: 1, y: 0 });
+  gsap.set(remainingWords, { autoAlpha: 0, y: 16 });
 
   const timeline = gsap.timeline({ onComplete });
   const wordStep = 0.32;
@@ -55,16 +57,18 @@ export const initIntroLoader = async ({
     const start = 0.4 + index * wordStep;
     const isLast = index === words.length - 1;
 
-    timeline.to(
-      word,
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.2,
-        ease: "power2.out",
-      },
-      start,
-    );
+    if (index > 0) {
+      timeline.to(
+        word,
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.2,
+          ease: "power2.out",
+        },
+        start,
+      );
+    }
 
     if (!isLast) {
       timeline.to(

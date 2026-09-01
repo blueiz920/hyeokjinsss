@@ -1,7 +1,7 @@
 @layer components {
   @media (prefers-reduced-motion: no-preference) {
-    html:has([data-intro-loader]),
-    html:has([data-intro-loader]) body {
+    html:has([data-intro-loader]):not([data-intro-seen="true"]),
+    html:has([data-intro-loader]):not([data-intro-seen="true"]) body {
       overflow: hidden;
       cursor: wait;
     }
@@ -17,6 +17,10 @@
     cursor: wait;
   }
 
+  html[data-intro-seen="true"] .intro-loader {
+    display: none;
+  }
+
   .intro-loader {
     --intro-loader-bg: rgb(24 23 21);
     position: fixed;
@@ -26,6 +30,7 @@
     height: 100dvh;
     overflow: hidden;
     pointer-events: auto;
+    animation: intro-loader-failsafe 0s 8s forwards;
   }
 
   .intro-loader-screen {
@@ -61,6 +66,11 @@
     white-space: nowrap;
     opacity: 0;
     will-change: transform, opacity;
+  }
+
+  .intro-loader-word:first-child {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   .intro-loader-dot {
@@ -105,6 +115,14 @@
   @media (prefers-reduced-motion: reduce) {
     .intro-loader {
       display: none;
+    }
+  }
+
+  @keyframes intro-loader-failsafe {
+    to {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
   }
 }
