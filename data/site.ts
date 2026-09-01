@@ -10,9 +10,9 @@ export const siteConfig = {
   name: "권혁진 포트폴리오",
   locale: "ko_KR",
   ogImage: {
-    url: "/intro/intro-cinematic-poster.png",
+    url: "/og/home.png",
     width: 1200,
-    height: 675,
-    alt: "권혁진 포트폴리오 대표 이미지",
+    height: 630,
+    alt: "권혁진 프론트엔드 개발자 포트폴리오 인트로",
   },
 } as const;
