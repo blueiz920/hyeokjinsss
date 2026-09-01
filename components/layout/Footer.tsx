@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { portfolio } from "@/data/portfolio";
+import { siteConfig } from "@/data/site";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { initFooterCurve } from "@/lib/animation/footerCurve";
 import { Container } from "./Container";
@@ -97,15 +98,20 @@ export const Footer = () => {
         </div>
 
         <div className="site-footer-meta mt-12 flex flex-col gap-8 border-t border-neutral-950/15 pt-8 md:mt-16 md:flex-row md:items-end md:justify-between">
-          <a
-            className="site-footer-pill"
-            href={`mailto:${portfolio.contactEmail}`}
-            data-magnetic
-            data-magnetic-strength="25"
-            data-magnetic-label-strength="15"
-          >
-            <span data-magnetic-label>{portfolio.contactEmail}</span>
-          </a>
+          <div className="space-y-3">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-neutral-950/45">
+              {siteConfig.author.name} · {portfolio.title}
+            </p>
+            <a
+              className="site-footer-pill"
+              href={`mailto:${portfolio.contactEmail}`}
+              data-magnetic
+              data-magnetic-strength="25"
+              data-magnetic-label-strength="15"
+            >
+              <span data-magnetic-label>{portfolio.contactEmail}</span>
+            </a>
+          </div>
 
           <nav aria-label="Footer links" className="space-y-3">
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-950/45">

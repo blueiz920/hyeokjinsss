@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.title,
-    template: "%s | 권혁진",
+    template: `%s | ${siteConfig.author.name}`,
   },
   description: siteConfig.description,
   alternates: {
