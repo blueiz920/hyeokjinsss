@@ -160,7 +160,6 @@ export const ProjectDesktopList = ({
                       fill
                       className="object-cover"
                       sizes="396px"
-                      loading="eager"
                     />
                   </div>
                 </div>
