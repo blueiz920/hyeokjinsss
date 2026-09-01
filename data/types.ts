@@ -14,6 +14,23 @@ export type ProjectSlug = "moum-zip" | "k-festival" | "yajoba";
 
 export type SectionId = "intro" | "projects" | "skills" | "contact";
 
+export type SkillTool =
+  | "React"
+  | "TypeScript"
+  | "Tailwind CSS"
+  | "TanStack Query"
+  | "Zustand"
+  | "STOMP WebSocket"
+  | "Next.js"
+  | "Rendering"
+  | "Sitemap"
+  | "Framer Motion"
+  | "GSAP"
+  | "Lenis"
+  | "Vitest"
+  | "GitHub Actions"
+  | "Vercel";
+
 export type Project = {
   slug: ProjectSlug;
   title: string;
@@ -36,7 +53,7 @@ export type SkillProjectReference =
 
 export type SkillCapability = {
   title: string;
-  tools: string[];
+  tools: SkillTool[];
   summary: string;
   projects: SkillProjectReference[];
   evidence: string;
