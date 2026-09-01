@@ -5,7 +5,6 @@ import { siteConfig } from "@/data/site";
 export default function sitemap(): MetadataRoute.Sitemap {
   const home = {
     url: siteConfig.url,
-    lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 1,
   };

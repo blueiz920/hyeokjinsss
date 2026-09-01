@@ -14,4 +14,8 @@ describe("sitemap", () => {
       ),
     ]);
   });
+
+  it("실제 수정일을 알 수 없는 경로에는 임의 날짜를 넣지 않는다", () => {
+    expect(sitemap().every(({ lastModified }) => !lastModified)).toBe(true);
+  });
 });
