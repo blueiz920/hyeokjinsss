@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { forwardRef, useCallback, useRef } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Project } from "@/data/types";
 import { TransitionLink } from "@/components/common/TransitionLink";
 import { useProjectCardMotion } from "@/lib/animation/projectReveal";
@@ -12,17 +13,29 @@ type ProjectRevealCardProps = {
   index: number;
   total: number;
   prefersReducedMotion: boolean;
+  isDesktop?: boolean;
+  onPointerEnter?: (event: ReactPointerEvent<HTMLElement>) => void;
 };
 
 export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>(
-  ({ project, index, total, prefersReducedMotion }, ref) => {
+  (
+    {
+      project,
+      index,
+      total,
+      prefersReducedMotion,
+      isDesktop = false,
+      onPointerEnter,
+    },
+    ref,
+  ) => {
     const cardRef = useRef<HTMLElement | null>(null);
     const { cardStyle, imageStyle } = useProjectCardMotion(
       cardRef,
-      prefersReducedMotion,
+      prefersReducedMotion || isDesktop,
     );
 
-    // 부모 observer와 카드 motion이 같은 article을 보도록 ref를 합침.
+    // 부모 observer와 카드 motion이 같은 프로젝트 항목을 보도록 ref를 합친다.
     const setCardRef = useCallback(
       (node: HTMLElement | null) => {
         cardRef.current = node;
@@ -40,16 +53,17 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
     );
 
     return (
-      <motion.article
+      <motion.li
         ref={setCardRef}
-        className="project-mobile-card"
+        className="project-mobile-card project-list-item"
         aria-label={project.title}
         style={cardStyle}
+        onPointerEnter={onPointerEnter}
       >
         <TransitionLink
           href={`/projects/${project.slug}`}
           label={project.title}
-          className="project-mobile-route"
+          className="project-mobile-route project-list-row"
           aria-label={`${project.title} 프로젝트 자세히 보기`}
         >
           <div
@@ -63,7 +77,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
               <div className="project-mobile-image">
                 <Image
                   src={project.thumbnail}
-                  alt={project.title}
+                  alt=""
                   fill
                   className="object-cover"
                   sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) calc((100vw - 104px) / 2), 40vw"
@@ -73,17 +87,19 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
           </div>
 
           <div className="project-mobile-content">
-            <h3 className="project-mobile-title">{project.title}</h3>
-            <div className="project-mobile-hairline" />
-            <div className="project-mobile-meta">
-              <p className="project-mobile-role">{project.role}</p>
-              <p className="project-mobile-index">
-                {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-              </p>
+            <div className="project-list-heading">
+              <h3 className="project-mobile-title">{project.title}</h3>
+              <div className="project-mobile-hairline" />
+              <div className="project-mobile-meta">
+                <p className="project-mobile-role">{project.role}</p>
+                <p className="project-mobile-index">
+                  {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                </p>
+              </div>
+              <p className="project-mobile-impact">{project.impact}</p>
             </div>
 
             <p className="project-mobile-summary">{project.summary}</p>
-            <p className="project-mobile-impact">{project.impact}</p>
             <p className="project-mobile-stack">
               {project.stack.slice(0, 3).join(" · ")}
             </p>
@@ -104,7 +120,7 @@ export const ProjectRevealCard = forwardRef<HTMLElement, ProjectRevealCardProps>
             </a>
           ))}
         </div>
-      </motion.article>
+      </motion.li>
     );
   },
 );

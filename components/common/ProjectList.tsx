@@ -4,27 +4,28 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Project } from "@/data/types";
-import { TransitionLink } from "@/components/common/TransitionLink";
+import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
 
-type ProjectDesktopListProps = {
+type ProjectListProps = {
   projects: Project[];
   prefersReducedMotion: boolean;
-  setRowRef: (index: number, node: HTMLElement | null) => void;
+  setItemRef: (index: number, node: HTMLElement | null) => void;
 };
 
 const PREVIEW_EASE = 12;
 
-// 데스크톱에서 프로젝트 행과 포인터 추종 미리보기를 함께 렌더링한다.
-export const ProjectDesktopList = ({
+// 반응형 프로젝트 목록과 데스크톱 포인터 추종 미리보기를 함께 렌더링한다.
+export const ProjectList = ({
   projects,
   prefersReducedMotion,
-  setRowRef,
-}: ProjectDesktopListProps) => {
+  setItemRef,
+}: ProjectListProps) => {
   const previewRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const previewVisibleRef = useRef(false);
   const targetRef = useRef({ x: 0, y: 0 });
   const positionRef = useRef({ x: 0, y: 0 });
+  const [isDesktop, setIsDesktop] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [previewVisible, setPreviewVisible] = useState(false);
 
@@ -45,11 +46,36 @@ export const ProjectDesktopList = ({
     frameRef.current = requestAnimationFrame(drawPreview);
   }
 
+  useEffect(() => {
+    const query = window.matchMedia?.("(min-width: 1024px)");
+
+    if (!query) return;
+
+    const updateViewport = () => {
+      setIsDesktop(query.matches);
+
+      if (!query.matches) {
+        previewVisibleRef.current = false;
+        setPreviewVisible(false);
+
+        if (frameRef.current !== null) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+      }
+    };
+    updateViewport();
+    query.addEventListener?.("change", updateViewport);
+
+    return () => query.removeEventListener?.("change", updateViewport);
+  }, []);
+
   const startPreview = (
     index: number,
     event: ReactPointerEvent<HTMLElement>,
   ) => {
     if (
+      !isDesktop ||
       prefersReducedMotion ||
       event.pointerType === "touch" ||
       !window.matchMedia("(hover: hover) and (pointer: fine)").matches
@@ -101,35 +127,22 @@ export const ProjectDesktopList = ({
   return (
     <>
       <ul
-        className="project-desktop-list"
+        className="project-list"
         aria-label="프로젝트 목록"
         onPointerMove={movePreview}
         onPointerLeave={stopPreview}
       >
         {projects.map((project, index) => (
-          <li
+          <ProjectRevealCard
             key={project.slug}
-            ref={(node) => setRowRef(index, node)}
-            className="project-desktop-item"
+            ref={(node) => setItemRef(index, node)}
+            project={project}
+            index={index}
+            total={projects.length}
+            prefersReducedMotion={prefersReducedMotion}
+            isDesktop={isDesktop}
             onPointerEnter={(event) => startPreview(index, event)}
-          >
-            <TransitionLink
-              href={`/projects/${project.slug}`}
-              label={project.title}
-              className="project-desktop-row"
-              aria-label={`${project.title} 프로젝트 자세히 보기`}
-            >
-              <div className="project-desktop-heading">
-                <p className="project-desktop-role">{project.role}</p>
-                <h3 className="project-desktop-title">{project.title}</h3>
-                <p className="project-desktop-impact">{project.impact}</p>
-              </div>
-
-              <div className="project-desktop-meta">
-                <p>{project.summary}</p>
-              </div>
-            </TransitionLink>
-          </li>
+          />
         ))}
       </ul>
 

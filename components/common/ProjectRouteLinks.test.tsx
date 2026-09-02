@@ -1,5 +1,6 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import {
   afterAll,
   afterEach,
@@ -17,7 +18,7 @@ import ProjectPage, {
 import { portfolio } from "@/data/portfolio";
 import { siteConfig } from "@/data/site";
 import type { Project } from "@/data/types";
-import { ProjectDesktopList } from "./ProjectDesktopList";
+import { ProjectList } from "./ProjectList";
 import { ProjectRevealCard } from "./ProjectRevealCard";
 
 vi.mock("next/image", () => ({
@@ -101,24 +102,52 @@ afterEach(async () => {
 });
 
 describe("project route links", () => {
-  it("각 데스크톱 행을 행 참조를 유지한 내부 전환 링크로 만든다", async () => {
-    const setRowRef = vi.fn();
+  it("각 프로젝트 항목을 항목 참조를 유지한 내부 전환 링크로 만든다", async () => {
+    const setItemRef = vi.fn();
     const container = await mountProject(
-      <ProjectDesktopList
+      <ProjectList
         projects={[project]}
         prefersReducedMotion={false}
-        setRowRef={setRowRef}
+        setItemRef={setItemRef}
       />,
     );
 
     const link = container.querySelector<HTMLAnchorElement>(
-      ".project-desktop-row",
+      ".project-list-row",
     )!;
 
     expect(link).toHaveProperty("tagName", "A");
     expect(link.getAttribute("href")).toBe(`/projects/${project.slug}`);
     expect(link.dataset.transitionLabel).toBe(project.title);
-    expect(setRowRef).toHaveBeenCalledWith(0, link.closest("li"));
+    expect(setItemRef).toHaveBeenCalledWith(0, link.closest("li"));
+  });
+
+  it("SSR에서 프로젝트별 상세 링크 하나와 표현 전용 미리보기만 렌더링한다", () => {
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(
+      <ProjectList
+        projects={portfolio.projects}
+        prefersReducedMotion={false}
+        setItemRef={vi.fn()}
+      />,
+    );
+
+    const items = container.querySelectorAll(".project-list-item");
+    const preview = container.querySelector<HTMLElement>(
+      ".project-desktop-preview",
+    );
+
+    expect(items).toHaveLength(portfolio.projects.length);
+    items.forEach((item, index) => {
+      const detailLinks = item.querySelectorAll(
+        `a[href="/projects/${portfolio.projects[index]?.slug}"]`,
+      );
+
+      expect(detailLinks).toHaveLength(1);
+    });
+    expect(preview?.getAttribute("aria-hidden")).toBe("true");
+    expect(preview?.querySelector("a")).toBeNull();
+    expect(preview?.querySelector("h1, h2, h3")).toBeNull();
   });
 
   it("fine pointer가 행에 들어오면 미리보기 RAF를 시작하고 나가면 취소한다", async () => {
@@ -132,13 +161,13 @@ describe("project route links", () => {
     );
 
     const container = await mountProject(
-      <ProjectDesktopList
+      <ProjectList
         projects={[project]}
         prefersReducedMotion={false}
-        setRowRef={vi.fn()}
+        setItemRef={vi.fn()}
       />,
     );
-    const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+    const item = container.querySelector<HTMLElement>(".project-list-item")!;
 
     const enter = new Event("pointerover", { bubbles: true });
     Object.defineProperties(enter, {
@@ -165,16 +194,16 @@ describe("project route links", () => {
     );
 
     const { root, container } = await mountProject(
-      <ProjectDesktopList
+      <ProjectList
         projects={[project]}
         prefersReducedMotion={false}
-        setRowRef={vi.fn()}
+        setItemRef={vi.fn()}
       />,
     ).then((mountedContainer) => ({
       container: mountedContainer,
       root: mountedRoots[mountedRoots.length - 1]!,
     }));
-    const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+    const item = container.querySelector<HTMLElement>(".project-list-item")!;
     const enter = new Event("pointerover", { bubbles: true });
     Object.defineProperties(enter, {
       clientX: { value: 120 },
@@ -204,13 +233,13 @@ describe("project route links", () => {
       );
 
       const container = await mountProject(
-        <ProjectDesktopList
+        <ProjectList
           projects={[project]}
           prefersReducedMotion={prefersReducedMotion}
-          setRowRef={vi.fn()}
+          setItemRef={vi.fn()}
         />,
       );
-      const item = container.querySelector<HTMLElement>(".project-desktop-item")!;
+      const item = container.querySelector<HTMLElement>(".project-list-item")!;
       const enter = new Event("pointerover", { bubbles: true });
       Object.defineProperties(enter, {
         clientX: { value: 120 },

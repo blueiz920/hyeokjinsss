@@ -6,22 +6,17 @@ import { Container } from "@/components/layout/Container";
 import { useScrollRuntime } from "@/hooks/useScrollRuntime";
 import { useScrollIndicators } from "@/hooks/useScrollIndicators";
 import { useSectionRegistry } from "@/hooks/useSectionRegistry";
-import { ProjectDesktopList } from "@/components/common/ProjectDesktopList";
-import { ProjectRevealCard } from "@/components/common/ProjectRevealCard";
+import { ProjectList } from "@/components/common/ProjectList";
 import { initProjectCurve } from "@/lib/animation/projectCurve";
 import { getProjectCardIndex } from "@/lib/animation/projectReveal";
-
-type ProjectsViewport = "unknown" | "mobile" | "desktop";
 
 // 프로젝트 카드와 배경 reveal을 렌더링하고 전역 진행 indicator를 동기화한다.
 export const ProjectReveal = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const bgFrameRef = useRef<HTMLDivElement | null>(null);
   const curveRef = useRef<HTMLDivElement | null>(null);
-  const mobileCardsRef = useRef<Array<HTMLElement | null>>([]);
-  const desktopRowsRef = useRef<Array<HTMLElement | null>>([]);
+  const projectItemsRef = useRef<Array<HTMLElement | null>>([]);
   const [bgActive, setBgActive] = useState(false);
-  const [viewport, setViewport] = useState<ProjectsViewport>("unknown");
 
   const { prefersReducedMotion } = useScrollRuntime();
   const { register, unregister } = useSectionRegistry();
@@ -39,28 +34,6 @@ export const ProjectReveal = () => {
     register("projects", sectionRef);
     return () => unregister("projects");
   }, [register, unregister]);
-
-  // SSR과 hydration 직후에는 두 레이아웃을 유지하고, viewport가 확인된 뒤 활성 트리만 남긴다.
-  useEffect(() => {
-    const query = window.matchMedia?.("(min-width: 1024px)");
-    const updateViewport = (matches: boolean) => {
-      setViewport(matches ? "desktop" : "mobile");
-    };
-
-    if (!query) {
-      updateViewport(false);
-      return;
-    }
-
-    const handleViewportChange = () => {
-      updateViewport(query.matches);
-    };
-
-    handleViewportChange();
-    query.addEventListener("change", handleViewportChange);
-
-    return () => query.removeEventListener("change", handleViewportChange);
-  }, []);
 
   // Intro의 밝은 면을 Projects 위로 이어 붙인 뒤 진입 스크롤에서 평탄화한다.
   useEffect(() => {
@@ -133,31 +106,20 @@ export const ProjectReveal = () => {
     };
   }, []);
 
-  // section과 카드가 화면 중앙을 지날 때 indicator의 표시 여부와 단계를 갱신한다.
+  // section과 프로젝트 항목이 화면 중앙을 지날 때 indicator를 갱신한다.
   useEffect(() => {
     const section = sectionRef.current;
 
-    if (!section || viewport === "unknown") return;
+    if (!section) return;
 
-    const getProjectCards = () => {
-      if (viewport === "desktop") {
-        return desktopRowsRef.current.filter(
-          (card): card is HTMLElement => Boolean(card),
-        );
-      }
-
-      if (viewport === "mobile") {
-        return mobileCardsRef.current.filter(
-          (card): card is HTMLElement => Boolean(card),
-        );
-      }
-
-      return [];
-    };
+    const getProjectItems = () =>
+      projectItemsRef.current.filter(
+        (item): item is HTMLElement => Boolean(item),
+      );
 
     // 현재 DOM 위치를 다시 읽어 section 활성 상태와 가장 가까운 카드를 계산한다.
     const syncProjectIndicator = () => {
-      const projectCards = getProjectCards();
+      const projectItems = getProjectItems();
       const sectionRect = section.getBoundingClientRect();
       const viewportCenter = window.innerHeight / 2;
       const sectionActive =
@@ -165,8 +127,8 @@ export const ProjectReveal = () => {
 
       setProjectsActive(sectionActive);
 
-      if (sectionActive && projectCards.length > 0) {
-        setProjectsStep(getProjectCardIndex(projectCards));
+      if (sectionActive && projectItems.length > 0) {
+        setProjectsStep(getProjectCardIndex(projectItems));
       }
     };
 
@@ -184,15 +146,15 @@ export const ProjectReveal = () => {
     );
 
     indicatorObserver.observe(section);
-    getProjectCards().forEach((card) => indicatorObserver.observe(card));
+    getProjectItems().forEach((item) => indicatorObserver.observe(item));
     syncProjectIndicator();
 
     return () => {
       indicatorObserver.disconnect();
     };
-  }, [setProjectsActive, setProjectsStep, viewport]);
+  }, [setProjectsActive, setProjectsStep]);
 
-  // breakpoint 재연결 중에는 활성 상태를 유지하고 실제 언마운트에서만 indicator를 끈다.
+  // 실제 언마운트에서만 indicator를 끈다.
   useEffect(
     () => () => {
       setProjectsActive(false);
@@ -243,34 +205,13 @@ export const ProjectReveal = () => {
             </h2>
           </header>
 
-          {viewport !== "desktop" ? (
-            <div className="-mx-1 grid gap-y-12 md:mx-0 md:grid-cols-2 md:items-start md:gap-x-6 md:gap-y-14 lg:hidden">
-              {portfolio.projects.map((project, index) => (
-                <ProjectRevealCard
-                  key={project.slug}
-                  ref={(cardNode) => {
-                    mobileCardsRef.current[index] = cardNode;
-                  }}
-                  project={project}
-                  index={index}
-                  total={portfolio.projects.length}
-                  prefersReducedMotion={prefersReducedMotion}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          {viewport !== "mobile" ? (
-            <div className="hidden lg:block lg:pl-16 xl:pl-0">
-              <ProjectDesktopList
-                projects={portfolio.projects}
-                prefersReducedMotion={prefersReducedMotion}
-                setRowRef={(index, rowNode) => {
-                  desktopRowsRef.current[index] = rowNode;
-                }}
-              />
-            </div>
-          ) : null}
+          <ProjectList
+            projects={portfolio.projects}
+            prefersReducedMotion={prefersReducedMotion}
+            setItemRef={(index, itemNode) => {
+              projectItemsRef.current[index] = itemNode;
+            }}
+          />
         </div>
       </Container>
     </section>

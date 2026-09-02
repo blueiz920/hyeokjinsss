@@ -15,12 +15,9 @@ import { ProjectReveal } from "./ProjectReveal";
 
 const projectMocks = vi.hoisted(() => ({
   cleanupCurve: vi.fn(),
-  getProjectCardIndex: vi.fn((cards: HTMLElement[]) =>
-    cards[0]?.dataset.projectSource === "desktop" ? 2 : 1,
-  ),
+  getProjectCardIndex: vi.fn(() => 1),
   initProjectCurve: vi.fn(),
   register: vi.fn(),
-  removeMediaListener: vi.fn(),
   setProjectsActive: vi.fn(),
   setProjectsStep: vi.fn(),
   setProjectsTotal: vi.fn(),
@@ -41,36 +38,26 @@ vi.mock("@/components/layout/Container", () => ({
   Container: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("@/components/common/ProjectRevealCard", async () => {
-  const { forwardRef } = await import("react");
-
-  return {
-    ProjectRevealCard: forwardRef<HTMLElement, { index: number }>(
-      ({ index }, ref) => (
-        <article ref={ref} data-project-source="mobile" data-index={index} />
-      ),
-    ),
-  };
-});
-
-vi.mock("@/components/common/ProjectDesktopList", () => ({
-  ProjectDesktopList: ({
+vi.mock("@/components/common/ProjectList", () => ({
+  ProjectList: ({
     projects,
-    setRowRef,
+    setItemRef,
   }: {
     projects: Array<{ slug: string }>;
-    setRowRef: (index: number, node: HTMLElement | null) => void;
+    setItemRef: (index: number, node: HTMLElement | null) => void;
   }) => (
-    <div>
+    <ul data-project-list>
       {projects.map((project, index) => (
-        <article
+        <li
           key={project.slug}
-          ref={(node) => setRowRef(index, node)}
-          data-project-source="desktop"
+          ref={(node) => setItemRef(index, node)}
+          data-project-source="project"
           data-index={index}
-        />
+        >
+          <a href={`/projects/${project.slug}`}>{project.slug}</a>
+        </li>
       ))}
-    </div>
+    </ul>
   ),
 }));
 
@@ -102,8 +89,6 @@ vi.mock("@/lib/animation/projectCurve", () => ({
 }));
 
 let mountedRoots: Root[] = [];
-let mediaMatches = false;
-let mediaListener: (() => void) | null = null;
 
 class IntersectionObserverMock {
   observed: Element[] = [];
@@ -145,29 +130,10 @@ const mountProjects = async () => {
 
 beforeEach(() => {
   observerInstances.length = 0;
-  mediaMatches = false;
-  mediaListener = null;
   Object.values(projectMocks).forEach((mock) => mock.mockClear());
   projectMocks.initProjectCurve.mockResolvedValue(projectMocks.cleanupCurve);
 
   vi.stubGlobal("IntersectionObserver", IntersectionObserverMock);
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => ({
-      get matches() {
-        return mediaMatches;
-      },
-      media: "(min-width: 1024px)",
-      onchange: null,
-      addEventListener: vi.fn((_type: string, listener: () => void) => {
-        mediaListener = listener;
-      }),
-      removeEventListener: projectMocks.removeMediaListener,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  );
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
     function (this: HTMLElement) {
       if (this.id === "projects") {
@@ -210,123 +176,66 @@ afterEach(async () => {
 });
 
 describe("ProjectReveal indicator", () => {
-  it("SSR에서는 hydration을 위해 모바일 카드와 데스크톱 목록을 모두 렌더링한다", () => {
+  it("SSR에서 프로젝트마다 의미 항목과 상세 링크를 하나씩 렌더링한다", () => {
     const container = document.createElement("div");
     container.innerHTML = renderToString(<ProjectReveal />);
 
     expect(
-      container.querySelectorAll('[data-project-source="mobile"]'),
+      container.querySelectorAll('[data-project-source="project"]'),
     ).toHaveLength(3);
-    expect(
-      container.querySelectorAll('[data-project-source="desktop"]'),
-    ).toHaveLength(3);
-  });
-
-  it("viewport 확인 후 활성 레이아웃 하나만 마운트한다", async () => {
-    const { container } = await mountProjects();
-
-    expect(
-      container.querySelectorAll('[data-project-source="mobile"]'),
-    ).toHaveLength(3);
-    expect(
-      container.querySelectorAll('[data-project-source="desktop"]'),
-    ).toHaveLength(0);
-
-    mediaMatches = true;
-    await act(async () => mediaListener?.());
-
+    expect(container.querySelectorAll('a[href^="/projects/"]')).toHaveLength(
+      3,
+    );
     expect(
       container.querySelectorAll('[data-project-source="mobile"]'),
     ).toHaveLength(0);
     expect(
       container.querySelectorAll('[data-project-source="desktop"]'),
-    ).toHaveLength(3);
+    ).toHaveLength(0);
   });
 
-  it("중단점 왕복 시 indicator observer를 끊고 새 목록만 다시 관찰한다", async () => {
+  it("hydration과 breakpoint 변경 후에도 같은 의미 프로젝트 목록을 유지한다", async () => {
     const { container } = await mountProjects();
-    const getProjectObserver = () =>
-      [...observerInstances].reverse().find((observer) =>
-        observer.observed.some((target) =>
-          (target as HTMLElement).dataset.projectSource,
-        ),
-      );
-    const getProjectTargets = (observer: IntersectionObserverMock | undefined) =>
-      observer?.observed.filter((target) =>
-        (target as HTMLElement).dataset.projectSource,
-      ) ?? [];
 
-    const mobileObserver = getProjectObserver();
-    expect(getProjectTargets(mobileObserver)).toHaveLength(3);
     expect(
-      getProjectTargets(mobileObserver).every(
-        (target) => (target as HTMLElement).dataset.projectSource === "mobile",
-      ),
-    ).toBe(true);
-
-    projectMocks.setProjectsActive.mockClear();
-    mediaMatches = true;
-    await act(async () => mediaListener?.());
-
-    const desktopObserver = getProjectObserver();
-    expect(mobileObserver?.disconnect).toHaveBeenCalledOnce();
-    expect(desktopObserver).not.toBe(mobileObserver);
-    expect(
-      getProjectTargets(desktopObserver).every(
-        (target) => (target as HTMLElement).dataset.projectSource === "desktop",
-      ),
-    ).toBe(true);
-    expect(projectMocks.setProjectsActive).not.toHaveBeenCalledWith(false);
-    expect(container.querySelectorAll('[data-project-source="desktop"]')).toHaveLength(
+      container.querySelectorAll('[data-project-source="project"]'),
+    ).toHaveLength(3);
+    expect(container.querySelectorAll('a[href^="/projects/"]')).toHaveLength(
       3,
     );
 
-    mediaMatches = false;
-    await act(async () => mediaListener?.());
+    await act(async () => {
+      window.dispatchEvent(new Event("resize"));
+    });
 
-    const nextMobileObserver = getProjectObserver();
-    expect(desktopObserver?.disconnect).toHaveBeenCalledOnce();
-    expect(nextMobileObserver).not.toBe(desktopObserver);
     expect(
-      getProjectTargets(nextMobileObserver).every(
-        (target) => (target as HTMLElement).dataset.projectSource === "mobile",
-      ),
-    ).toBe(true);
+      container.querySelectorAll('[data-project-source="project"]'),
+    ).toHaveLength(3);
+    expect(container.querySelectorAll('a[href^="/projects/"]')).toHaveLength(
+      3,
+    );
   });
 
-  it("중단점이 바뀌면 현재 레이아웃의 프로젝트 목록으로 단계를 다시 계산한다", async () => {
+  it("indicator observer가 같은 프로젝트 항목을 관찰하고 언마운트 시 정리한다", async () => {
     const { container, root } = await mountProjects();
     const section = container.querySelector<HTMLElement>("#projects");
-    const curve = container.querySelector<HTMLElement>(".project-entry-curve");
+    const projectItems = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-project-source="project"]'),
+    );
+    const projectObserver = observerInstances.find((observer) =>
+      observer.observed.includes(section!),
+    );
 
-    expect(projectMocks.setProjectsTotal).toHaveBeenCalledWith(3);
-    expect(projectMocks.initProjectCurve).toHaveBeenCalledWith({
-      section,
-      curve,
-    });
+    expect(projectObserver?.observed).toEqual([section, ...projectItems]);
+    expect(projectMocks.getProjectCardIndex).toHaveBeenCalledWith(projectItems);
     expect(projectMocks.setProjectsActive).toHaveBeenCalledWith(true);
-    expect(projectMocks.getProjectCardIndex.mock.calls.at(-1)?.[0]).toSatisfy(
-      (cards: HTMLElement[]) =>
-        cards.every((card) => card.dataset.projectSource === "mobile"),
-    );
+    expect(projectMocks.setProjectsTotal).toHaveBeenCalledWith(3);
     expect(projectMocks.setProjectsStep).toHaveBeenLastCalledWith(1);
-
-    mediaMatches = true;
-    await act(async () => mediaListener?.());
-
-    expect(projectMocks.getProjectCardIndex.mock.calls.at(-1)?.[0]).toSatisfy(
-      (cards: HTMLElement[]) =>
-        cards.every((card) => card.dataset.projectSource === "desktop"),
-    );
-    expect(projectMocks.setProjectsStep).toHaveBeenLastCalledWith(2);
 
     await act(async () => root.unmount());
     mountedRoots = mountedRoots.filter((mountedRoot) => mountedRoot !== root);
 
-    expect(projectMocks.removeMediaListener).toHaveBeenCalledWith(
-      "change",
-      expect.any(Function),
-    );
+    expect(projectObserver?.disconnect).toHaveBeenCalledOnce();
     expect(projectMocks.setProjectsActive).toHaveBeenLastCalledWith(false);
     expect(projectMocks.cleanupCurve).toHaveBeenCalledOnce();
   });
