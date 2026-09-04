@@ -23,8 +23,20 @@ vi.mock("@/components/common/TransitionLink", () => ({
   ),
 }));
 
+const motionMocks = vi.hoisted(() => ({
+  useProjectCardMotion: vi.fn<
+    (targetRef: unknown, prefersReducedMotion: boolean) => {
+      cardStyle: Record<string, never>;
+      imageStyle: Record<string, never>;
+    }
+  >(() => ({
+    cardStyle: {},
+    imageStyle: {},
+  })),
+}));
+
 vi.mock("@/lib/animation/projectReveal", () => ({
-  useProjectCardMotion: () => ({ cardStyle: {}, imageStyle: {} }),
+  useProjectCardMotion: motionMocks.useProjectCardMotion,
 }));
 
 const project: Project = portfolio.projects[0];
@@ -40,6 +52,41 @@ const createPointerMedia = (matches: boolean) => ({
   removeListener: vi.fn(),
   dispatchEvent: vi.fn(),
 });
+
+const createViewportMedia = (initialMatches: boolean) => {
+  let matches = initialMatches;
+  const listeners = new Set<() => void>();
+  const media = {
+    get matches() {
+      return matches;
+    },
+    media: "(min-width: 1024px)",
+    onchange: null,
+    addEventListener: vi.fn((_type: string, listener: () => void) => {
+      listeners.add(listener);
+    }),
+    removeEventListener: vi.fn((_type: string, listener: () => void) => {
+      listeners.delete(listener);
+    }),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn((event: Event) => {
+      if (event.type === "change") {
+        listeners.forEach((listener) => listener());
+      }
+
+      return true;
+    }),
+  };
+
+  return {
+    media,
+    setMatches(nextMatches: boolean) {
+      matches = nextMatches;
+      media.dispatchEvent(new Event("change"));
+    },
+  };
+};
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -93,6 +140,37 @@ describe("project list", () => {
     expect(link.getAttribute("href")).toBe(`/projects/${project.slug}`);
     expect(link.dataset.transitionLabel).toBe(project.title);
     expect(setItemRef).toHaveBeenCalledWith(0, link.closest("li"));
+  });
+
+  it("viewport breakpoint에 따라 카드 모션 비활성 조건을 전달한다", async () => {
+    const viewport = createViewportMedia(false);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) =>
+        query === "(min-width: 1024px)"
+          ? viewport.media
+          : createPointerMedia(false),
+      ),
+    );
+
+    await mountProject(
+      <ProjectList
+        projects={[project]}
+        prefersReducedMotion={false}
+        setItemRef={vi.fn()}
+      />,
+    );
+    expect(motionMocks.useProjectCardMotion.mock.lastCall?.[1]).toBe(false);
+
+    await act(async () => {
+      viewport.setMatches(true);
+    });
+    expect(motionMocks.useProjectCardMotion.mock.lastCall?.[1]).toBe(true);
+
+    await act(async () => {
+      viewport.setMatches(false);
+    });
+    expect(motionMocks.useProjectCardMotion.mock.lastCall?.[1]).toBe(false);
   });
 
   it("SSR에서 프로젝트별 상세 링크 하나와 표현 전용 미리보기만 렌더링한다", () => {
